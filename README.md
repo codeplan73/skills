@@ -1,5 +1,7 @@
 # JSM Skills
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Agent skills for developers who want to build real, production-ready software with AI — without losing the engineering thinking behind it.
 
 These skills work with any AI coding agent that supports the SKILL.md format — Claude Code, Cursor, Windsurf, Codex, Cline, and more.
@@ -112,4 +114,4 @@ Found a bug or want to improve a skill? Open an issue or PR. Skills are just mar
 
 ## License
 
-MIT
+[MIT](LICENSE)
