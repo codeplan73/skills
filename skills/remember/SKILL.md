@@ -31,7 +31,7 @@ When the developer runs `/remember save`:
 
 ### What to capture
 
-Review the current conversation to extract only what a developer would genuinely need to continue this work in a completely fresh context. Do not include sensitive data such as credentials, API keys, or tokens in the saved memory. Not a transcript. Not a summary of everything that happened. The essential state.
+Review the current conversation to extract only what a developer would genuinely need to continue this work in a completely fresh context. Omit any sensitive values from the saved memory — these belong in environment files, not here. Not a transcript. Not a summary of everything that happened. The essential state.
 
 Think like someone handing off a project to a colleague who is equally skilled but knows nothing about what happened today. What would they need to know to continue without losing anything?
 
@@ -130,17 +130,9 @@ To save memory at the end of a session, run /remember save.
 
 ### Step 2 — Read everything available
 
-Read `memory.md` first. Then check for these specific context files if they exist and read only those:
+Read `memory.md` first. Then check for the agent context file for whichever AI tool is in use — each agent has one well-known file where project instructions live. Read only that file if it exists.
 
-- `CLAUDE.md`, `.claude/context.md` — Claude Code
-- `.github/copilot-instructions.md` — GitHub Copilot
-- `.cursorrules`, `.cursor/rules/` — Cursor
-- `.windsurfrules` — Windsurf
-- `AGENTS.md` — Codex
-- `.clinerules` — Cline
-- `context.md` — generic fallback
-
-Do not scan or read other files beyond this list. Build the most complete picture possible from what is available.
+Do not read anything beyond `memory.md` and the single agent context file. Use only what is available in those files.
 
 ### Step 3 — Confirm what was restored
 
