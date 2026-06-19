@@ -1,0 +1,101 @@
+# /triage
+
+---
+name: triage
+description: Use this skill when starting any new task, change, bug fix, or feature to determine the appropriate risk tier, workflow playbook, and severity before touching any code. Run /triage first to get a recommendation on whether to proceed as just-do-it, lean, medium, or full, and to understand which downstream skills to invoke.
+---
+
+## What this skill does
+
+Analyses the stated task and recommends:
+
+- **Tier**: `just-do-it` | `lean` | `medium` | `full`
+- **Playbook**: the ordered list of skills to run for that tier
+- **Severity**: `low` | `medium` | `high` | `critical` (impact if this goes wrong)
+- **Rationale**: one short paragraph explaining why
+
+It proposes; the engineer confirms. No code is touched until confirmation.
+
+## Asks vs acts
+
+**Asks first** when any of the following is unknown from the task description:
+- Is this production-facing?
+- Does it touch auth, payments, data migrations, or shared infrastructure?
+- What is the rough size: one-liner, a feature, or a cross-cutting refactor?
+
+**Acts without asking** when all three are clear from the description.
+
+Maximum three clarifying questions. If still uncertain after answers, default one tier higher.
+
+## Output formats
+
+### When enough information is available
+
+Haiku outputs this block directly — relay it verbatim:
+
+```
+## Triage
+
+**Tier**: <tier>
+**Severity**: <severity>
+**Playbook**: <ordered list: /skill → /skill → ...>
+
+**Rationale**:
+<one paragraph — mention the specific signals that drove the tier>
+
+---
+Confirm? Reply `yes` to lock this in, or redirect me.
+```
+
+### After the engineer confirms
+
+```
+Triage locked. Begin with: `/<first-skill-in-playbook>`
+```
+
+Do not output code. Do not touch files at any point.
+
+## Execution — spawn a haiku subagent
+
+### Pre-flight (main model does this before spawning)
+
+1. Read `CLAUDE.md` at the repo root. If missing, note "no CLAUDE.md found".
+2. Read `.claude/skills/triage/tier-guide.md`.
+3. Read `.claude/skills/triage/agent-prompt.md` to get the prompt template.
+4. Fill the template with: task description, CLAUDE.md contents, tier-guide contents.
+
+### Spawning
+
+Spawn an Agent with:
+- `model: "haiku"`
+- `description: "Triage: recommend tier, playbook, severity"`
+- `prompt`: the filled template from `agent-prompt.md`
+- No tools (all context is injected; haiku must not read files or browse)
+
+### Multi-turn (when questions are needed)
+
+Haiku signals it needs clarification by outputting a JSON block tagged `TRIAGE_QUESTIONS` (see `agent-prompt.md` for schema). When the main model receives this:
+
+1. Parse the JSON — it contains an array of questions, each with a `question`, `header`, and three `options` (label + description).
+2. Call `AskUserQuestion` with those questions and options exactly as structured. Do not rewrite them. The tool automatically appends "Other" as a free-text fourth option.
+3. Collect the user's answers from the tool result.
+4. Re-spawn the haiku agent using the same filled template, appending the answers under a `CLARIFICATIONS` section at the bottom.
+5. Relay the final recommendation verbatim.
+
+Maximum one round of questions. If haiku outputs `TRIAGE_QUESTIONS` a second time, pick the higher tier and proceed.
+
+### Post-confirmation
+
+When the engineer replies `yes`, output the "After confirmation" format above. The skill is now complete.
+
+## Tier decision guide
+
+See `.claude/skills/triage/tier-guide.md`.
+
+## Subagent prompt template
+
+See `.claude/skills/triage/agent-prompt.md`.
+
+## Artifact
+
+This skill owns no files. Chat output only.
