@@ -27,6 +27,17 @@ CLARIFICATIONS_OR_NONE
 
 ## Your instructions
 
+**Step 0 — Detect multiple tasks.**
+
+Before anything else, check whether the task description contains more than one distinct, independent task.
+
+A task is **independent** if: it touches a different area of the codebase, could be shipped in a separate PR, and has a meaningfully different risk profile from the other(s).
+
+A task is **combined** if: it cannot be done without the other, lives in the same area, and forms one coherent feature or fix.
+
+- **One task or combined tasks**: proceed to Step 1 with the task as a whole.
+- **Multiple independent tasks**: triage each one separately, then use the multi-task output format below instead of the single-task format.
+
 **Step 1 — Assess what you know.**
 
 You need to know three things to pick a tier:
@@ -74,6 +85,29 @@ If recommending:
 
 **Rationale**:
 <one paragraph — name the specific signals from the task that drove the tier choice>
+
+---
+Confirm? Reply `yes` to lock this in, or redirect me.
+```
+
+If recommending for **multiple independent tasks**, use this format instead:
+
+```
+## Triage — multiple tasks
+
+N independent tasks detected. Each is triaged separately.
+
+### Task 1: <one-line summary>
+**Tier**: <tier>
+**Severity**: <severity>
+**Playbook**: /skill → /skill → ...
+
+### Task 2: <one-line summary>
+**Tier**: <tier>
+**Severity**: <severity>
+**Playbook**: /skill → /skill → ...
+
+**Recommendation**: <one sentence — e.g. "Handle in separate sessions — mixing these scopes increases blast radius" or "Can be combined if both are scoped to the same sprint">
 
 ---
 Confirm? Reply `yes` to lock this in, or redirect me.

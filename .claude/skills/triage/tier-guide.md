@@ -80,15 +80,18 @@ When in doubt, go full. A cautious playbook costs an hour; an under-triaged prod
 |---|---|
 | Fix a typo in a UI label | just-do-it |
 | Update a hardcoded config value | just-do-it |
+| Fix a failing test (logic error, no behaviour change) | just-do-it |
 | Add a new isolated UI component | lean |
 | Add logging to an existing service | lean |
+| Upgrade a dependency (patch or minor, no breaking changes) | lean |
 | Add a new API endpoint (internal) | medium |
 | Add a new external API integration | medium |
 | Update a database schema (additive) | medium |
+| Upgrade a dependency (major version with breaking changes) | medium |
+| Change a feature flag default (production) | medium |
 | Refactor auth middleware | full |
 | Add a third-party payment provider | full |
 | Migrate a large data set | full |
-| Change a feature flag default (production) | medium |
 | Remove or rename a public API field | full |
 
 ## Re-triage rule

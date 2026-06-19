@@ -29,7 +29,32 @@ Maximum three clarifying questions. If still uncertain after answers, default on
 
 ## Output formats
 
-### When enough information is available
+### When multiple independent tasks are detected
+
+Haiku outputs a multi-task block — relay it verbatim:
+
+```
+## Triage — multiple tasks
+
+N independent tasks detected. Each is triaged separately.
+
+### Task 1: <summary>
+**Tier**: <tier>
+**Severity**: <severity>
+**Playbook**: /skill → /skill → ...
+
+### Task 2: <summary>
+**Tier**: <tier>
+**Severity**: <severity>
+**Playbook**: /skill → /skill → ...
+
+**Recommendation**: <one sentence>
+
+---
+Confirm? Reply `yes` to lock this in, or redirect me.
+```
+
+### When enough information is available (single task)
 
 Haiku outputs this block directly — relay it verbatim:
 
@@ -49,8 +74,17 @@ Confirm? Reply `yes` to lock this in, or redirect me.
 
 ### After the engineer confirms
 
+Single task:
 ```
 Triage locked. Begin with: `/<first-skill-in-playbook>`
+```
+
+Multiple tasks — list each task with its starting point:
+```
+Triage locked.
+
+- Task 1 (<summary>): begin with `/<first-skill>`
+- Task 2 (<summary>): handle in a separate session, begin with `/<first-skill>`
 ```
 
 Do not output code. Do not touch files at any point.
@@ -77,10 +111,11 @@ Spawn an Agent with:
 Haiku signals it needs clarification by outputting a JSON block tagged `TRIAGE_QUESTIONS` (see `agent-prompt.md` for schema). When the main model receives this:
 
 1. Parse the JSON — it contains an array of questions, each with a `question`, `header`, and three `options` (label + description).
-2. Call `AskUserQuestion` with those questions and options exactly as structured. Do not rewrite them. The tool automatically appends "Other" as a free-text fourth option.
-3. Collect the user's answers from the tool result.
-4. Re-spawn the haiku agent using the same filled template, appending the answers under a `CLARIFICATIONS` section at the bottom.
-5. Relay the final recommendation verbatim.
+2. **If the JSON is malformed or cannot be parsed**: fall back to asking the questions as plain numbered text in chat. Collect the engineer's text answers and continue to step 4.
+3. Call `AskUserQuestion` with those questions and options exactly as structured. Do not rewrite them. The tool automatically appends "Other" as a free-text fourth option.
+4. Collect the user's answers from the tool result.
+5. Re-spawn the haiku agent using the same filled template, appending the answers under a `CLARIFICATIONS` section at the bottom.
+6. Relay the final recommendation verbatim.
 
 Maximum one round of questions. If haiku outputs `TRIAGE_QUESTIONS` a second time, pick the higher tier and proceed.
 
