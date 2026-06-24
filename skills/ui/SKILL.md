@@ -18,7 +18,7 @@ All paths: **component-or-screen → stack detection → styling library → dar
 
 ## Portability (any OS, any agent)
 
-Written for any Agent Skills client on macOS, Linux, or Windows. The detection snippets (`find`, `cat | grep`, `cp`) are POSIX **reference**, not literal scripts — don't assume those utilities exist. Use your agent's own cross-platform file tools to find files, read `package.json`/config, and copy a template to `design.md`. Bundled files (`templates/*.md`, `checklist.md`) are referenced by paths relative to this skill's folder and read by the main agent (this skill runs inline — no subagent). This skill writes app code/CSS, which is inherently cross-platform.
+Written for any Agent Skills client on macOS, Linux, or Windows. The detection snippets (`find`, `cat | grep`, `cp`) are POSIX **reference**, not literal scripts — don't assume those utilities exist. Use your agent's own cross-platform file tools to find files, read `package.json`/config, and copy a template to `design.md`. Bundled files (`templates/*.md`, `checklist.md`) are referenced by paths relative to this skill's folder and read by the main agent (this skill runs inline — no subagent). This skill writes app code/CSS, which is inherently cross-platform. If your tool has no interactive-question picker, ask the multiple-choice prompts as plain text with the same options.
 
 ## Step 0 — Check for existing design.md
 

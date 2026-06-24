@@ -41,6 +41,7 @@ No scope question. The git working tree defines the scope.
 This skill targets any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves identically on every OS — run the `git` lines as shown. All other shell snippets are POSIX **reference**, not literal scripts: do not assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `xargs`, `mkdir -p`, or `node -e` exist. Use your agent's own cross-platform file tools (read, search/glob, write) to list files, check existence, read, and search, and apply any branching logic yourself rather than via shell `if`/variables/redirects.
 - **Bundled files**: referenced by path relative to this skill's own folder. The main agent reads them; anything a subagent needs is passed **into its prompt** as text — subagents can't resolve skill-relative paths.
+- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a Task/subagent tool, and the multiple-choice steps assume an interactive picker — both Claude Code features. On a tool without them: write the tests inline yourself, and ask any multiple-choice question as plain text with the same options.
 
 ## Execution
 

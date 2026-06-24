@@ -44,6 +44,7 @@ Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** n
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `ls`, or `xargs` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
 - **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them. Anything a subagent needs is passed **into its prompt as text** — subagents can't resolve skill-relative paths.
+- **No subagent support?** The maintenance normally runs in a cheap-model subagent. On a tool without one, do the AGENTS.md updates and ADR-staleness checks inline yourself — same conservative rules.
 
 ## Execution
 

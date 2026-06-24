@@ -36,6 +36,7 @@ Does not write code. Does not update the `AGENTS.md`/`CLAUDE.md` context files (
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS. Other shell snippets (`mkdir -p`, `date`, `find`, `ls`, `cat`, `wc`) are POSIX **reference**, not literal scripts — use your agent's own cross-platform file tools (read, search/glob, write, create-dir) and your knowledge of today's date instead. Creating `docs/adr/` should use your write tool, not `mkdir`.
 - **Bundled files**: the Round-2 question files (`questions/*.md`), `agent-prompt.md`, and `adr-template.md` are referenced by paths relative to this skill's folder. The main agent reads them; the question files drive the MCQ prompts, and the **ADR template text is injected into the subagent prompt** (subagents can't resolve skill-relative paths).
+- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a Task/subagent tool, and the multiple-choice rounds assume an interactive picker — both Claude Code features. On a tool without them: do the research/drafting inline yourself, and ask the question rounds as plain text with the same options.
 
 ## Execution
 
@@ -65,8 +66,9 @@ find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" 
   -o -name "*.go" -o -name "*.rs" -o -name "*.java" \) \
   -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/dist/*' | wc -l
 
-# Detect installed community skills (exclude workflow skills)
-ls .claude/skills/ 2>/dev/null
+# Detect installed community skills (exclude workflow skills) — check every agent's skills dir,
+# since skills install per-tool: list the subfolders of .claude/skills/, .agents/skills/, and skills/
+# (use your file tools). De-duplicate by skill name.
 
 # Read project context — AGENTS.md is canonical; fall back to CLAUDE.md (use your file tool)
 #   read AGENTS.md if present, else CLAUDE.md, else treat as MISSING
@@ -82,7 +84,7 @@ From the community skill scan:
 
 **Workflow skills** (never treat as community skills): `triage`, `understand`, `design`, `test`, `review`, `harden`, `document`, `debug`, `migrate`, `sync`, `ui`.
 
-This list is complete for the 13 workflow skills in this system. As additional workflow skills are added to `.claude/skills/`, update this list immediately or they will appear as community skills.
+This list is the 11 workflow skills in this system. As additional workflow skills are added, update this list immediately or they will appear as community skills.
 
 **Relevant community skills**: from the installed skill list, identify any whose name matches a technology involved in the design topic. Match heuristics:
 

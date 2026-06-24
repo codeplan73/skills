@@ -31,6 +31,7 @@ You may steer it: `/review` (default contrasting model), `/review with opus` (fo
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `ls`, `xargs`, or `for` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
 - **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them. Anything a subagent needs is passed **into its prompt as text** — subagents can't resolve skill-relative paths.
+- **No subagent support?** The review normally runs in a subagent on a *different* model. On a tool without subagents: the cross-model benefit needs you to **switch your active model** (or open the diff in another assistant) and run the review there — otherwise run it inline, noting the reviewer shares the author model's blind spots.
 
 ## Execution
 

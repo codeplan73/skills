@@ -90,7 +90,7 @@ Do not output code. Do not touch files at any point.
 
 ## Portability (any OS, any agent)
 
-Written for any Agent Skills client on macOS, Linux, or Windows. Bundled files (`tier-guide.md`, `agent-prompt.md`) are referenced by paths relative to this skill's folder; the **main agent reads them and injects their text** into the subagent prompt (the haiku subagent has no file tools, so it can't resolve skill paths). No POSIX-only shell utilities are required — use your agent's own cross-platform file tools to read files.
+Written for any Agent Skills client on macOS, Linux, or Windows. Bundled files (`tier-guide.md`, `agent-prompt.md`) are referenced by paths relative to this skill's folder; the **main agent reads them and injects their text** into the subagent prompt (the haiku subagent has no file tools, so it can't resolve skill paths). No POSIX-only shell utilities are required — use your agent's own cross-platform file tools to read files. If your tool has no subagent or interactive-question support (both Claude Code features), run the triage reasoning inline yourself and present the questions as plain-text options.
 
 ## Execution — spawn a haiku subagent
 

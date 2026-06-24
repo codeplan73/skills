@@ -28,6 +28,7 @@ PR text, `CHANGELOG.md`, `docs/releases/`, `docs/postmortems/` — owned by this
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` (and optionally `gh`) are the only CLIs, and behave the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `command -v`, or `node -e` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
 - **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them and passes the chosen template's text **into the subagent prompt** — subagents can't resolve skill-relative paths.
+- **No subagent / interactive-question support?** The drafting normally runs in a cheap-model subagent, and the doc-type pick uses an interactive picker — both Claude Code features. On a tool without them: write the document inline yourself following the template, and ask the doc-type question as plain text.
 
 ## Execution
 
