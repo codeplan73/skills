@@ -4,7 +4,7 @@ A collection of Claude Code skills encoding a tiered, phase-based engineering wo
 
 ## Stack
 
-- Skills: `.claude/skills/<name>/SKILL.md`
+- Skills (source, for distribution via `npx skills`): `skills/<name>/SKILL.md`
 - Decision records: `docs/adr/`
 
 ## Tiers
@@ -18,7 +18,7 @@ A collection of Claude Code skills encoding a tiered, phase-based engineering wo
 
 ## Skills
 
-See `.claude/skills/` for available skills.
+See `skills/` for available skills. (Consumers install them via `npx skills add JavaScript-Mastery-Pro/pilot`, which lands them in their agent's skills dir, e.g. `.claude/skills/`.)
 
 ## ADRs
 

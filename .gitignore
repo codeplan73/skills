@@ -1,1 +1,5 @@
 .DS_Store
+
+# Local-only: optional dogfooding of skills into an agent read-path (e.g. .claude/skills).
+# Canonical source is top-level skills/ — never commit a second copy.
+.claude/

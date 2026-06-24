@@ -60,6 +60,26 @@ The amount of process scales with risk. `/triage` picks the tier and the subset 
 
 Each skill owns one artifact: ADRs (`docs/adr/`, `design`), tests (`test`), review findings (`docs/reviews/`, `review`), hardening checklists (`docs/hardening/`, `harden`), docs (`document`), and the `CLAUDE.md` context files (`understand` creates, `sync` maintains).
 
+## Local development
+
+The canonical source for every skill is the top-level **`skills/`** directory — that's the single copy `npx skills` publishes and installs, so there are no duplicates.
+
+If you want Claude Code to use these skills *while developing this repo* (Claude Code reads from `.claude/skills/`), create a local link — `.claude/` is git-ignored, so this never ships and can't double-list in `npx skills`:
+
+```bash
+# macOS / Linux
+mkdir -p .claude && ln -s ../skills .claude/skills
+
+# Windows (PowerShell — junction, no admin needed)
+New-Item -ItemType Junction -Path .claude\skills -Target skills
+```
+
+Validate any skill against the spec with [`skills-ref`](https://github.com/agentskills/agentskills/tree/main/skills-ref):
+
+```bash
+npx skills-ref validate ./skills/<name>
+```
+
 ---
 
-Built with the [Agent Skills](https://agentskills.io) open format. Validate locally with [`skills-ref`](https://github.com/agentskills/agentskills/tree/main/skills-ref).
+Built with the [Agent Skills](https://agentskills.io) open format.
