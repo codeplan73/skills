@@ -70,15 +70,15 @@ Rules you must not break:
 
 You may create **one** nested `<area>/AGENTS.md` for an area the change introduced wholesale. The test is **context, not policy**:
 
-- **Create it** when every source file in that area carries status `A` (added) in CHANGED_FILES — the diff shows you the entire area, so you can document it accurately. If any file in the area is `M` (modified), the area pre-existed: do NOT create, defer to /understand. Write a focused doc: local file pointers, local commands, the conventions/constraints visible in the new code, and links to any governing ADR. End it with a one-line note: `_Drafted by /sync from the introducing change — worth a quick human pass._` (a cheap model wrote it; mark it as a starting point). Then add exactly one pointer line to root AGENTS.md under `## Context files`:
+- **Create it** when every source file in that area carries status `A` (added) in CHANGED_FILES — the diff shows you the entire area, so you can document it accurately. If any file in the area is `M` (modified), the area pre-existed: do NOT create, defer to /audit. Write a focused doc: local file pointers, local commands, the conventions/constraints visible in the new code, and links to any governing ADR. End it with a one-line note: `_Drafted by /sync from the introducing change — worth a quick human pass._` (a cheap model wrote it; mark it as a starting point). Then add exactly one pointer line to root AGENTS.md under `## Context files`:
   ```
   - [<area>/AGENTS.md](<area>/AGENTS.md) — <one-line description>
   ```
   **Idempotency + missing section**: before adding the pointer, check it isn't already there. If root has no `## Context files` heading, create the heading (append it near the end of root) and add the pointer under it.
 
   Also create the sibling **`<area>/CLAUDE.md` pointer** (body = a one-line note plus `@AGENTS.md`, which imports the sibling nested AGENTS.md) so Claude Code picks up the new area too.
-- **Do NOT create it — defer to /understand** when the area **pre-existed** this change and you've only seen a slice of it in the diff. You lack the whole-area context to write a good doc. Record it under `CONTEXT_GAPS` instead.
-- **Never create or restructure the root AGENTS.md** — if the repo has no root AGENTS.md at all, that's /understand's job; record it under `CONTEXT_GAPS`.
+- **Do NOT create it — defer to /audit** when the area **pre-existed** this change and you've only seen a slice of it in the diff. You lack the whole-area context to write a good doc. Record it under `CONTEXT_GAPS` instead.
+- **Never create or restructure the root AGENTS.md** — if the repo has no root AGENTS.md at all, that's /audit's job; record it under `CONTEXT_GAPS`.
 - One nested doc per genuinely-distinct new area — never one per folder.
 
 ### 3. Clean up orphans from deletions
@@ -91,7 +91,7 @@ For each path in DELETED_PATHS, check whether the change removed an area that ha
 
 ### 4. Flag stale ADRs (do not edit them)
 
-Be **strict** to avoid false positives — noise here erodes trust. Read an ADR only if the changed paths plausibly touch its subject (use the ADR's title/first lines to decide; don't read all of them blindly). Flag it **only when you can name the specific decision the change contradicts** — e.g. "ADR 0007 mandates Postgres; this change adds a MongoDB adapter." Do not flag vague "might be affected" cases. When in doubt, do not flag. Record genuine hits under `STALE_ADRS` with the contradicted point; recommend /design to update or supersede — never edit the ADR yourself.
+Be **strict** to avoid false positives — noise here erodes trust. Read an ADR only if the changed paths plausibly touch its subject (use the ADR's title/first lines to decide; don't read all of them blindly). Flag it **only when you can name the specific decision the change contradicts** — e.g. "ADR 0007 mandates Postgres; this change adds a MongoDB adapter." Do not flag vague "might be affected" cases. When in doubt, do not flag. Record genuine hits under `STALE_ADRS` with the contradicted point; recommend /architect to update or supersede — never edit the ADR yourself.
 
 ### 5. Report
 
@@ -113,7 +113,7 @@ STALE_ADRS:
 - <docs/adr/file> — <why the change makes it stale>
 
 CONTEXT_GAPS:
-- <area> — <pre-existing undocumented area only sliced by this change; suggest /understand>
+- <area> — <pre-existing undocumented area only sliced by this change; suggest /audit>
 
 CONFLICTS:
 - <path> — <curated content that would need rewriting; left for a human>

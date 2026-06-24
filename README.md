@@ -1,6 +1,6 @@
 # Engineering Workflow Skills
 
-A set of [Agent Skills](https://agentskills.io) that encode a tiered, phase-based engineering workflow — triage a change, understand the code, design the decision, build, test, review, harden, document, and keep context in sync. Each skill owns one phase and one artifact, so nothing sprawls.
+A set of [Agent Skills](https://agentskills.io) that encode a tiered, phase-based engineering workflow — scope an idea, triage a change, audit the code, architect the decision, build, test, review, harden, document, and keep context in sync. Each skill owns one phase and one artifact, so nothing sprawls.
 
 ## Install
 
@@ -40,10 +40,11 @@ These skills follow the open Agent Skills format and are written to be **portabl
 
 | Skill | Phase | What it does |
 |---|---|---|
+| `mvp` | Scope | Turns an idea into a prioritized feature roadmap (`docs/features/index.md`). |
 | `triage` | Plan | Recommends a risk tier, playbook, and severity before any code is touched. |
-| `understand` | Comprehend | Maps a repo or area and writes the first context files (root / nested `CLAUDE.md`). |
-| `design` | Decide | Staff-engineer system design; writes an ADR to `docs/adr/`. |
-| `ui` | Build | Disciplined UI from a design system — semantic HTML, tokens, accessibility. |
+| `audit` | Comprehend | Maps a repo or area and writes the first context files (root / nested `AGENTS.md`). |
+| `architect` | Decide | Staff-engineer system design with feature-specific questioning; writes an ADR to `docs/adr/`. |
+| `develop` | Build | Builds a feature — UI and logical — from its ADR; gates on the decision first. |
 | `test` | Verify | Senior test suite for your uncommitted change; saves tooling prefs. |
 | `review` | Verify | Rigorous code review on a **different model** than wrote the code. |
 | `harden` | Verify | Systems-level pass for concurrency, scale, and security failure modes. |
@@ -63,7 +64,7 @@ The amount of process scales with risk. `/triage` picks the tier and the subset 
 
 ## Artifacts
 
-Each skill owns one artifact: ADRs (`docs/adr/`, `design`), tests (`test`), review findings (`docs/reviews/`, `review`), hardening checklists (`docs/hardening/`, `harden`), docs (`document`), and the `CLAUDE.md` context files (`understand` creates, `sync` maintains).
+Each skill owns one artifact: the feature roadmap (`docs/features/index.md`, `mvp`), ADRs (`docs/adr/`, `architect`), app code (`develop`), tests (`test`), review findings (`docs/reviews/`, `review`), hardening checklists (`docs/hardening/`, `harden`), docs (`document`), and the `AGENTS.md` context files (`audit` creates, `sync` maintains).
 
 ## Local development
 

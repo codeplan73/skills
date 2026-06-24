@@ -1,14 +1,14 @@
 ---
-name: understand
+name: audit
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to comprehend a repository or a specific area of the codebase before designing or planning a change. Run /understand when starting a medium or full task (per the triage playbook), when no AGENTS.md context files exist yet, or when you need a reliable map of an area before making changes. This skill creates context files the first time — a tool-agnostic AGENTS.md (root for the repo, or nested for a focused area) holding the content, plus a thin CLAUDE.md pointer beside it so Claude Code picks it up. It never overwrites an existing AGENTS.md. It does not maintain files after changes; that is /sync's job. Do not run /understand after /design has already written an ADR for the same scope."
+description: "Use this skill to comprehend a repository or a specific area of the codebase before designing or planning a change. Run /audit when starting a medium or full task (per the triage playbook), when no AGENTS.md context files exist yet, or when you need a reliable map of an area before making changes. This skill creates context files the first time — a tool-agnostic AGENTS.md (root for the repo, or nested for a focused area) holding the content, plus a thin CLAUDE.md pointer beside it so Claude Code picks it up. It never overwrites an existing AGENTS.md. It does not maintain files after changes; that is /sync's job. Do not run /audit after /architect has already written an ADR for the same scope."
 ---
 
 ## What this skill does
 
 Explores the repo or a named area, extracts durable knowledge, and writes context files where they are missing. Asks for coding standards when starting a greenfield project.
 
-Does not create ADRs (/design owns those). Does not maintain files after changes (/sync owns that).
+Does not create ADRs (/architect owns those). Does not maintain files after changes (/sync owns that).
 
 ## Context-file convention (AGENTS.md is canonical)
 
@@ -143,7 +143,7 @@ Question 2 — Additional standards (multi-select):
 
 ### Phase 3 — Area scan
 
-**Trigger**: a path or area name was given (e.g. `/understand src/auth`).
+**Trigger**: a path or area name was given (e.g. `/audit src/auth`).
 
 **Pre-flight additionally**:
 1. Check the area path exists:

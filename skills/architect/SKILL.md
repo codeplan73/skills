@@ -1,7 +1,7 @@
 ---
-name: design
+name: architect
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to get expert system design guidance and document an architectural or technical decision before writing code. Run /design when facing a meaningful choice between approaches, when designing a new feature from scratch, when selecting a tech stack for a new project, or when the triage playbook lists /design as a step. This skill acts as a Staff Engineer and Principal Architect: it challenges bad directions, applies industry best practices, calls out named anti-patterns, and recommends the right answer rather than presenting a neutral menu of options. It runs two rounds of targeted MCQ questions, researches options, writes a draft ADR to docs/adr/, and presents it for confirmation. It owns all ADR files. Do not run /understand after /design has written an ADR for the same scope."
+description: "Use this skill to get expert system design guidance and document an architectural or technical decision before writing code. Run /architect when facing a meaningful choice between approaches, when designing a new feature from scratch, when selecting a tech stack for a new project, or when the triage playbook lists /architect as a step. This skill acts as a Staff Engineer and Principal Architect: it challenges bad directions, applies industry best practices, calls out named anti-patterns, and recommends the right answer rather than presenting a neutral menu of options. It runs two rounds of targeted MCQ questions, researches options, writes a draft ADR to docs/adr/, and presents it for confirmation. It owns all ADR files. Do not run /audit after /architect has written an ADR for the same scope."
 ---
 
 ## What this skill does
@@ -23,7 +23,13 @@ Does not write code. Does not update the `AGENTS.md`/`CLAUDE.md` context files (
 
 ## Asks vs acts
 
-**Always asks two rounds of MCQ questions** before spawning any subagent. Round 1 establishes mode and context. Round 2 digs into the specifics of that mode.
+Asks targeted questions before spawning any subagent — but **spends the question budget on substance, not ceremony.** Every question is sorted into one of three buckets:
+
+- **INFER** — anything the prompt or codebase already reveals: feature-vs-architecture, the stack in use, whether UI is in scope, an already-chosen provider. **Do not ask these** — derive them. Asking what you can read wastes the engineer's attention and reads as incompetent.
+- **ASK** — only what the engineer alone knows: requirements, preferences, business rules, compliance scope. This is what Round 1 and Round 2 are *for*.
+- **RECOMMEND** — anything expertise can settle: which provider/library/pattern is best for their constraints. **Decide it and propose** — state the pick, a one-line why, and the runner-up, and let them override. Never present a neutral menu, never silently decide for them.
+
+Round 1 is a **quick** pass for the un-inferable framing context (constraints, how settled the direction is) — not the place for depth, and not a business questionnaire. The depth lives in **Round 2**, which **generates questions specific to this feature** — no fixed list, no hardcoded domains — and asks **as many batched rounds as it takes** to pin every load-bearing dimension (data, API, auth, rules, integrations, edge cases, security, …), so the ADR is a *complete* build spec. The generic mode files exist only as a structural fallback when the feature is too vague to generate from.
 
 ## Artifact ownership
 
@@ -42,7 +48,7 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 ### Step 0 — Topic check (before pre-flight)
 
-If no design topic was provided (the engineer ran `/design` with no argument or an empty description): **stop and ask before doing anything else**:
+If no design topic was provided (the engineer ran `/architect` with no argument or an empty description): **stop and ask before doing anything else**:
 
 "What design decision do you want to work through? Describe the feature, system, or choice you need to design in one or two sentences."
 
@@ -82,9 +88,9 @@ From the ADR list:
 
 From the community skill scan:
 
-**Workflow skills** (never treat as community skills): `triage`, `understand`, `design`, `test`, `review`, `harden`, `document`, `debug`, `migrate`, `sync`, `ui`.
+**Workflow skills** (never treat as community skills): `triage`, `audit`, `architect`, `mvp`, `develop`, `test`, `review`, `harden`, `document`, `debug`, `migrate`, `sync`.
 
-This list is the 11 workflow skills in this system. As additional workflow skills are added, update this list immediately or they will appear as community skills.
+This list is the workflow skills in this system. As additional workflow skills are added, update this list immediately or they will appear as community skills.
 
 **Relevant community skills**: from the installed skill list, identify any whose name matches a technology involved in the design topic. Match heuristics:
 
@@ -148,7 +154,7 @@ A design topic is **decision-scoped** if it names a specific component, feature,
 
 **If product-scoped**: do not ask Round 1 yet. Instead:
 
-1. Tell the engineer: "This describes a full product — /design works one decision at a time. Let me help you pick the first foundational decision."
+1. Tell the engineer: "This describes a full product — /architect works one decision at a time. Let me help you pick the first foundational decision."
 2. Based on the product type, generate 4 first-decision options and ask via `AskUserQuestion`:
    - question: "Which foundational decision should we design first?"
    - header: "First decision"
@@ -164,9 +170,9 @@ A design topic is **decision-scoped** if it names a specific component, feature,
 
 ### Round 1 — Foundational questions (main model calls `AskUserQuestion`)
 
-Four questions, always asked. Do not skip any.
+**Infer before asking.** Q1 (decision type) and Q2 (users) are usually derivable from the topic + codebase — infer them and *skip the question*. Only ask Q1/Q2 when genuinely ambiguous. **Q3 (constraints) and Q4 (settledness) are user-only — always ask these.** State your inferences back to the engineer in one line ("Reading this as a *feature* for *B2B* users — correct me if not") so a wrong inference is cheap to fix.
 
-**Q1 — What type of decision is this?** (single-select)
+**Q1 — What type of decision is this?** (single-select — infer if possible)
 - `Feature design` — designing a new feature from scratch
 - `Architecture selection` — choosing tech stack or foundational architecture
 - `System enhancement` — improving or changing something existing
@@ -192,18 +198,42 @@ Four questions, always asked. Do not skip any.
 
 ---
 
-### Round 2 — Mode-specific deep questions (main model calls `AskUserQuestion`)
+### Round 2 — Deep questions (main model generates, then calls `AskUserQuestion`)
 
-Based on Q1 from Round 1, read the relevant question file and present those questions:
+**Generate the questions from the feature — do not read them from a list.** The whole point is that the questions are specific to whatever is being designed. A fixed question bank is what made the old version feel generic. So:
 
-| Q1 answer | File to read |
-|---|---|
-| `Feature design` | `questions/feature.md` |
-| `Architecture selection` | `questions/architecture.md` |
-| `System enhancement` | `questions/enhancement.md` |
-| `Cross-cutting standard` | `questions/cross-cutting.md` |
+**Your mandate (senior+ role):** you are the Staff/Principal engineer who will be blamed if this feature ships wrong. The ADR you produce is the **complete build spec** `/develop` implements from — every load-bearing decision must be settled here. Any dimension you leave blank becomes a question `/develop` is forced to ask mid-build, or worse, an assumption it guesses wrong. **Leaving a gap is the failure mode.** So be exhaustive, not minimal — cover *everything* a senior engineer would pin down before writing code.
 
-Each file contains a ready-to-present set of 3–4 questions with labels, descriptions, and options. Present them via `AskUserQuestion` exactly as structured in the file.
+**Step A — Enumerate every load-bearing dimension of this feature.** Walk this checklist (not all apply to every feature; add any feature-specific ones). For each, decide whether you can settle it yourself or must ask:
+
+- **Functional scope & boundaries** — what's in, what's explicitly out, the key user flows and their happy/unhappy paths
+- **Data model & persistence** — entities, fields, types, nullability, relationships, indexes, uniqueness, retention/deletion
+- **Lifecycle & state machine** — states, valid transitions, who/what triggers each
+- **API / interface surface** — endpoints or actions, inputs, outputs, status codes, versioning
+- **Authentication & authorization** — who may do what; ownership, roles, multi-tenant scoping
+- **Validation & business rules** — limits, quotas, invariants that must always hold
+- **External integrations** — providers, webhooks, idempotency, reconciliation
+- **Failure & edge cases** — concurrency, retries, timeouts, partial failure, empty/error/loading states
+- **Performance & scale** — expected volume, pagination, async-vs-sync, caching
+- **Security & compliance** — PII, encryption, audit logging, rate limiting, regulatory scope
+- **Observability** — what to log, metrics, alerts
+- **Configuration & secrets** — new env vars, feature flags, credentials
+- **UX surface (if UI in scope)** — capture the *requirements* (what each screen must show/do, states, accessibility needs); leave pixel/layout detail to `/develop`
+
+**Step B — Sort each dimension into INFER / ASK / RECOMMEND** (see *Asks vs acts*):
+- **INFER** — answer it yourself from the prompt/codebase/AGENTS.md. Do not ask.
+- **ASK** — only the engineer knows it (requirements, business rules, preferences, scope boundaries). These become questions.
+- **RECOMMEND** — expertise decides it (provider/library/pattern/architecture). The subagent makes the call and justifies it; do **not** ask.
+
+**Step C — Ask every ASK question, in as many batched rounds as it takes.** This is the heart of the skill — do not truncate to hit a number.
+- Group the ASK questions by dimension and present them via `AskUserQuestion`, **up to 4 per call**. Run **multiple rounds** until every un-inferable, decision-relevant question is answered. A non-trivial feature legitimately needs 2–4 rounds (e.g. round 1 scope & data, round 2 auth & rules, round 3 integrations & edge cases). Stop only when there is genuinely nothing left that the engineer alone can settle — not at an arbitrary cap.
+- Quality bar per question: maps to a real, feature-specific decision (never a generic placeholder like "how complex is the data model?"); concrete options drawn from the actual choices, each with a one-line tradeoff; multi-select where answers aren't exclusive.
+- Between rounds, briefly fold prior answers in ("Given org-scoped roles, the next questions are about invitation flow…") so the rounds feel like one coherent interview, not a form.
+- Before finishing: re-scan the Step A checklist and confirm no load-bearing dimension is still unanswered. If one is, ask it.
+
+**Step D — Collect the RECOMMEND items** (the decisions you deferred to the subagent) as a list to inject into its prompt — it must decide each, state the pick + one-line why + the runner-up, and never echo it back as an open question.
+
+**Fallback only:** if the feature is too vague to generate good questions from (rare — usually means Round 1 should have narrowed it), use the generic mode file keyed on Q1 as scaffolding: `questions/feature.md`, `questions/architecture.md`, `questions/enhancement.md`, `questions/cross-cutting.md`.
 
 **Skip Round 2 entirely** when Q4 from Round 1 is `Documenting a made decision` — the direction is already settled, and deep-dive questions add friction with no benefit. Proceed directly to spawning the subagent.
 
@@ -239,6 +269,7 @@ Inject into the template:
 1. Design topic (from the user's original message)
 2. All Round 1 answers (Q1–Q4)
 3. All Round 2 answers — if Round 2 was skipped, inject: `"Round 2 skipped — [reason: Documenting a made decision / already-built documentation task]"` so the subagent knows this was intentional, not an error
+3a. The **RECOMMEND items** generated in Round 2 (Step D) → inject into `RECOMMEND_ITEMS_OR_NONE` — the specific decisions the subagent must make and justify (provider, session strategy, etc.). If none were generated, inject `"none"`.
 4. Context-file contents — `AGENTS.md` (canonical), or `CLAUDE.md` as fallback, or "MISSING"
 5. Existing ADR list (filenames + first line of each)
 6. Related ADR paths (flagged in pre-flight)
@@ -278,7 +309,7 @@ If a required section is missing or a field is blank/placeholder, add this line 
 2. Do not rewrite the ADR from scratch on feedback. Use the **Edit** tool to apply targeted changes to the specific sections the engineer called out.
 3. After any edits, confirm: "ADR updated. Confirm with `yes` or give further feedback."
 
-/design is complete when the engineer confirms the ADR. It does not invoke other skills.
+/architect is complete when the engineer confirms the ADR. It does not invoke other skills.
 
 ---
 
@@ -296,4 +327,5 @@ If the task is to update or supersede an **existing** ADR:
 
 - ADR template: `adr-template.md`
 - Research subagent prompt: `agent-prompt.md`
-- Round 2 questions: `questions/`
+- Round 2 questions are **generated per feature** (see Round 2, Steps A–D) — not stored
+- Generic mode files (`questions/`) are a structural fallback only, used when the feature is too vague to generate from

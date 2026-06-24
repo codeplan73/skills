@@ -48,6 +48,13 @@ Your job is **not** to present a neutral menu of options. Your job is to guide t
 
 **Engineer's answers — Round 2:**
 ANSWER_R2_ALL
+<!-- Round 2 questions were generated specifically for this feature. ANSWER_R2_ALL has two parts:
+     (1) ASK answers — the engineer's selections; treat as fixed requirements.
+     (2) RECOMMEND items — feature-specific decisions assigned to YOU. These are NOT answered.
+         You must make each call, state the pick + one-line rationale + the runner-up in
+         `## Decision`/`## Rationale`, and reflect them in the ADR's invariants, config, and
+         critical test scenarios. Never echo a RECOMMEND item back as an open question. -->
+**RECOMMEND items (you decide these):** RECOMMEND_ITEMS_OR_NONE
 
 **ADR number**: ADR_NUMBER
 **ADR file path**: ADR_FILE_PATH
@@ -517,7 +524,7 @@ Standard format. Include a `## Standard definition` section after `## Rationale`
 ## Report format
 
 ```
-## /design complete
+## /architect complete
 
 **Mode**: <feature | architecture | enhancement | cross-cutting>
 **Operation**: <create | update | supersede>

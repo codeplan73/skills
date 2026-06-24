@@ -1,7 +1,7 @@
 ---
 name: sync
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill after a change is complete to keep the project's durable knowledge current — update the tool-agnostic AGENTS.md context files (root and nested) to reflect what changed, and flag any ADR the change may have made stale. Run /sync as the last step on medium or full tier work, before or just after merge. It maintains existing AGENTS.md files, and creates a nested AGENTS.md (plus a CLAUDE.md pointer) only for an area net-new in this change; it never overwrites an existing AGENTS.md, never restructures the root (that is /understand's job), and never edits ADRs (that is /design's job) — it only flags stale ones. Conservative by default: surgical, additive edits that preserve curated content."
+description: "Use this skill after a change is complete to keep the project's durable knowledge current — update the tool-agnostic AGENTS.md context files (root and nested) to reflect what changed, and flag any ADR the change may have made stale. Run /sync as the last step on medium or full tier work, before or just after merge. It maintains existing AGENTS.md files, and creates a nested AGENTS.md (plus a CLAUDE.md pointer) only for an area net-new in this change; it never overwrites an existing AGENTS.md, never restructures the root (that is /audit's job), and never edits ADRs (that is /architect's job) — it only flags stale ones. Conservative by default: surgical, additive edits that preserve curated content."
 ---
 
 ## What this skill does
@@ -10,7 +10,7 @@ Closes the loop on a change by syncing the durable knowledge to reality:
 
 1. **Maintains existing AGENTS.md** — root and nested — so commands, conventions, and constraints stay accurate after the change. Surgical, additive edits only; it never rewrites curated prose.
 2. **Creates a nested AGENTS.md for a brand-new area** introduced by the change — because the diff *is* the whole area, so it has enough context to write an accurate one. It adds the one root pointer line too.
-3. **Flags stale ADRs** — decisions the change may have contradicted or outgrown — and recommends running /design to update or supersede them. It does not edit ADRs.
+3. **Flags stale ADRs** — decisions the change may have contradicted or outgrown — and recommends running /architect to update or supersede them. It does not edit ADRs.
 
 Runs on a cheap model (haiku) in a subagent. Acts — no upfront questions.
 
@@ -22,12 +22,12 @@ Runs on a cheap model (haiku) in a subagent. Acts — no upfront questions.
 |---|---|---|
 | Edit existing root/nested AGENTS.md | ✅ maintains | /sync |
 | Create nested `<area>/AGENTS.md` for an area **net-new in this change** | ✅ creates (diff = full area context) + adds root pointer | /sync |
-| Create nested doc for a **pre-existing** undocumented area (only sliced by the diff) | ❌ flags "run /understand" | /understand |
-| Create or restructure the **root** AGENTS.md | ❌ flags "run /understand" | /understand |
-| Edit / supersede an ADR | ❌ flags as stale | /design |
+| Create nested doc for a **pre-existing** undocumented area (only sliced by the diff) | ❌ flags "run /audit" | /audit |
+| Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |
+| Edit / supersede an ADR | ❌ flags as stale | /architect |
 | Overwrite or rewrite curated AGENTS.md prose | ❌ flags conflict instead | human |
 
-The dividing line on creation is **context, not policy**: create only when this change shows you the whole area; defer to /understand when the area predates the change and you've seen only a slice. When unsure, **flag instead of creating**.
+The dividing line on creation is **context, not policy**: create only when this change shows you the whole area; defer to /audit when the area predates the change and you've seen only a slice. When unsure, **flag instead of creating**.
 
 ## Asks vs acts
 
@@ -35,7 +35,7 @@ The dividing line on creation is **context, not policy**: create only when this 
 
 ## Artifact ownership
 
-Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /understand). Writes nothing else.
+Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Writes nothing else.
 
 ---
 
@@ -118,17 +118,17 @@ The subagent returns a compact summary. Relay:
 **Orphans cleaned** (after deletions):
 - `<path>` — <removed orphaned nested doc / fixed broken pointer>
 
-**ADRs flagged stale** (run /design to update or supersede):
+**ADRs flagged stale** (run /architect to update or supersede):
 - `docs/adr/<file>` — <why the change makes it stale>
 
-**Context gaps** (run /understand — area too established for /sync to document from the diff alone):
+**Context gaps** (run /audit — area too established for /sync to document from the diff alone):
 - `<area>` — <pre-existing undocumented area only sliced by this change>
 
 **Conflicts left for you** (not auto-edited):
 - `<path>` — <curated content that would need rewriting; decide manually>
 ```
 
-Omit any section with no items. If everything was already current and nothing is stale, say so in one line. /sync does not run /design or /understand for you — it points; you decide.
+Omit any section with no items. If everything was already current and nothing is stale, say so in one line. /sync does not run /architect or /audit for you — it points; you decide.
 
 ---
 

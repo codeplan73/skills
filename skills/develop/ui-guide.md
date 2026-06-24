@@ -1,10 +1,8 @@
----
-name: ui
-compatibility: Built for Claude Code — uses interactive questions and stack detection. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to implement any web UI — components, pages, or full layouts — using semantic HTML, design tokens, and strict accessibility standards. Works on any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). If the project has a design.md at the root, enforces it as the single source of truth. Run /ui with a screenshot for pixel-perfect replication, or without one to choose from 5 curated design templates, paste a design.md URL, or describe a style. Do not use for backend logic, API routes, server actions, or data fetching."
----
+# /develop — UI track guide
 
-## What this skill does
+The UI build track for `/develop`. The main agent reads this after the ADR gate (Step 0 in `SKILL.md`) classifies a task as UI: components, pages, or full layouts using semantic HTML, design tokens, and strict accessibility. Works on any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). If the project has a `design.md` at the root, it is the single source of truth. With a screenshot, replicate pixel-perfectly; without one, pick from a curated template, a `design.md` URL, or a described style.
+
+## What this track does
 
 Three entry points — checked in order:
 
@@ -356,6 +354,39 @@ Update the `--font-sans` token to match whatever was loaded.
 
 ---
 
+## Asset resolution (run before Phase 1 if the UI needs imagery)
+
+Many UIs need real visual content — hero images, avatars, product/gallery photos, logos, illustrations, background media. Resolve where these come from **before** building markup, so you don't hardcode broken paths or invent files.
+
+**Step 1 — Does this build need image/media assets at all?** If it's a pure form, table, or text layout, skip this section.
+
+**Step 2 — Look for matching project assets** (use your file tools):
+```bash
+find . -type d \( -iname "assets" -o -iname "images" -o -iname "img" -o -iname "media" -o -iname "public" \) \
+  -not -path '*/node_modules/*' -not -path '*/.git/*' | head
+# then scan those dirs for files whose names plausibly match what the UI needs (hero, avatar, logo, product, …)
+```
+Also check `design.md`/the design reference for named or pictured assets.
+
+**Step 3 — If no matching assets are found, ask** via `AskUserQuestion` (do **not** silently invent paths, emoji, or blank boxes):
+- **question**: "This UI needs <list what — e.g. a hero image + 3 product photos> but I found no matching assets in the project. How should I source them?"
+- **header**: "Assets"
+- **options**:
+  1. `I'll add the assets` — "Stop and let me drop real files in. Tell me the exact paths/filenames to reference and I'll wire them when they're added." → list the precise paths you'll expect (e.g. `public/hero.jpg`, `public/products/{1,2,3}.jpg`), then pause for the engineer.
+  2. `Use placeholder service` — "Wire dynamic placeholders from a stock/placeholder service so the layout is real now; swap later." → use a reputable service (below), with correct dimensions and descriptive `alt`.
+  3. `Local solid/gradient placeholders` — "No external requests — use CSS gradient/blocks at the right aspect ratios as stand-ins." → use design tokens, never raw hex.
+
+The tool appends "Other" automatically.
+
+**Placeholder services** (option 2) — pick per need, request exact dimensions, keep them swappable behind a token/constant:
+- **Photos**: `https://picsum.photos/<w>/<h>` (Lorem Picsum), or Unsplash Source-style stock URLs by keyword for topical imagery.
+- **Avatars**: `https://i.pravatar.cc/<size>` or DiceBear (`https://api.dicebear.com/…`).
+- **Logos/illustrations**: a neutral local SVG placeholder rather than a random remote logo.
+
+Rules for placeholders: real `width`/`height` (or aspect-ratio box) to avoid layout shift; meaningful `alt` describing the *intended* content, not "placeholder"; centralise the URLs/paths in one constant or token so a later swap to real assets is one edit. Note in the report that placeholders are in use and where to replace them.
+
+---
+
 ## Implementation phases
 
 ### Phase 1 — Semantic structure
@@ -559,7 +590,7 @@ Use CSS logical properties instead of physical ones so layouts work correctly fo
 ## Report
 
 ```
-## /ui complete
+## /develop complete (UI)
 
 **Build type**: Component | Screen
 **Stack**: Next.js | Vite | Nuxt | SvelteKit | Plain HTML
@@ -571,6 +602,7 @@ Use CSS logical properties instead of physical ones so layouts work correctly fo
 **Token conflicts**: none | <list — verify manually before next run>
 **Token file**: created | updated | unchanged — <path>
 **Fonts**: <family> via <method> | <proprietary> → <substitute> | system
+**Assets**: project files | placeholders (<service> — swap at <where>) | none needed
 **Built**: <name> — <file paths>
 **Token adherence**: all sourced from design.md | <deviations>
 **Accessibility**: WCAG AA passed | <items deferred>

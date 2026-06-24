@@ -1,5 +1,11 @@
 # Tier Decision Guide
 
+## Before triage — new product or new slice
+
+`/triage` sizes **one change**. If the engineer is starting a whole product or a fresh batch of features ("I want to build X"), that isn't one change — point them to **`/mvp`** first to produce the feature roadmap (`docs/features/index.md`), then triage each feature off that list one at a time.
+
+In the playbooks below, `/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern). For a medium/full change that reuses already-decided patterns, `/develop`'s ADR gate will confirm none is needed and skip straight to building.
+
 ## Tier definitions
 
 ### just-do-it
@@ -20,7 +26,7 @@ Playbook: *(no skills — act directly)*
 - Low blast radius; easy to revert
 - Does not touch auth, payments, migrations, or shared infra
 
-Playbook: `/test` → `/document`
+Playbook: `/develop` → `/test` → `/document`
 
 ---
 
@@ -31,7 +37,7 @@ Playbook: `/test` → `/document`
 - Touches shared state, APIs, or data models
 - Moderate blast radius or non-trivial rollback
 
-Playbook: `/understand` → `/design` → `/test` → `/review` → `/document`
+Playbook: `/audit` → `/architect` → `/develop` → `/test` → `/review` → `/document`
 
 ---
 
@@ -43,7 +49,7 @@ Playbook: `/understand` → `/design` → `/test` → `/review` → `/document`
 - High blast radius; difficult or risky to reverse
 - Security-sensitive surface
 
-Playbook: `/understand` → `/design` → `/test` → `/harden` → `/review` → `/document` → `/sync`
+Playbook: `/audit` → `/architect` → `/develop` → `/test` → `/harden` → `/review` → `/document` → `/sync`
 
 ---
 

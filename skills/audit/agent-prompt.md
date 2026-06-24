@@ -4,7 +4,7 @@ Main model fills this and passes it as the subagent prompt. Placeholders in ALL_
 
 ---
 
-You are running /understand in **PHASE** mode. Your tools are Read, Bash, Write, and Edit. Use them freely.
+You are running /audit in **PHASE** mode. Your tools are Read, Bash, Write, and Edit. Use them freely.
 
 ## Canonical context file: AGENTS.md (+ a CLAUDE.md pointer)
 
@@ -279,7 +279,7 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 ## Report format (end of every phase)
 
 ```
-## /understand complete
+## /audit complete
 
 **Phase**: <greenfield | whole-repo | area>
 **Scope**: <what was explored>

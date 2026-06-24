@@ -1,6 +1,6 @@
 # UI Accessibility and Token Checklist
 
-Loaded by /ui during Phase 5. Work through each section. Items marked **required** must pass before the skill is complete. Best-effort items should be completed where scope allows.
+Loaded by /develop (UI track) during Phase 5. Work through each section. Items marked **required** must pass before the skill is complete. Best-effort items should be completed where scope allows.
 
 ---
 
