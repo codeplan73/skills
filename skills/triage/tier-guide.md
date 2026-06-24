@@ -6,6 +6,15 @@
 
 In the playbooks below, `/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern). For a medium/full change that reuses already-decided patterns, `/develop`'s ADR gate will confirm none is needed and skip straight to building.
 
+## Greenfield vs brownfield order (`/audit` vs `/architect`)
+
+The first two steps **invert** depending on whether code exists yet:
+
+- **Brownfield** (existing codebase): `/audit` → `/architect` → … — understand what's there *before* deciding the change. This is the order shown in the playbooks below.
+- **Greenfield** (new project): `/mvp` → `/architect` → `/audit` → `/develop` → … — decide the foundational stack **first** (`/architect`'s ARCHITECTURE ADR), *then* `/audit` seeds the root `AGENTS.md` from that decision. Running `/audit` before the stack is chosen would seed an empty/placeholder stack.
+
+Either way the stack stays correct: `/audit` reconciles root `AGENTS.md`'s `## Stack` from the architecture ADR whenever it runs, and `/sync` flags it if root drifts from the ADR — so a wrong order self-corrects on the next pass.
+
 ## Tier definitions
 
 ### just-do-it
@@ -26,7 +35,7 @@ Playbook: *(no skills — act directly)*
 - Low blast radius; easy to revert
 - Does not touch auth, payments, migrations, or shared infra
 
-Playbook: `/develop` → `/test` → `/document`
+Playbook: `/develop` → `/verify` → `/test` → `/document`
 
 ---
 
@@ -37,7 +46,7 @@ Playbook: `/develop` → `/test` → `/document`
 - Touches shared state, APIs, or data models
 - Moderate blast radius or non-trivial rollback
 
-Playbook: `/audit` → `/architect` → `/develop` → `/test` → `/review` → `/document`
+Playbook: `/audit` → `/architect` → `/develop` → `/verify` → `/test` → `/review` → `/document`
 
 ---
 
@@ -49,7 +58,9 @@ Playbook: `/audit` → `/architect` → `/develop` → `/test` → `/review` →
 - High blast radius; difficult or risky to reverse
 - Security-sensitive surface
 
-Playbook: `/audit` → `/architect` → `/develop` → `/test` → `/harden` → `/review` → `/document` → `/sync`
+Playbook: `/audit` → `/architect` → `/develop` → `/verify` → `/test` → `/harden` → `/review` → `/document` → `/sync`
+
+`/debug` is **on-demand**, not a playbook step: invoke it whenever `/verify` or `/test` surfaces a failure, or any time behavior is wrong and the cause isn't obvious.
 
 ---
 

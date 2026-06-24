@@ -1,4 +1,4 @@
-# Understand Subagent Prompt Template
+# Audit Subagent Prompt Template
 
 Main model fills this and passes it as the subagent prompt. Placeholders in ALL_CAPS.
 
@@ -25,15 +25,30 @@ Hard rules:
 - **Migration** (when told `MIGRATE=yes`): copy the legacy `CLAUDE.md`'s content verbatim into a new `AGENTS.md`, then replace `CLAUDE.md` with the pointer above. Never discard curated content.
 - If a `CLAUDE.md` pointer already exists and points to AGENTS.md, leave it untouched.
 
+## Stack reconciliation (every phase that writes or audits root)
+
+Root `AGENTS.md`'s `## Stack` is a **mirror of the architecture decision**. Before finalizing root in any phase, check `docs/adr/` for an architecture ADR (one with a `## Proposed stack` section):
+- **Creating root** (greenfield, whole-repo): populate `## Stack` from that ADR if it exists — it is the source of truth, even on greenfield where no code exists yet. Otherwise derive from the code/manifest, or `<to be filled>`.
+- **Auditing existing root** (gap-fill): if root's `## Stack` is missing, placeholder, or **contradicts** the architecture ADR, that's a gap/contradiction — surface it (ROOT_GAPS for missing, CONTRADICTIONS for conflict). Never silently overwrite curated stack text.
+
+This makes the `/architect → /audit` handoff order-independent: whenever audit runs, root absorbs the decided stack.
+
 ## Phase
 
 PHASE
-<!-- one of: greenfield | whole-repo | area -->
+<!-- one of: greenfield | whole-repo | area | gap-fill -->
 
 ## Scope / area
 
 SCOPE_OR_AREA
 <!-- "whole repo" or a specific path like "src/auth" -->
+
+## Monorepo
+
+MONOREPO_OR_NO
+<!-- "no", or "yes — apps: web, api, …". If yes: each app/package is its own area — give each
+     a nested AGENTS.md with its own stack/commands/conventions, and keep root AGENTS.md to
+     monorepo-wide concerns (workspace tooling, shared conventions) only. -->
 
 ## Task context
 
@@ -72,13 +87,14 @@ The project is new — no source files yet. Your job: create a root AGENTS.md th
 
 ```bash
 find . -maxdepth 2 -not -path '*/.git/*' | sort
+find docs/adr -name "[0-9]*.md" 2>/dev/null | sort   # did /architect already choose the stack?
 ```
 
-Read `package.json` / `pyproject.toml` / `go.mod` if present — note language and package manager.
+Read `package.json` / `pyproject.toml` / `go.mod` if present — note language and package manager. **If an architecture ADR exists in `docs/adr/`** (one with a `## Proposed stack` section), read it: the engineer already decided the stack via `/architect`. Use it to populate `## Stack` — do not leave placeholders or contradict it. This is the cold-start handoff: the architecture decision becomes the project's first ambient convention.
 
 **Step 2 — Create root AGENTS.md**
 
-Use the template below. Populate `## Stack` from what you found.
+Use the template below. Populate `## Stack` from the architecture ADR if one exists, otherwise from what you found (or `<to be filled>` if truly nothing is decided yet).
 
 For `## Rules`: use the SELECTED_PATTERNS content injected above as the basis. If the engineer selected "Other" (free-text) instead of a named pattern, treat their exact text as the conventions and include it verbatim under `## Rules` — do not interpret or reformat it. Append ADDITIONAL_STANDARDS as extra bullet points at the end of `## Rules`. If nothing was found for stack, write placeholders like `<to be filled>`.
 
@@ -115,9 +131,21 @@ From your reading, answer:
 
 Discard: implementation details, TODO comments, anything that changes frequently.
 
-**Step 3 — Create root AGENTS.md** using the template below.
+**Step 3 — Create root AGENTS.md** using the template below. Keep it global and short (≤60 lines) — area-specific detail belongs in nested docs (next step), not here.
 
-**Step 4 — Report** (use the report format at the bottom of this file).
+**Step 4 — Create nested AGENTS.md for areas that warrant one**
+
+Identify the major areas/modules of the codebase (e.g. `src/auth`, `src/payments`, `src/api`, `src/jobs`). For **each**, decide by judgment whether it warrants its own context file:
+- **Warrants nested** — the area has distinct conventions, non-obvious rules, local commands, external integrations, or gotchas a developer must know before touching it.
+- **Does not** — it's a simple module with no surprises, or root already covers it. Skip it (don't create one per folder).
+
+For each warranted area: write `<area>/AGENTS.md` using the nested template below, create its sibling `<area>/CLAUDE.md` pointer, and add one pointer line into root's `## Context files` via Edit:
+```
+- [<area>/AGENTS.md](<area>/AGENTS.md) — <one-line description>
+```
+This root-vs-nested split is the point: global facts in root, area-specific knowledge co-located with the area's code (where it auto-loads when that code is edited).
+
+**Step 5 — Report** (use the report format at the bottom of this file). List every nested doc created.
 
 ---
 
@@ -174,6 +202,35 @@ Do not warrant: the area is a simple CRUD module with no surprises, or it is alr
 - Area AGENTS.md **exists** → propose additions only (never overwrite). Use the proposed diff format below.
 
 **Step 4 — Report** (use the report format at the bottom of this file).
+
+---
+
+### GAP-FILL phase
+
+Root AGENTS.md already exists. The codebase is partially documented. Your job: audit the **whole codebase** against the existing docs and fill only what's genuinely missing — never rewrite curated content.
+
+**Step 1 — Read what's documented**
+
+The existing root AGENTS.md is injected above. Read every nested AGENTS.md (paths injected above) so you know what's already covered.
+
+**Step 2 — Scan the codebase**
+
+```bash
+find . -maxdepth 3 -not -path '*/.git/*' -not -path '*/node_modules/*' \
+  -not -path '*/.next/*' -not -path '*/dist/*' -not -path '*/build/*' | sort
+```
+Read the manifest(s), CI config, entry points, and a sample of each major area. Build a picture of the real stack, commands, conventions, and the major areas.
+
+**Step 3 — Find four kinds of finding**
+
+- **(a) Global facts missing from root** — a daily command, stack element, or project-wide rule that's true but absent from root AGENTS.md. Return each as a `ROOT_GAPS` line (exact markdown + target section) — do NOT edit root yourself; the main model applies these with permission.
+- **(b) Undocumented areas** — a major area with distinct conventions/gotchas that has **no** nested AGENTS.md. Create the nested doc (nested template + sibling CLAUDE.md pointer) and add its root pointer line via Edit. (This is safe to do directly — you're creating, not overwriting.)
+- **(c) Stale/incomplete nested docs** — an existing nested AGENTS.md missing something now true of its area. Return as `PROPOSED_ADDITIONS` — do NOT edit it yourself.
+- **(d) Contradictions** — a doc states something the codebase **disproves**: root says "tests: Jest" but the project uses Vitest; root's `## Stack` conflicts with the architecture ADR; a documented command no longer exists. This is worse than a gap — the docs are actively wrong. **Do NOT auto-fix** (the line may be curated). Return each as a `CONTRADICTIONS` entry naming the doc, what it says, and what the code/ADR actually shows. The main model surfaces these to the human to resolve.
+
+Be conservative: only flag findings you're confident about and that are durable. When unsure, leave it. Do not flag implementation detail, TODOs, or anything that churns.
+
+**Step 4 — Report** (use the report format at the bottom of this file). Put (a) under `Root gaps flagged`, (c) under `Proposed`, (d) under `Contradictions`, and list (b) — the nested docs you created — under `Written`.
 
 ---
 
@@ -281,7 +338,7 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 ```
 ## /audit complete
 
-**Phase**: <greenfield | whole-repo | area>
+**Phase**: <greenfield | whole-repo | area | gap-fill>
 **Scope**: <what was explored>
 
 **Discovered**:
@@ -291,11 +348,14 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 **Written**:
 - <file path> — <created | pointer added | updated>
 
-**Root gaps flagged** (area phase only):
+**Root gaps flagged** (area / gap-fill phases):
 <ROOT_GAPS output or "none">
 
 **Proposed** (existing files):
 <PROPOSED_ADDITIONS block or "none">
+
+**Contradictions** (gap-fill phase — docs the code disproves; for a human to resolve):
+<CONTRADICTIONS entries or "none">
 ```
 
 ---

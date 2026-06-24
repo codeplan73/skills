@@ -1,6 +1,6 @@
 # Engineering Workflow Skills
 
-A set of [Agent Skills](https://agentskills.io) that encode a tiered, phase-based engineering workflow — scope an idea, triage a change, audit the code, architect the decision, build, test, review, harden, document, and keep context in sync. Each skill owns one phase and one artifact, so nothing sprawls.
+A set of [Agent Skills](https://agentskills.io) that encode a tiered, phase-based engineering workflow — scope an idea, triage a change, audit the code, architect the decision, build, verify, test, review, harden, document, and keep context in sync. Each skill owns one phase and one artifact, so nothing sprawls.
 
 ## Install
 
@@ -42,14 +42,16 @@ These skills follow the open Agent Skills format and are written to be **portabl
 |---|---|---|
 | `mvp` | Scope | Turns an idea into a prioritized feature roadmap (`docs/features/index.md`). |
 | `triage` | Plan | Recommends a risk tier, playbook, and severity before any code is touched. |
-| `audit` | Comprehend | Maps a repo or area and writes the first context files (root / nested `AGENTS.md`). |
+| `audit` | Comprehend | Audits the codebase (or seeds standards on greenfield) and writes the context files (root / nested `AGENTS.md`). |
 | `architect` | Decide | Staff-engineer system design with feature-specific questioning; writes an ADR to `docs/adr/`. |
 | `develop` | Build | Builds a feature — UI and logical — from its ADR; gates on the decision first. |
+| `verify` | Verify | Runs the real app and confirms the change works end to end (not just green tests). |
 | `test` | Verify | Senior test suite for your uncommitted change; saves tooling prefs. |
+| `debug` | Fix | Root-cause investigation loop — reproduce, localize, prove, fix at the root. |
 | `review` | Verify | Rigorous code review on a **different model** than wrote the code. |
 | `harden` | Verify | Systems-level pass for concurrency, scale, and security failure modes. |
 | `document` | Ship | PR text, changelog, release notes, or postmortem from the real diff. |
-| `sync` | Close | Keeps `CLAUDE.md` current and flags stale ADRs after a change. |
+| `sync` | Close | Keeps `AGENTS.md` current, reconciles the roadmap, and flags stale ADRs after a change. |
 
 ## Tiers
 

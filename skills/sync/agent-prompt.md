@@ -44,6 +44,10 @@ ROOT_AGENTS_MD
 
 ADR_PATHS
 
+## Feature roadmap (you may RECONCILE status only — never add/remove/reorder features)
+
+ROADMAP_PATH_OR_NONE
+
 ---
 
 ## What to do
@@ -60,6 +64,8 @@ Make the edit **only if** it is:
 - **Surgical** — change or add specific lines; do not rewrite sections.
 - **Additive or corrective** — add a missing fact or fix an inaccurate one. Never delete curated guidance you don't fully understand.
 - **Durable** — true beyond this one change. Skip one-off notes, history, and feature summaries (those don't belong in AGENTS.md).
+
+**Stack consistency:** if root AGENTS.md has a `## Stack` and an architecture ADR (one with `## Proposed stack`) exists, check they agree. If root's stack is **missing the decided stack** (e.g. greenfield root was seeded before the ADR), add it surgically. If they **contradict** (root says one thing, the ADR another), do not rewrite curated stack lines — flag it under `CONFLICTS` for a human, noting which ADR.
 
 Rules you must not break:
 - **Idempotent — check before you add.** Read the target doc first. If the fact, command, or pointer is already present (even worded differently), do **not** add it again. Running /sync twice on the same change must produce zero new edits the second time. This is critical — the same branch gets synced repeatedly.
@@ -93,7 +99,15 @@ For each path in DELETED_PATHS, check whether the change removed an area that ha
 
 Be **strict** to avoid false positives — noise here erodes trust. Read an ADR only if the changed paths plausibly touch its subject (use the ADR's title/first lines to decide; don't read all of them blindly). Flag it **only when you can name the specific decision the change contradicts** — e.g. "ADR 0007 mandates Postgres; this change adds a MongoDB adapter." Do not flag vague "might be affected" cases. When in doubt, do not flag. Record genuine hits under `STALE_ADRS` with the contradicted point; recommend /architect to update or supersede — never edit the ADR yourself.
 
-### 5. Report
+### 5. Reconcile the feature roadmap (only if ROADMAP_PATH_OR_NONE is a path)
+
+Read `docs/features/index.md`. Bring its status to match what the diff **actually shipped** — nothing more:
+- For each feature whose code area the diff touched, tick (`[ ]` → `[x]`) the build sub-tasks the diff completed, and update the feature's **Status** (`planned` → `in-progress`, or → `done` only when every sub-task is checked).
+- **Strictly status only.** Never add, remove, rename, or reorder features or sub-tasks — that's /mvp's. Never invent a feature for code that has no row; if shipped code clearly matches no row, note it under `ROADMAP_RECONCILED` as "unmapped: <area>" so a human can decide.
+- **Idempotent**: a box already `[x]` stays `[x]`; re-running on the same diff changes nothing.
+- **Conservative**: only tick a sub-task you can see completed in the diff. When unsure, leave it.
+
+### 6. Report
 
 Output exactly this block — verbatim, no extra prose. Omit any section that's empty.
 
@@ -108,6 +122,9 @@ AGENTS_CREATED:
 
 ORPHANS_CLEANED:
 - <path> — <removed orphaned doc / fixed broken pointer after deletion>
+
+ROADMAP_RECONCILED:
+- <feature> — <sub-tasks ticked / status advanced to match the diff; or "unmapped: <area>">
 
 STALE_ADRS:
 - <docs/adr/file> — <why the change makes it stale>

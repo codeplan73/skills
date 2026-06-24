@@ -28,7 +28,34 @@ find . -maxdepth 3 -name "design.md" \
 **Found** — validate before using: must have at least a `colors:` block and a `typography:` block. If either is missing or the file is empty, treat as **not found** and warn the user.
 
 **Found and valid** → **Design.md path**. Skip Steps 1 onward.
-**Not found** → **Step 0.5**.
+**Not found** → **Step 0.1 (brownfield check)**.
+
+---
+
+## Step 0.1 — Brownfield check (no design.md, but is there existing UI?)
+
+Before generating a fresh design system, find out if the project **already has a visual language** you must match. Generating a new one on top of an existing app produces UI that clashes with what's shipped.
+
+```bash
+# Existing styling/tokens/components that imply a design language already exists
+find . -maxdepth 4 \( -name "globals.css" -o -name "tokens.css" -o -name "theme.*" \
+  -o -name "tailwind.config.*" \) -not -path '*/node_modules/*' | head
+find . -maxdepth 4 -type d \( -path '*/components/*' -o -name "ui" \) -not -path '*/node_modules/*' | head
+```
+
+**If existing UI/styles are found (brownfield) — ask before proceeding** via `AskUserQuestion`:
+- **question**: "There's no `design.md`, but this project already has UI. How should I get the design system?"
+- **header**: "Design system"
+- **options**:
+  1. `Extract from existing code` — "Recommended — reverse-engineer `design.md` from the current tokens/components so new UI matches what's shipped." → go to **Step 0.2**.
+  2. `Use a reference` — "I'll give a screenshot or a `design.md` URL, or pick a template." → go to **Step 1**.
+  3. `Match a specific file` — "Build to mirror an existing component/page I name; I'll point you at it." → read that file's styles and treat them as the local source of truth.
+
+**If no existing UI is found (greenfield)** → **Step 0.5**.
+
+### Step 0.2 — Extract design.md from existing code
+
+Read the token files and 3–5 representative components/pages. Recover the real system into a `design.md` (same schema as a generated one): colors (light + dark if present), typography (families, scale, weights), spacing scale, radii, shadows, motion, and the conventions visible in components. Pull values from CSS variables / Tailwind config — do not invent. Where the codebase is inconsistent, pick the dominant value and note the variance. Write `./design.md`, show the engineer a short summary, and confirm before building. Then proceed to implementation with it as the source of truth.
 
 ---
 

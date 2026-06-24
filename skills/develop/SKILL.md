@@ -40,6 +40,8 @@ Decide whether a **load-bearing decision is owed and unrecorded**. A decision is
 
 It is **not** owed for pure implementation that an existing `design.md`, `AGENTS.md` convention, or a prior ADR already covers — e.g. rendering a page in the existing design system, or wiring already-decided pieces together.
 
+**The dangerous case is the false negative — building a real decision without noticing it.** So when you genuinely can't tell whether a choice is load-bearing, treat it as **owed** and ask (the panel below). One extra question is cheap; an unrecorded provider/data-model/pattern decision discovered after the code ships is not.
+
 **Check, in order:**
 1. If `docs/features/index.md` exists, find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.**
 2. Search `docs/adr/` for an ADR covering this scope. If one exists, it's the spec — proceed.
@@ -85,12 +87,28 @@ Before building, read:
 
 This step is why `/develop auth functionality` doesn't re-ask the stack chosen during `/develop auth pages`: `/architect` decided it, `/sync` wrote it into `AGENTS.md`, and you read it here.
 
-### Step 3 — Set status and build
+**Spec-completeness check (before building, not mid-build).** Confirm the ADR actually contains what you need to build *this* task — for logical work: data model, API surface, security model, key invariants; for UI work: the screens and their states/requirements. If a load-bearing section you need is **missing or left as a placeholder**, do not guess your way through it. Ask via `AskUserQuestion`:
+- **question**: "The ADR for this is missing `<section>` — I need it to build correctly. How do you want to proceed?"
+- **header**: "ADR gap"
+- **options**: `Update the ADR first` (recommended — end with a paste-ready `/architect <feature> — fill in <section>` handoff) · `Tell me the answer now` (engineer supplies it inline; proceed, and note it should be backfilled into the ADR) · `Use your best judgment` (proceed on a stated assumption, surfaced in the report for review).
 
-- In `docs/features/index.md` (if the roadmap exists), set the feature's **Status** to `in-progress` and find the specific build sub-task(s) you're about to do in its breakdown checklist.
-- **UI track** → follow `ui-guide.md` end to end (component-or-screen → stack/styling/dark-mode detection → token sync → font → the five implementation phases → accessibility).
-- **Logical track** → follow `logical-guide.md` end to end (ground in the ADR → data layer → core logic → interface → integration → correctness pass).
-- **Both** → build the logical track first (so the UI has something to bind to), then the UI track.
+A thin ADR caught here is a 30-second question; caught mid-build it's a wrong guess baked into code.
+
+### Step 3 — Resume check, then build
+
+**Resume first — never rebuild what's already done.** If `docs/features/index.md` has this feature, read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`. (No roadmap → just build the requested task.)
+
+**Gather any remaining inline answers** (the Step 2 spec-gap answer, the UI asset/template questions, an ambiguous business rule) — these need the engineer, so collect them *before* handing off to a build run.
+
+Then build the track(s):
+- **UI track** → follow `ui-guide.md` **inline** (it is interactive and visual: component-or-screen → stack/styling/dark-mode detection → asset resolution → token sync → font → the five implementation phases → accessibility). Keep it on the main thread so the design/asset questions stay responsive.
+- **Logical track** → once all open answers are collected, **spawn a build subagent** to write the code (keeps the main context lean for a large build):
+  - `model: "sonnet"`
+  - `description: "Develop (logical): <feature>"`
+  - Tools: `Read`, `Bash`, `Write`, `Edit`, `Grep`, `Glob`
+  - `prompt`: the full `logical-guide.md` text + the governing ADR (inlined) + the nearest `AGENTS.md` (inlined) + the collected answers + the exact sub-tasks to build. Subagents can't resolve skill paths, so inline everything it needs.
+  - If the change is small (a single endpoint or helper), skip the subagent and do it inline — spawning has overhead.
+- **Both** → build the logical track first (so the UI has a real interface to bind to), then the UI track.
 
 ### Step 4 — Update the roadmap and report
 

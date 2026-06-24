@@ -1,14 +1,18 @@
 ---
 name: audit
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to comprehend a repository or a specific area of the codebase before designing or planning a change. Run /audit when starting a medium or full task (per the triage playbook), when no AGENTS.md context files exist yet, or when you need a reliable map of an area before making changes. This skill creates context files the first time — a tool-agnostic AGENTS.md (root for the repo, or nested for a focused area) holding the content, plus a thin CLAUDE.md pointer beside it so Claude Code picks it up. It never overwrites an existing AGENTS.md. It does not maintain files after changes; that is /sync's job. Do not run /audit after /architect has already written an ADR for the same scope."
+description: "Use this skill to bootstrap a project's AI context — the AGENTS.md files every later skill and tool reads — at any starting point. Run /audit at the start of a greenfield project (it asks for your coding standards and seeds the root AGENTS.md, pulling the stack from the architecture ADR if one exists), on an undocumented existing codebase (it scans the whole project and writes the root AGENTS.md plus nested per-area AGENTS.md by judgment of what's global vs area-specific), on a partially-documented one (it audits the codebase against existing docs and adds only what's missing, never overwriting), or on a single named area (e.g. /audit src/auth). It writes a tool-agnostic AGENTS.md holding the content plus a thin CLAUDE.md pointer beside it. It never overwrites curated content. It does not create ADRs (/architect), maintain docs after changes (/sync), or write the roadmap (/mvp)."
 ---
 
 ## What this skill does
 
-Explores the repo or a named area, extracts durable knowledge, and writes context files where they are missing. Asks for coding standards when starting a greenfield project.
+The context-bootstrapper. It gives every later skill (and every AI tool) an accurate picture of the project by writing the `AGENTS.md` files — and it handles all three starting points:
 
-Does not create ADRs (/architect owns those). Does not maintain files after changes (/sync owns that).
+- **Greenfield** (no code yet): asks the engineer for the coding standards and conventions, and **seeds the root `AGENTS.md`** from the answers — so the very first `/develop` already has ambient conventions to build to. (This is the cold-start fix: without it, the foundational stack/standards decision has nowhere to land.)
+- **Brownfield, undocumented** (code, no `AGENTS.md`): scans the whole project, then **writes the root `AGENTS.md` AND creates nested `<area>/AGENTS.md` files** — using judgment about what is global (→ root) versus area-specific (→ nested).
+- **Brownfield, partially documented** (code + some `AGENTS.md` already): checks the existing root and nested docs **against the whole codebase** and **adds only what's missing** — new global facts, and nested docs for undocumented areas — never clobbering curated content.
+
+Does not create ADRs (/architect owns those). Does not maintain files after changes (/sync owns that). Does not write the feature roadmap (/mvp owns `docs/features/index.md`).
 
 ## Context-file convention (AGENTS.md is canonical)
 
@@ -34,25 +38,28 @@ From the argument or task description:
 
 | Input | Phase triggered |
 |---|---|
-| No argument, codebase is empty, no AGENTS.md | Phase 1 — greenfield setup |
-| No argument, codebase exists, no AGENTS.md | Phase 2 — whole-repo scan |
+| No argument, **new project** (no/boilerplate code, no AGENTS.md) | Phase 1 — greenfield setup (ask standards → seed root) |
+| No argument, **established codebase**, no root AGENTS.md | Phase 2 — whole-repo scan (create root **+ judged nested**) |
+| No argument, codebase exists, root AGENTS.md **already exists** | Phase 4 — gap-fill (audit codebase vs existing docs, add what's missing) |
+| No argument, **ambiguous** (scaffold-only, or unfamiliar language) | Phase 0 — ask new-vs-existing, then route |
 | Path or area name (e.g. `auth`, `src/payments`) | Phase 3 — area scan |
 
-(Detection treats a content-ful legacy `CLAUDE.md` with no `AGENTS.md` as "present but needs migration" — see the convention above.)
+The choice is made from **several signals** (source count, git history, manifests), not a file count alone — see Pre-flight. A content-ful legacy `CLAUDE.md` with no `AGENTS.md` is migrated, then treated as Phase 4.
 
 ## Acts vs asks
 
-- Phase 1: asks coding pattern questions via MCQ before creating root AGENTS.md.
-- Phase 2: acts immediately, no questions.
+- Phase 1: asks coding-standards questions via MCQ before creating root AGENTS.md.
+- Phase 2: acts immediately, no questions — writes root and creates the nested docs it judges warranted.
 - Phase 3: acts to explore; asks permission before modifying an existing root AGENTS.md, and before migrating a legacy CLAUDE.md.
+- Phase 4: acts to explore the whole codebase; **asks permission before applying additions to the existing root AGENTS.md** (nested-doc creation for undocumented areas it reports first, then applies on confirmation).
 
 ## Artifact ownership
 
 | File | Rule |
 |---|---|
-| Root `AGENTS.md` | The content. Create if missing (Phase 1, 2). Gap-fill with permission if it exists (Phase 3). **Never overwrite.** |
+| Root `AGENTS.md` | The content. Create if missing (Phase 1, 2). Gap-fill with permission if it exists (Phase 3, 4). **Never overwrite.** |
 | Root `CLAUDE.md` | Pointer only. Create the forward-to-`AGENTS.md` pointer if missing; migrate its content into `AGENTS.md` (with permission) if it's a legacy content-ful file. |
-| `<area>/AGENTS.md` | The content for that area. Create if missing and the area warrants it (Phase 3). Propose additions if it exists; never overwrite. |
+| `<area>/AGENTS.md` | The content for that area. Create if missing and the area warrants it (Phase 2, 3, 4 — by judgment). Propose additions if it exists; never overwrite. |
 | `<area>/CLAUDE.md` | Pointer only, forwarding to `<area>/AGENTS.md`. |
 
 When creating a nested `AGENTS.md`, add exactly one pointer line to root `AGENTS.md` under `## Context files`:
@@ -75,32 +82,61 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 ### Pre-flight (main model does this before anything else)
 
-```bash
-# Detect the canonical context file and any legacy pointer-candidate
-#   AGENTS.md present  → ROOT_EXISTS (canonical)
-#   only CLAUDE.md present (content-ful, no AGENTS.md) → ROOT_LEGACY (migrate)
-#   neither → ROOT_MISSING
-# Use your file tools to check existence of AGENTS.md and CLAUDE.md at the repo root.
+**Don't decide on a file count alone** — a scaffold inflates it, an unfamiliar language zeroes it out. Gather several signals:
 
-# Count meaningful source files
+```bash
+# 1. Context files: AGENTS.md present → ROOT_EXISTS; content-ful CLAUDE.md only → ROOT_LEGACY; neither → ROOT_MISSING
+#    (use your file tools to check existence of AGENTS.md / CLAUDE.md at the root)
+
+# 2. Source count — broad extension set across ecosystems
 find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
   -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.java" -o -name "*.rb" \
-  -o -name "*.swift" -o -name "*.kt" \) \
-  -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/dist/*' \
-  -not -name "next.config.*" -not -name "tailwind.config.*" -not -name "postcss.config.*" \
-  -not -name "vite.config.*" -not -name "vitest.config.*" -not -name "jest.config.*" \
-  -not -name "eslint.config.*" -not -name "prettier.config.*" | wc -l
+  -o -name "*.swift" -o -name "*.kt" -o -name "*.php" -o -name "*.cs" -o -name "*.dart" \
+  -o -name "*.ex" -o -name "*.exs" -o -name "*.scala" -o -name "*.c" -o -name "*.cpp" \
+  -o -name "*.h" -o -name "*.lua" -o -name "*.clj" \) \
+  -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/dist/*' -not -path '*/build/*' \
+  -not -name "*.config.*" | wc -l
+
+# 3. Established-project signals
+git log --oneline 2>/dev/null | wc -l                                   # commit history depth
+ls package.json pyproject.toml go.mod Cargo.toml composer.json \
+   *.csproj pubspec.yaml mix.exs Gemfile 2>/dev/null                    # a real manifest?
+
+# 4. Monorepo signal
+ls pnpm-workspace.yaml turbo.json 2>/dev/null; grep -l '"workspaces"' package.json 2>/dev/null
+find . -maxdepth 2 -path '*/apps/*/package.json' -o -path '*/packages/*/package.json' 2>/dev/null | head
 ```
 
-Use the results to pick the phase below.
+**Pick the phase from the combined signals:**
+
+| Condition | Phase |
+|---|---|
+| Area path given as argument | Phase 3 (area scan) |
+| `ROOT_EXISTS` (or `ROOT_LEGACY` after migration) | Phase 4 (gap-fill) |
+| `ROOT_MISSING`, **clearly greenfield**: source count < 10 AND git history ≤ 1 commit | Phase 1 (greenfield) |
+| `ROOT_MISSING`, **clearly established**: source count ≥ 10, OR > 5 commits, OR a manifest with real deps + non-boilerplate code | Phase 2 (whole-repo) |
+| `ROOT_MISSING`, **ambiguous**: a scaffold (files present but ~1 commit and only boilerplate), OR a manifest/real history but 0 counted source files (a language not in the set) | **Phase 0 (ask)** |
+
+**Monorepo (`MONOREPO=yes`)**: in Phase 2/4, treat **each app/package as its own area** — give each a nested `AGENTS.md` carrying its stack/commands/conventions, and keep the repo-root `AGENTS.md` to monorepo-wide concerns only (workspace tooling, shared conventions). Note `MONOREPO=yes` + the app list in the subagent prompt.
 
 ---
 
-**Legacy migration (any phase):** if detection returned `ROOT_LEGACY` (content-ful root `CLAUDE.md`, no `AGENTS.md`), before proceeding ask permission to migrate: "I found a `CLAUDE.md` with project context but no `AGENTS.md`. I'll move its content into a new `AGENTS.md` (so all tools read it) and replace `CLAUDE.md` with a pointer. Proceed?" On yes: the subagent copies the content verbatim into `AGENTS.md`, then replaces `CLAUDE.md` with the pointer. On no: leave both untouched and continue without migrating. The same applies to any nested `<area>/CLAUDE.md`.
+**Legacy migration (any phase):** if detection returned `ROOT_LEGACY` (content-ful root `CLAUDE.md`, no `AGENTS.md`), before proceeding ask permission to migrate: "I found a `CLAUDE.md` with project context but no `AGENTS.md`. I'll move its content into a new `AGENTS.md` (so all tools read it) and replace `CLAUDE.md` with a pointer. Proceed?" On yes: the subagent copies the content verbatim into `AGENTS.md`, then replaces `CLAUDE.md` with the pointer. **After migration, `AGENTS.md` now exists → continue as Phase 4 (gap-fill)** to fill anything the legacy file lacked. On no: leave both untouched and continue without migrating. The same applies to any nested `<area>/CLAUDE.md`.
+
+### Phase 0 — Classify (only when pre-flight is ambiguous)
+
+Don't guess. Ask once via `AskUserQuestion`:
+- **question**: "I can't tell if this is a new project or an existing codebase — <state why: e.g. 'a manifest exists but I see no source in a language I recognise', or 'files look like untouched scaffolding'>. Which is it?"
+- **header**: "Project state"
+- **options**:
+  1. `New project` — "I'll ask for your coding standards and seed the context." → **Phase 1** (read the manifest/scaffold for the stack; still ask standards).
+  2. `Existing codebase` — "I'll scan what's here and document it." → **Phase 2**.
+
+Then route to the chosen phase.
 
 ### Phase 1 — Greenfield setup
 
-**Trigger**: root AGENTS.md is missing (`ROOT_MISSING`) AND source file count < 10.
+**Trigger**: pre-flight classified **clearly greenfield**, or Phase 0 → `New project`.
 
 **Step 1 — Ask coding patterns** (main model calls `AskUserQuestion`):
 
@@ -123,21 +159,23 @@ Question 2 — Additional standards (multi-select):
 
 **Step 3 — Spawn subagent** with:
 - `model: "sonnet"`
-- `description: "Understand: greenfield setup — create root AGENTS.md + CLAUDE.md pointer"`
+- `description: "Audit: greenfield setup — create root AGENTS.md + CLAUDE.md pointer"`
 - Tools: `Read`, `Bash`, `Write`
 - `prompt`: filled `agent-prompt.md` template with `PHASE=greenfield`, `SELECTED_PATTERNS=<file contents>`, `ADDITIONAL_STANDARDS=<selections>`. The subagent writes the content to `AGENTS.md` and creates the `CLAUDE.md` pointer beside it.
 
 ---
 
-### Phase 2 — Whole-repo scan
+### Phase 2 — Whole-repo scan (root + judged nested)
 
-**Trigger**: root AGENTS.md is missing AND source file count ≥ 5.
+**Trigger**: pre-flight classified **clearly established**, or Phase 0 → `Existing codebase`.
+
+The subagent doesn't just write root — it **identifies the major areas with distinct conventions** (e.g. `src/auth`, `src/payments`, `src/api`) and creates a nested `AGENTS.md` for each that warrants one, deciding by judgment what is global (→ root) vs area-specific (→ nested). Root stays short; area detail lives nested.
 
 **Spawn subagent** with:
 - `model: "sonnet"`
-- `description: "Understand: whole-repo scan — create root AGENTS.md + CLAUDE.md pointer"`
-- Tools: `Read`, `Bash`, `Write`
-- `prompt`: filled `agent-prompt.md` with `PHASE=whole-repo`, AGENTS.md noted as MISSING. The subagent writes content to `AGENTS.md` and creates the `CLAUDE.md` pointer.
+- `description: "Audit: whole-repo scan — root + nested AGENTS.md"`
+- Tools: `Read`, `Bash`, `Write`, `Edit` (`Edit` to add nested pointers into the root it just wrote)
+- `prompt`: filled `agent-prompt.md` with `PHASE=whole-repo`, AGENTS.md noted as MISSING. The subagent writes root `AGENTS.md`, creates each warranted nested `<area>/AGENTS.md` (+ its `CLAUDE.md` pointer), and adds one pointer line per nested doc into root's `## Context files`.
 
 ---
 
@@ -159,7 +197,7 @@ Question 2 — Additional standards (multi-select):
 
 **Spawn subagent** with:
 - `model: "sonnet"`
-- `description: "Understand: area scan — <area>"`
+- `description: "Audit: area scan — <area>"`
 - Tools: `Read`, `Bash`, `Write`, `Edit`
 - `prompt`: filled `agent-prompt.md` with `PHASE=area`, `AREA=<path>`, root and nested `AGENTS.md` contents injected. The subagent writes the area's content to `<area>/AGENTS.md` and creates `<area>/CLAUDE.md` as a pointer.
 
@@ -178,6 +216,27 @@ Note: the subagent adds the nested `AGENTS.md` pointer line to root `AGENTS.md` 
   - If `Skip for now`: do nothing.
 
 Relay the full report after the choice is applied.
+
+---
+
+### Phase 4 — Gap-fill (root AGENTS.md already exists)
+
+**Trigger**: no area argument, codebase exists, AND root AGENTS.md **already exists** (including right after a legacy `CLAUDE.md` migration). The project is partially documented — audit the whole codebase against what's written and fill the holes, conservatively.
+
+**Pre-flight additionally**:
+1. Read root `AGENTS.md` (inject its contents).
+2. List all nested AGENTS.md paths: `find . -name AGENTS.md -not -path '*/node_modules/*' -not -path '*/.git/*'` — inject the list.
+
+**Spawn subagent** with:
+- `model: "sonnet"`
+- `description: "Audit: gap-fill — codebase vs existing docs"`
+- Tools: `Read`, `Bash`, `Write`, `Edit`
+- `prompt`: filled `agent-prompt.md` with `PHASE=gap-fill`, root AGENTS.md contents + nested paths injected. The subagent scans the codebase and finds three kinds of gap: (a) **global facts missing from root** (a command, stack element, or project-wide rule) → returns as `ROOT_GAPS` proposals; (b) **areas with distinct conventions but no nested doc** → creates the nested doc (+ pointer); (c) **existing nested docs missing something** → returns as `PROPOSED_ADDITIONS`. It never overwrites curated content.
+
+**After subagent runs**, handle proposals before applying:
+- Nested docs it created for clearly-undocumented areas → already written; list them in the relay.
+- `ROOT_GAPS` and `PROPOSED_ADDITIONS` to existing files → present via `AskUserQuestion` (`Add them now` / `Show me the diff` / `Skip for now`), exactly as in Phase 3, then apply with `Edit` (verbatim, no paraphrase) on `Add them now`.
+- `CONTRADICTIONS` (docs the code disproves) → **surface to the engineer, do not auto-fix** — these touch possibly-curated lines. Relay each as "`<doc>` says *X*, but the code/ADR shows *Y*" and let them decide (correct it, or update the code). Never silently overwrite.
 
 ---
 
