@@ -113,7 +113,17 @@ Flag **no** only for genuinely pure implementation an existing `design.md`/ADR/c
 | 10 | **Tests** | `/test` | |
 | 11 | **Sync conventions** | `/sync` | promote decisions into AGENTS.md |
 
-Recommended build order within a feature: **data → backend → integration → UI → wire-up → harden → test**. (UI can start in parallel against a stub once the API shape is in the ADR.)
+**Build order — UI-first, layered (default).** Sequence the *whole roadmap by layer*, not each feature end-to-end. The point is to make the app **visible and clickable as early as possible** — motivating progress, and UI needs no accounts or database to exist. Order the work as:
+
+1. **Foundations** — coding standards (`/audit`), stack (`/architect`), and the **design system** (`/architect` → `design.md`). Everything visual depends on these.
+2. **All UI, against placeholder data** — build every page/screen with **static/mock data and placeholder assets** (no auth, no DB). The whole product becomes browsable. Each feature's **UI** sub-task lands in this layer (its design ADR first if `Needs ADR`).
+3. **Data & auth foundations** — now add **authentication**, the **database + schema**, and **seed data**. Pure logical work, no new screens.
+4. **Integration, page by page** — wire each page to real data, auth, and actions, **one page at a time** (e.g. home → shop → product → cart → checkout → account → admin). Each feature's **data-integration / permissions** sub-tasks land here.
+5. **Harden & test** each feature as it becomes real.
+
+So a single feature's sub-tasks are **spread across layers**: its UI is built in layer 2 (against mocks), its data/backend become real in layer 3–4, its integration in layer 4. In the breakdown, mark a feature's UI sub-task as using placeholder data until its data-integration sub-task is done. Group the **Build order** section by these layers/phases, not by feature.
+
+Deviate only when a page genuinely can't be prototyped without real data (rare — even then, mock it).
 
 ### Step 6 — Write `docs/features/index.md`
 
@@ -132,12 +142,14 @@ _Seeded by /mvp · status advanced by /develop and /sync._
 | 2 | Billing | P1 | yes | planned | — |
 | 3 | Marketing site | P0 | no | planned | — |
 
-## Build order
+## Build order (UI-first, layered)
 
-1. Auth & identity — foundational, everything gated depends on it
-2. Marketing site — public, can run in parallel
-3. Billing — after auth
-4. _Deferred: advanced search, analytics dashboard_
+**Phase 1 — Foundations**: coding standards (`/audit`) → stack (`/architect`) → design system (`/architect` → `design.md`)
+**Phase 2 — All UI (placeholder data, no auth/DB)**: home → catalog/shop → product → cart → checkout → account → admin — every page, static mock data + placeholder assets, browsable end to end
+**Phase 3 — Data & auth foundations**: authentication → database + schema → seed data
+**Phase 4 — Integration (page by page)**: wire home → catalog → product → cart → checkout → account → admin to real data + auth + actions, one at a time
+**Phase 5 — Harden & test**: per feature as it goes live
+_Deferred: advanced search, analytics dashboard_
 
 ## Build breakdown
 
