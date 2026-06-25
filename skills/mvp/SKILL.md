@@ -26,7 +26,10 @@ It does one decomposition pass and hands you a detailed, checkable plan. Walking
 
 `docs/mvp/` — the **feature roadmap**, created and maintained by this skill. The first planning pass writes **`docs/mvp/01-mvp.md`**; a later distinct planning pass (a new slice on a brownfield repo) writes the next number — `docs/mvp/02-<slice>.md`, `03-…` — so each plan is its own numbered document. Clean separation from `/architect`, which owns `docs/adr/` (the ADR files). Other skills find the roadmap by looking in `docs/mvp/` (the numbered file containing the feature). When continuing an existing plan, **merge** into its file: add new features/sub-tasks, never clobber existing rows or rewrite their status. Writes nothing else — no ADR files, no code, no AGENTS.md.
 
-Status lifecycle other skills advance: `/mvp` seeds sub-tasks as **todo**; `/develop` flips one to **in-progress**/**done**; `/sync` reconciles after a change ships.
+Status lifecycle — **`/mvp` sets the *initial* status, the pipeline advances it from there:**
+- New features start `planned` (sub-tasks `todo`). On **brownfield**, `/mvp` also sets enrolled pre-existing features to **`existing`** (complete) or **`in-progress`** (partial) — this is the one place `/mvp` writes a status other than `planned`.
+- From there, **`/develop`** advances *pipeline-built* work (`in-progress` → `done`) and **`/sync`** reconciles against the diff.
+- **`done` ≠ `existing`**: `done` means *this pipeline* built and verified it; `existing` means it predates the workflow. `/develop` and `/sync` never touch `existing` rows (they have no sub-tasks).
 
 **Artifact base.** The roadmap lives under `docs/` by default. If `docs/` is a *published* docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` instead (`.workflow/mvp/01-mvp.md`). **Always follow whichever base — `docs/` or `.workflow/` — already exists** (paths here assume `docs/`).
 
@@ -59,8 +62,11 @@ ls docs/mvp/*.md 2>/dev/null | sort        # existing roadmap files — note the
 
 - **Greenfield**: decompose the whole MVP from scratch. Sequence the roadmap so the **foundations come first, gradually**: (1) **coding guidelines & principles** — run `/audit` (greenfield) to capture the engineer's standards/conventions into root `AGENTS.md`; (2) the **stack** decision (`/architect` → ARCHITECTURE ADR); (3) the **design system / UI foundation** if the product has meaningful UI; then (4) data model, auth, and the rest. Don't jump to feature pages before these exist — every later feature builds on them. Surface this ordering in the Build order and the first foundation feature(s).
 - **Brownfield**: read root `AGENTS.md` (and every `ls`-ed roadmap file under `docs/mvp/`) so you plan the *next* slice on top of what's already there. Two things to do:
-  1. **Enroll the already-built features** as `done` overview rows — derive them from `AGENTS.md` (its nested-area docs map to existing features/areas) plus a light code scan, and give each a `Code area` pointer. **No build breakdown** for these — they're shipped; they're in the roadmap only so it's a *complete* picture (and so `/develop`/`/status` can see them). Mark them clearly as pre-existing.
-  2. **Plan the next slice** as `planned` features with full breakdowns. Don't write build plans for already-shipped features.
+  1. **Enroll the already-built features** for context — derive them from `AGENTS.md` (its nested-area docs map to existing features/areas) plus a light code scan, each with a `Code area` pointer. **Assess completeness honestly from the code**, and set status accordingly — do not just stamp everything done:
+     - **Complete & shipped** → status **`existing`** (a *distinct* marker — **not** `done`, which is reserved for work *this pipeline* built and verified). No build breakdown; it's here for a complete picture, not to rebuild.
+     - **Partially built** (something you may want to finish) → status **`in-progress`** with a breakdown: tick `[x]` the sub-tasks the code already covers, leave `[ ]` for what's missing — so `/develop` can resume it.
+     Never mark a half-built feature `existing` — reflect what's actually there.
+  2. **Plan the next slice** as `planned` features with full breakdowns. Don't write build plans for features already complete (`existing`).
   - If there's no root `AGENTS.md`, note in the report that `/audit` should run first to give this real context.
 
 ### Step 2 — Round 1: product & business (generate, then `AskUserQuestion`)
@@ -168,10 +174,11 @@ _Seeded by /mvp · status advanced by /develop and /sync. Roadmap files live in 
 | 8 | Cart | P0 | yes | planned | — |
 | … | … | … | … | … | — |
 
-<!-- Brownfield: already-built features are enrolled here as `done` rows above the planned ones, e.g.
-| — | Auth (existing) | — | — | done | `src/auth/` |
-| — | Product catalog (existing) | — | — | done | `src/catalog/` |
-— Code area filled, no build breakdown; they're here for a complete picture, not to re-build. -->
+<!-- Brownfield: already-built features are enrolled here above the planned ones, with status `existing`
+     (complete, no breakdown) or `in-progress` (partial — finish via /develop), e.g.
+| — | Auth | — | — | existing | `src/auth/` |
+| — | Product catalog | — | — | existing | `src/catalog/` |
+— `existing` ≠ `done`: it predates the workflow. Code area filled; complete ones get no breakdown. -->
 
 _(Granular: home and segment landing are separate features; listing, product, and cart are separate — not one "storefront".)_
 
@@ -211,7 +218,7 @@ _Deferred: advanced search, analytics dashboard_
 ### … (every feature gets its own block with filled-in prompts)
 
 ## Legend
-- **Status**: `planned` → `in-progress` (set by /develop) → `done`
+- **Status**: `planned` → `in-progress` → `done` (pipeline: /mvp seeds → /develop builds → /sync reconciles). Plus **`existing`** — a pre-existing feature enrolled by /mvp for context (built before this workflow; no breakdown; `done` is reserved for pipeline-verified work).
 - **Sub-task checkbox**: `todo` `[ ]` → `done` `[x]` (advanced by /develop / /test / /sync)
 - **Needs ADR?**: `yes` → run `/architect` before building · `no` → `/develop` directly
 - **Priority**: P0 (MVP-critical) · P1 (MVP) · P2 (deferred)
@@ -226,7 +233,7 @@ On a brownfield merge: append new features/sub-tasks; leave existing rows and ch
 
 **Product**: <one line>
 **Roadmap file**: <docs/mvp/NN-name.md> — <created new | merged into existing | new slice (next number) because <reason>>
-**Existing features enrolled** (brownfield): <count, as `done` rows for context — or "n/a (greenfield)">
+**Existing features enrolled** (brownfield): <count as `existing` + count as `in-progress` (partial) — or "n/a (greenfield)">
 **Scope (this plan)**: <N> features to build (<P0 count> P0, <deferred count> deferred), <total sub-task count> build sub-tasks
 **Cross-cutting in scope**: <SEO / analytics / i18n / compliance — or "none">
 **Build order**: <feature 1> → <feature 2> → …

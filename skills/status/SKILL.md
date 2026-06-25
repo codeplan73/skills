@@ -48,7 +48,7 @@ Note: behind > 0 → **you're not up to date**; uncommitted entries → **work i
 ### Step 2 — Roadmap
 
 Scan `docs/mvp/` (or `.workflow/mvp/`) for roadmap files — one or more numbered files (`01-mvp.md`, `02-…`). Parse all of them:
-- Count features by **Status** across every roadmap file; for each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
+- Count features by **Status** across every roadmap file (`planned` / `in-progress` / `done`, plus `existing` — pre-existing features enrolled for context, not pipeline-built); for each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
 - Note any feature flagged `⚠ ADR pending` or `Needs ADR? = yes` with an empty `ADR` cell (a decision owed before building).
 
 If there's no roadmap, say so — suggest `/mvp` (greenfield) or `/audit` (brownfield) to establish one.
@@ -75,7 +75,7 @@ Surface anything that makes it unsafe to just dive in:
 **Working tree**: clean | <N> files changed (<areas>)
 
 **Roadmap** (`<base path>/mvp/01-mvp.md`):
-- done: <n>  ·  in-progress: <n>  ·  planned: <n>
+- done: <n>  ·  in-progress: <n>  ·  planned: <n>  ·  existing: <n> (pre-workflow)
 - In progress:
   - <feature> — <c>/<t> sub-tasks · resume at **<first unchecked>**
 
