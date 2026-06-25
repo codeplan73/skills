@@ -115,7 +115,7 @@ A thin ADR caught here is a 30-second question; caught mid-build it's a wrong gu
 
 ### Step 3 — Resume check, then build
 
-**Resume first — never rebuild what's already done.** If a roadmap file in `docs/mvp/` has this feature (scan the dir — it may be `01-mvp.md` or a later numbered slice), read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`. (No roadmap → just build the requested task.)
+**Resume first — never rebuild what's already done.** If a roadmap file in `docs/mvp/` has this feature (scan the dir — it may be `01-mvp.md` or a later numbered slice): if its status is **`existing`** (already shipped) or **`dropped`** (de-scoped), it isn't active — don't auto-build; tell the engineer it's marked `<status>` and confirm they want to revive/modify it (that's a new task, possibly needing an ADR). Otherwise read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`. (No roadmap → just build the requested task.)
 
 **Gather any remaining inline answers** (the Step 2 spec-gap answer, the UI asset/template questions, an ambiguous business rule) — these need the engineer, so collect them *before* handing off to a build run.
 

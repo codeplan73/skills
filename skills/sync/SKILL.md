@@ -25,7 +25,7 @@ Runs on a cheap model (haiku) in a subagent. Acts — no upfront questions.
 | Create nested doc for a **pre-existing** undocumented area (only sliced by the diff) | ❌ flags "run /audit" | /audit |
 | Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |
 | Edit / supersede an ADR | ❌ flags as stale | /architect |
-| Reconcile `docs/mvp/01-mvp.md` status/checkboxes ↔ what the diff shipped | ✅ corrects | /sync |
+| Reconcile the roadmap (`docs/mvp/`) — tick **any** completed sub-task from repo **evidence** (code, tests, hardening entry, AGENTS.md), advance status | ✅ corrects | /sync |
 | Add / reorder features or sub-tasks in the roadmap | ❌ leaves alone | /mvp |
 | Overwrite or rewrite curated AGENTS.md prose | ❌ flags conflict instead | human |
 
@@ -37,7 +37,7 @@ The dividing line on creation is **context, not policy**: create only when this 
 
 ## Artifact ownership
 
-Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Also **reconciles `docs/mvp/01-mvp.md`** — ticking sub-task checkboxes and advancing feature status to match what the diff actually shipped — but never adds, removes, or reorders features/sub-tasks (that's /mvp). Writes nothing else.
+Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Also **reconciles the roadmap** under `docs/mvp/` — it's the **universal sub-task reconciler**: it ticks *any* completed sub-task it can verify from repo **evidence**, not only the diff's source changes. `/develop` ticks its own sub-tasks as it builds; `/sync` sweeps the rest — the `/test`, `/harden`, `/audit`/tooling, and `/sync` sub-tasks that those skills don't tick themselves — and advances feature status. It never adds, removes, or reorders features/sub-tasks (that's /mvp). Writes nothing else.
 
 **Artifact base.** The ADRs and roadmap it reads/reconciles live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Use whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
