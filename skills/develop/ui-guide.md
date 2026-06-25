@@ -414,6 +414,18 @@ Rules for placeholders: real `width`/`height` (or aspect-ratio box) to avoid lay
 
 ---
 
+## Placeholder data (UI-first builds)
+
+In a **UI-first** roadmap, pages are built *before* their database/auth/API exist (see `/mvp`'s layered build order). When there's no real data source yet, bind the page to a **clearly-marked local mock module** so it renders fully — don't block on the backend and don't invent a real data layer here:
+
+- Put mock data in one obvious place, e.g. `lib/<feature>.placeholder.ts` (or `mocks/`), exporting typed objects shaped like the real data the ADR specifies — so swapping to the real source later is a single import change.
+- Cover the real states with the mock: a populated list, an empty list, a loading and an error case, so those UI states are actually built now.
+- Mark it unmistakably (a `// PLACEHOLDER — replaced by <feature>'s data-integration sub-task` header) and note it in the report.
+
+The feature's later **data-integration** sub-task (layer 4) replaces the mock with the real query/action. Same principle as placeholder assets: render real UI now, wire real data later.
+
+---
+
 ## Implementation phases
 
 ### Phase 1 — Semantic structure

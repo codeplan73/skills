@@ -28,6 +28,10 @@ It does one decomposition pass and hands you a detailed, checkable plan. Walking
 
 Status lifecycle other skills advance: `/mvp` seeds sub-tasks as **todo**; `/develop` flips one to **in-progress**/**done**; `/sync` reconciles after a change ships.
 
+**Artifact base.** The roadmap lives under `docs/` by default. If `docs/` is a *published* docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` instead (`.workflow/features/index.md`). **Always follow whichever base — `docs/` or `.workflow/` — already exists** (paths here assume `docs/`).
+
+**Concurrency & collaboration.** The roadmap is shared across sessions and teammates. **Re-read it immediately before writing** (it may have changed since you last looked); make **surgical** edits (append new rows in order, never rewrite the file); and if it isn't in the state you expected, **flag rather than clobber**. Append new features with the next free numbers so two people adding features don't collide on a row.
+
 ---
 
 ## Portability (any OS, any agent)
@@ -53,7 +57,7 @@ find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" 
 [ -f docs/features/index.md ] && echo "has roadmap"
 ```
 
-- **Greenfield**: decompose the whole MVP from scratch.
+- **Greenfield**: decompose the whole MVP from scratch. Sequence the roadmap so the **foundations come first, gradually**: (1) **coding guidelines & principles** — run `/audit` (greenfield) to capture the engineer's standards/conventions into root `AGENTS.md`; (2) the **stack** decision (`/architect` → ARCHITECTURE ADR); (3) the **design system / UI foundation** if the product has meaningful UI; then (4) data model, auth, and the rest. Don't jump to feature pages before these exist — every later feature builds on them. Surface this ordering in the Build order and the first foundation feature(s).
 - **Brownfield**: read root `AGENTS.md` and the existing `docs/features/index.md` if present, so you plan the *next* slice on top of what's already shipped — never re-list shipped features. If there's no root `AGENTS.md`, note in the report that `/audit` should run first to give later steps real context.
 
 ### Step 2 — Round 1: product & business (generate, then `AskUserQuestion`)
@@ -83,13 +87,21 @@ Each "yes" becomes either its own feature or a sub-task attached to relevant fea
 
 ### Step 5 — Decompose and break down (you reason; don't ask)
 
-**5a — Feature list.** From the answers, produce features ordered by dependency and value. Foundations first (data model, auth, multi-tenancy), then dependents, then explicitly-deferred nice-to-haves. Flag each `Needs ADR?` — **yes** for a load-bearing choice (provider, data model, architecture), **no** for pure implementation an existing convention/design system covers.
+**5a — Feature list.** From the answers, produce features ordered by dependency and value. Foundations first (coding standards, stack, design system, data model, auth, multi-tenancy), then dependents, then explicitly-deferred nice-to-haves.
+
+Flag each `Needs ADR?` using the same *invent-test* `/develop` uses — **would building it require a decision the engineer hasn't made?** Flag **yes** when it involves any of:
+- a provider, library, data model, or cross-cutting pattern;
+- **the design system / UI foundation** — make it an explicit early foundation feature (Needs ADR: yes), not a sub-task buried inside a page. It's cross-cutting: every page depends on it;
+- **any whole page/screen UI** when no design system + page spec exists yet — its composition (sections), components, and asset strategy are design decisions, so route through `/architect`;
+- **a feature with non-trivial behavior** (search, filtering, recommendations) — what it should *do* needs deciding (`/architect` asks: which fields? which filters? sort? fuzzy?).
+
+Flag **no** only for genuinely pure implementation an existing `design.md`/ADR/convention already covers — a small component, wiring, a content/copy page. When unsure, flag **yes**: an unflagged decision is the expensive miss (a page built with an invented design system is costly to redo).
 
 **5b — Per-feature build breakdown.** This is what makes the roadmap actionable. For **each** feature, generate its ordered build sub-tasks. Use this standard template, dropping rows that don't apply and adding feature-specific ones:
 
 | Order | Sub-task | Built by | Notes |
 |---|---|---|---|
-| 1 | **Decision (ADR)** — only if `Needs ADR? = yes` | `/architect` | settle provider / data model / pattern |
+| 1 | **Decision (ADR)** — only if `Needs ADR? = yes` | `/architect` | settle provider / data model / pattern / design system / page composition & behavior |
 | 2 | **Data model** — schema, migrations, entities | `/develop` (logical) | |
 | 3 | **Backend logic & API** — services, endpoints, business rules | `/develop` (logical) | |
 | 4 | **External integration** — provider/webhooks (if any) | `/develop` (logical) | |
@@ -101,7 +113,17 @@ Each "yes" becomes either its own feature or a sub-task attached to relevant fea
 | 10 | **Tests** | `/test` | |
 | 11 | **Sync conventions** | `/sync` | promote decisions into AGENTS.md |
 
-Recommended build order within a feature: **data → backend → integration → UI → wire-up → harden → test**. (UI can start in parallel against a stub once the API shape is in the ADR.)
+**Build order — UI-first, layered (default).** Sequence the *whole roadmap by layer*, not each feature end-to-end. The point is to make the app **visible and clickable as early as possible** — motivating progress, and UI needs no accounts or database to exist. Order the work as:
+
+1. **Foundations** — coding standards (`/audit`), stack (`/architect`), and the **design system** (`/architect` → `design.md`). Everything visual depends on these.
+2. **All UI, against placeholder data** — build every page/screen with **static/mock data and placeholder assets** (no auth, no DB). The whole product becomes browsable. Each feature's **UI** sub-task lands in this layer (its design ADR first if `Needs ADR`).
+3. **Data & auth foundations** — now add **authentication**, the **database + schema**, and **seed data**. Pure logical work, no new screens.
+4. **Integration, page by page** — wire each page to real data, auth, and actions, **one page at a time** (e.g. home → shop → product → cart → checkout → account → admin). Each feature's **data-integration / permissions** sub-tasks land here.
+5. **Harden & test** each feature as it becomes real.
+
+So a single feature's sub-tasks are **spread across layers**: its UI is built in layer 2 (against mocks), its data/backend become real in layer 3–4, its integration in layer 4. In the breakdown, mark a feature's UI sub-task as using placeholder data until its data-integration sub-task is done. Group the **Build order** section by these layers/phases, not by feature.
+
+Deviate only when a page genuinely can't be prototyped without real data (rare — even then, mock it).
 
 ### Step 6 — Write `docs/features/index.md`
 
@@ -120,12 +142,14 @@ _Seeded by /mvp · status advanced by /develop and /sync._
 | 2 | Billing | P1 | yes | planned | — |
 | 3 | Marketing site | P0 | no | planned | — |
 
-## Build order
+## Build order (UI-first, layered)
 
-1. Auth & identity — foundational, everything gated depends on it
-2. Marketing site — public, can run in parallel
-3. Billing — after auth
-4. _Deferred: advanced search, analytics dashboard_
+**Phase 1 — Foundations**: coding standards (`/audit`) → stack (`/architect`) → design system (`/architect` → `design.md`)
+**Phase 2 — All UI (placeholder data, no auth/DB)**: home → catalog/shop → product → cart → checkout → account → admin — every page, static mock data + placeholder assets, browsable end to end
+**Phase 3 — Data & auth foundations**: authentication → database + schema → seed data
+**Phase 4 — Integration (page by page)**: wire home → catalog → product → cart → checkout → account → admin to real data + auth + actions, one at a time
+**Phase 5 — Harden & test**: per feature as it goes live
+_Deferred: advanced search, analytics dashboard_
 
 ## Build breakdown
 
