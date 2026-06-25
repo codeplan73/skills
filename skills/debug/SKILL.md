@@ -1,7 +1,7 @@
 ---
 name: debug
 compatibility: Built for Claude Code — uses a subagent and iterative tool use. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to find and fix the root cause of a bug — something is failing, broken, throwing, or behaving wrong and you need to know why. Run /debug when a test fails for a non-obvious reason, when /verify finds a failure, or when production/dev behaves unexpectedly. It runs a disciplined investigation loop — reproduce, localize, hypothesize, test the hypothesis, fix at the root, verify — iterating one hypothesis at a time until the cause is proven, then makes the minimal fix and hands a regression test to /test. It fixes the root cause, not the symptom; it does not add features or refactor beyond the fix."
+description: "Use this skill to find and fix the root cause of a bug — something failing, broken, throwing, or behaving wrong. Run /debug when a test fails for a non-obvious reason, when /verify finds a failure, or when behavior is unexpected. It runs a disciplined loop — reproduce, localize, hypothesize, test, fix at the root, verify — one hypothesis at a time until the cause is proven, then makes the minimal fix and hands a regression test to /test. It fixes the cause, not the symptom; no features or extra refactors."
 ---
 
 ## What this skill does

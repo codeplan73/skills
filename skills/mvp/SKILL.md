@@ -1,7 +1,7 @@
 ---
 name: mvp
 compatibility: Built for Claude Code — uses interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill at the very start of a new product, or when planning the next slice of an existing one, to turn a vague idea into a prioritized, super-detailed, buildable roadmap. Run /mvp when you have an idea but don't know what to build first, when starting a greenfield project, or when scoping the next batch of features. Acting as a senior product engineer, it asks comprehensive questions across business, product, development, and go-to-market/SEO, then decomposes the product into features AND breaks every feature down into its ordered build sub-tasks (UI → data model → data integration → auth → SEO/meta → tests), flags which need an architecture decision first, and writes it all to docs/mvp/01-mvp.md. It owns docs/mvp/01-mvp.md. It does NOT design individual features (that's /architect), write code (that's /develop), create ADRs, or write AGENTS.md."
+description: "Use this skill to turn a product idea into a prioritized, buildable roadmap. Run /mvp at the start of a new product, when you don't know what to build first, or when scoping the next batch of features on an existing app. As a senior product engineer it asks across business, product, and SEO, then decomposes the product into small features — each broken into ordered build sub-tasks with ready-to-paste prompts — and writes the roadmap to docs/mvp/. It plans; it doesn't design individual features (/architect), write code (/develop), or create ADRs."
 ---
 
 ## What this skill does

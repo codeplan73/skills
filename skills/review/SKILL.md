@@ -1,7 +1,7 @@
 ---
 name: review
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to get a rigorous, senior-level code review of a change before it merges. Run /review after implementing a feature or bug fix, before opening a PR, or when the triage playbook lists /review. The review always runs on a DIFFERENT Claude model than the one that wrote the code — spawned automatically as a subagent, no API keys or setup — because a fresh model catches mistakes the author model is blind to. It acts as a Staff Engineer reviewing a colleague's PR: severity-ranked, actionable findings on correctness, security, performance, maintainability, and test adequacy. It reviews the branch's change set (vs the base branch) plus any uncommitted work. It reports findings and writes them to docs/reviews/ — it does not modify your code."
+description: "Use this skill for a rigorous, senior-level code review before merge. Run /review after implementing a feature or fix, before opening a PR, or when the triage playbook lists it. It runs on a DIFFERENT Claude model than wrote the code (spawned automatically, no setup) — a fresh model catches what the author is blind to. Severity-ranked findings on correctness, security, performance, maintainability, and tests, across the branch's changes plus uncommitted work, written to docs/reviews/. It doesn't modify your code."
 ---
 
 ## What this skill does

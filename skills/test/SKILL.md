@@ -1,7 +1,7 @@
 ---
 name: test
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to write a test suite for code you just built or changed. Run /test after implementing a feature, component, API route, or bug fix. It tests the files changed and not yet committed in git (working tree + staged + untracked) — no need to name files. Reads saved preferences from test-preferences.json at the project root; if absent it asks which framework to use, checks if it is installed, installs it with confirmation, then saves preferences for future runs. Acts as a senior test engineer, choosing the right test strategy per file: happy path, edge cases, error states, and accessibility where relevant."
+description: "Use this skill to write a test suite for code you just built or changed. Run /test after implementing a feature, component, API route, or fix — it targets the files changed and not yet committed (working tree + staged + untracked), no need to name them. Reads test-preferences.json for your framework; if absent it asks, installs with confirmation, and saves it. A senior test engineer choosing the right strategy per file: happy path, edge cases, error states, and accessibility where relevant."
 ---
 
 ## What this skill does

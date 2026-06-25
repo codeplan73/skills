@@ -1,7 +1,7 @@
 ---
 name: status
 compatibility: Built for Claude Code — reads git and workflow artifacts. Installs on any Agent Skills client.
-description: "Use this skill to orient yourself in a project — where things stand and what's safe to pick up — across a paused session or a team. Run /status when resuming work ('where was I?', 'what's left?', 'catch me up'), when joining a repo others are working in ('what's in progress?', 'am I behind?'), or before starting anything to avoid colliding with a teammate. It reads git state (branch, uncommitted work, ahead/behind the remote), the feature roadmap, and the ADRs, then reports what's done, what's in-progress with its resume point, and what to do next — flagging collaboration hazards (you're behind the remote, uncommitted work, a feature someone else is mid-build on). Read-only: it reports, it never writes."
+description: "Use this skill to orient yourself — where things stand and what's safe to pick up — across a paused session or a team. Run /status when resuming ('where was I?', 'what's left?', 'catch me up'), joining a shared repo ('what's in progress?', 'am I behind?'), or before starting to avoid colliding with a teammate. Reads git state, the feature roadmap, and ADRs; reports what's done, what's in-progress with its resume point, and collaboration hazards (behind the remote, a feature someone else is mid-build on). Read-only."
 ---
 
 ## What this skill does

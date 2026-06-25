@@ -1,7 +1,7 @@
 ---
 name: develop
 compatibility: Built for Claude Code — uses interactive questions and stack detection. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to build a feature — both UI and logical/backend work — from an approved design. Run /develop to implement a page, component, API, service, data layer, integration, or any feature slice. It first runs an ADR gate: if the work carries a load-bearing decision (a new provider, data model, or cross-cutting pattern) and no ADR records it, /develop stops and tells you to run /architect first. Otherwise it reads the governing ADR, the co-located AGENTS.md conventions, and (for UI) design.md, then builds — asking template/design questions for frontend work or business-rule questions for backend work only where the design left them open. It writes app code and advances the feature's status in docs/mvp/01-mvp.md. It does NOT make architecture decisions or write ADRs (that's /architect)."
+description: "Use this skill to build a feature — UI or logical/backend — from an approved design. Run /develop to implement a page, component, API, service, data layer, or any slice. It first gates on the decision: if building would require inventing something undecided (a design system, page composition, a provider, data model, or a feature's behavior) and no ADR records it, /develop stops and routes you to /architect. Otherwise it reads the ADR + AGENTS.md (+ design.md for UI) and builds, advancing the roadmap. It doesn't make architecture decisions or write ADRs (/architect)."
 ---
 
 ## What this skill does

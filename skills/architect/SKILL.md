@@ -1,7 +1,7 @@
 ---
 name: architect
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to get expert system design guidance and document an architectural or technical decision before writing code. Run /architect when facing a meaningful choice between approaches, when designing a new feature from scratch, when selecting a tech stack for a new project, or when the triage playbook lists /architect as a step. This skill acts as a Staff Engineer and Principal Architect: it challenges bad directions, applies industry best practices, calls out named anti-patterns, and recommends the right answer rather than presenting a neutral menu of options. It runs two rounds of targeted MCQ questions, researches options, writes a draft ADR to docs/adr/, and presents it for confirmation. It owns all ADR files. Do not run /audit after /architect has written an ADR for the same scope."
+description: "Use this skill to make and document an architectural or technical decision before writing code. Run /architect when facing a meaningful choice between approaches, designing a feature or page from scratch, choosing a tech stack, or when /develop says a decision is owed. A Staff/Principal Engineer that challenges bad directions, names anti-patterns, asks deep feature-specific questions, and recommends the right answer rather than a neutral menu — then writes a complete-build-spec ADR to docs/adr/ for your confirmation. Owns all ADR files."
 ---
 
 ## What this skill does
