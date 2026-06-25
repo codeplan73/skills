@@ -25,7 +25,7 @@ Runs on a cheap model (haiku) in a subagent. Acts — no upfront questions.
 | Create nested doc for a **pre-existing** undocumented area (only sliced by the diff) | ❌ flags "run /audit" | /audit |
 | Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |
 | Edit / supersede an ADR | ❌ flags as stale | /architect |
-| Reconcile `docs/features/index.md` status/checkboxes ↔ what the diff shipped | ✅ corrects | /sync |
+| Reconcile `docs/mvp/01-mvp.md` status/checkboxes ↔ what the diff shipped | ✅ corrects | /sync |
 | Add / reorder features or sub-tasks in the roadmap | ❌ leaves alone | /mvp |
 | Overwrite or rewrite curated AGENTS.md prose | ❌ flags conflict instead | human |
 
@@ -37,7 +37,7 @@ The dividing line on creation is **context, not policy**: create only when this 
 
 ## Artifact ownership
 
-Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Also **reconciles `docs/features/index.md`** — ticking sub-task checkboxes and advancing feature status to match what the diff actually shipped — but never adds, removes, or reorders features/sub-tasks (that's /mvp). Writes nothing else.
+Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Also **reconciles `docs/mvp/01-mvp.md`** — ticking sub-task checkboxes and advancing feature status to match what the diff actually shipped — but never adds, removes, or reorders features/sub-tasks (that's /mvp). Writes nothing else.
 
 **Artifact base.** The ADRs and roadmap it reads/reconciles live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Use whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
@@ -84,7 +84,7 @@ De-duplicate. Then **filter the list to source files** the subagent should sync 
 [ -f AGENTS.md ] && echo "root: AGENTS.md"
 find . -name AGENTS.md -not -path './node_modules/*' -not -path './.git/*' 2>/dev/null   # root + nested
 find docs/adr -name "[0-9]*.md" 2>/dev/null | sort                                        # all ADRs
-[ -f docs/features/index.md ] && echo "roadmap: docs/features/index.md"                   # feature roadmap (if any)
+[ -f docs/mvp/01-mvp.md ] && echo "roadmap: docs/mvp/01-mvp.md"                   # feature roadmap (if any)
 ```
 
 The subagent reads these itself. The main model passes the **paths** (plus the changed-file list and diff command). The one inline exception is root AGENTS.md contents — short and useful for the subagent to anchor on.
@@ -104,7 +104,7 @@ Read `agent-prompt.md`, fill it, then spawn:
   3. Root AGENTS.md contents (inline) + the list of nested AGENTS.md paths
   4. The full ADR path list
   5. The map of changed files → nearest context file
-  6. The `docs/features/index.md` path (if it exists) — for roadmap reconciliation
+  6. The `docs/mvp/01-mvp.md` path (if it exists) — for roadmap reconciliation
 
 ### 4. Relay the result
 
@@ -124,7 +124,7 @@ The subagent returns a compact summary. Relay:
 **Orphans cleaned** (after deletions):
 - `<path>` — <removed orphaned nested doc / fixed broken pointer>
 
-**Roadmap reconciled** (`docs/features/index.md`):
+**Roadmap reconciled** (`docs/mvp/01-mvp.md`):
 - `<feature>` — <ticked sub-tasks / status planned→in-progress→done to match the diff>   (or "no roadmap, or already accurate")
 
 **ADRs flagged stale** (run /architect to update or supersede):

@@ -33,7 +33,7 @@ Round 1 is a **quick** pass for the un-inferable framing context (constraints, h
 
 ## Artifact ownership
 
-`docs/adr/NNNN-title.md` — created or updated by this skill only. **One narrow exception:** after the ADR is confirmed, it fills in the matching feature's `ADR` pointer cell in `docs/features/index.md` (a single-cell link update, not a rewrite) so the roadmap and the decision are connected. It touches nothing else in that file — status and sub-tasks stay owned by `/mvp`, `/develop`, and `/sync`.
+`docs/adr/NNNN-title.md` — the **ADR files**, created or updated by this skill only. (The roadmap lives separately in `docs/mvp/` and is owned by `/mvp` — not an ADR.) **One narrow exception:** after the ADR is confirmed, it fills in the matching feature's `ADR` pointer cell in the roadmap file under `docs/mvp/` (a single-cell link update, not a rewrite) so the roadmap and the decision are connected. It touches nothing else in that file — status and sub-tasks stay owned by `/mvp`, `/develop`, and `/sync`.
 
 **Artifact base.** ADRs live under `docs/` by default. If `docs/` is a *published* docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` instead (`.workflow/adr/`) so workflow files don't ship to the site. **Always follow whichever base — `docs/` or `.workflow/` — already exists** (paths in this skill assume `docs/`).
 
@@ -315,7 +315,7 @@ If a required section is missing or a field is blank/placeholder, add this line 
 
 2. Do not rewrite the ADR from scratch on feedback. Use the **Edit** tool to apply targeted changes to the specific sections the engineer called out.
 3. After any edits, confirm: "ADR updated. Confirm with `yes` or give further feedback."
-4. **Link the roadmap (after confirmation).** If `docs/features/index.md` exists and has a row for this feature, update that row's `ADR` cell to point at the new file (e.g. `[0007](../adr/0007-auth-approach.md)`) and, if the feature's first sub-task is "Decision (ADR)", tick it `[x]`. Edit only that cell/checkbox — never status or other rows. If there's no matching row, skip silently (an ad-hoc decision outside the roadmap).
+4. **Link the roadmap (after confirmation).** If `docs/mvp/01-mvp.md` exists and has a row for this feature, update that row's `ADR` cell to point at the new file — the roadmap is in `docs/mvp/` and the ADR in `docs/adr/`, so the link is `[0007](../adr/0007-auth-approach.md)` and, if the feature's first sub-task is "Decision (ADR)", tick it `[x]`. Edit only that cell/checkbox — never status or other rows. If there's no matching row, skip silently (an ad-hoc decision outside the roadmap).
 
 /architect is complete when the engineer confirms the ADR. It does not invoke other skills.
 

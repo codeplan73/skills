@@ -101,7 +101,7 @@ Be **strict** to avoid false positives — noise here erodes trust. Read an ADR 
 
 ### 5. Reconcile the feature roadmap (only if ROADMAP_PATH_OR_NONE is a path)
 
-Read `docs/features/index.md`. Bring its status to match what the diff **actually shipped** — nothing more:
+Read `docs/mvp/01-mvp.md`. Bring its status to match what the diff **actually shipped** — nothing more:
 - For each feature whose code area the diff touched, tick (`[ ]` → `[x]`) the build sub-tasks the diff completed, and update the feature's **Status** (`planned` → `in-progress`, or → `done` only when every sub-task is checked).
 - **Strictly status only.** Never add, remove, rename, or reorder features or sub-tasks — that's /mvp's. Never invent a feature for code that has no row; if shipped code clearly matches no row, note it under `ROADMAP_RECONCILED` as "unmapped: <area>" so a human can decide.
 - **Attribution when a diff spans features.** A single diff may touch several features (team branches, or a change crossing areas). Only tick a sub-task when the changed file→feature mapping is **unambiguous** (the file lives in that feature's code area and matches that sub-task). If a changed file/area maps to **more than one** feature, do **not** guess which one it advances — leave both untouched and note `ambiguous: <area> → <featureA> / <featureB>` under `ROADMAP_RECONCILED` for a human.

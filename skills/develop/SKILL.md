@@ -1,7 +1,7 @@
 ---
 name: develop
 compatibility: Built for Claude Code — uses interactive questions and stack detection. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to build a feature — both UI and logical/backend work — from an approved design. Run /develop to implement a page, component, API, service, data layer, integration, or any feature slice. It first runs an ADR gate: if the work carries a load-bearing decision (a new provider, data model, or cross-cutting pattern) and no ADR records it, /develop stops and tells you to run /architect first. Otherwise it reads the governing ADR, the co-located AGENTS.md conventions, and (for UI) design.md, then builds — asking template/design questions for frontend work or business-rule questions for backend work only where the design left them open. It writes app code and advances the feature's status in docs/features/index.md. It does NOT make architecture decisions or write ADRs (that's /architect)."
+description: "Use this skill to build a feature — both UI and logical/backend work — from an approved design. Run /develop to implement a page, component, API, service, data layer, integration, or any feature slice. It first runs an ADR gate: if the work carries a load-bearing decision (a new provider, data model, or cross-cutting pattern) and no ADR records it, /develop stops and tells you to run /architect first. Otherwise it reads the governing ADR, the co-located AGENTS.md conventions, and (for UI) design.md, then builds — asking template/design questions for frontend work or business-rule questions for backend work only where the design left them open. It writes app code and advances the feature's status in docs/mvp/01-mvp.md. It does NOT make architecture decisions or write ADRs (that's /architect)."
 ---
 
 ## What this skill does
@@ -21,7 +21,7 @@ Because building is where decisions get silently made, `/develop` **gates on the
 
 ## Artifact ownership
 
-Writes **app code** (and CSS/tokens for UI). Advances the feature's row in `docs/features/index.md` — `planned` → `in-progress` on start, `done` when the build lands — and fills in its `Code area` (and `ADR`) pointers. Never writes ADRs (flags the need and defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); records new area conventions only via `/sync` afterwards.
+Writes **app code** (and CSS/tokens for UI). Advances the feature's row in `docs/mvp/01-mvp.md` — `planned` → `in-progress` on start, `done` when the build lands — and fills in its `Code area` (and `ADR`) pointers. Never writes ADRs (flags the need and defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); records new area conventions only via `/sync` afterwards.
 
 **Artifact base.** The roadmap and ADRs it reads live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Read from whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
@@ -62,7 +62,7 @@ Do **not** hardcode this to a list of page names or features — apply the *inve
 **The dangerous case is the false negative — building a real decision without noticing it** (which is exactly what "just build the home page" looks like). So when you can't tell, treat it as **owed** and ask (the panel below). One extra question is cheap; a page or feature whose design/behavior you silently invented is expensive to unwind.
 
 **Check, in order:**
-1. If `docs/features/index.md` exists, find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.**
+1. If `docs/mvp/01-mvp.md` exists, find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.**
 2. Search `docs/adr/` for an ADR covering this scope. If one exists, it's the spec — proceed.
 3. Check whether the decision is already captured in the nearest `AGENTS.md` (the convention may have been synced from an earlier feature — e.g. "auth uses Clerk"). If so, proceed without a new ADR.
 
@@ -73,7 +73,7 @@ Do **not** hardcode this to a list of page names or features — apply the *inve
 - **options**:
   1. `Architect it first` — "Recommended — capture the decision in an ADR before building, so the build has a spec." → **end here** and output the paste-ready handoff (below). Do not build.
   2. `No — not needed` — "I've judged there's no real decision here; build directly." → proceed to Step 1.
-  3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to Step 1, and leave the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in `docs/features/index.md` so it isn't forgotten.
+  3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to Step 1, and leave the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in `docs/mvp/01-mvp.md` so it isn't forgotten.
 
 The tool appends "Other" as a free-text option automatically.
 
@@ -115,7 +115,7 @@ A thin ADR caught here is a 30-second question; caught mid-build it's a wrong gu
 
 ### Step 3 — Resume check, then build
 
-**Resume first — never rebuild what's already done.** If `docs/features/index.md` has this feature, read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`. (No roadmap → just build the requested task.)
+**Resume first — never rebuild what's already done.** If `docs/mvp/01-mvp.md` has this feature, read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`. (No roadmap → just build the requested task.)
 
 **Gather any remaining inline answers** (the Step 2 spec-gap answer, the UI asset/template questions, an ambiguous business rule) — these need the engineer, so collect them *before* handing off to a build run.
 
@@ -132,7 +132,7 @@ Then build the track(s):
 ### Step 4 — Update the roadmap and report
 
 - **Only mark what actually landed.** Before ticking anything, confirm the work is really there — files written, build subagent returned success (not an error or empty result), code present. If the build **failed or came back partial** (subagent errored, was interrupted, or left a sub-task half-done): leave that sub-task **unchecked**, keep the feature **`in-progress`**, and report exactly what's incomplete and why. Never mark a sub-task `done` on an unverified or failed build — a roadmap that claims work that isn't there is worse than one that's behind.
-- In `docs/features/index.md`: tick the build sub-task(s) you **verified** complete (`[ ]` → `[x]`), fill in the feature's `Code area` (and `ADR`) pointers, and set its **Status** to `done` only when every sub-task is checked — otherwise leave it `in-progress`.
+- In `docs/mvp/01-mvp.md`: tick the build sub-task(s) you **verified** complete (`[ ]` → `[x]`), fill in the feature's `Code area` (and `ADR`) pointers, and set its **Status** to `done` only when every sub-task is checked — otherwise leave it `in-progress`.
 - Relay the track's report (the `## /develop complete` block from `ui-guide.md` and/or `logical-guide.md`).
 - Recommend the next step per tier: usually `/test`, then `/sync` to promote any new area conventions into `AGENTS.md`.
 

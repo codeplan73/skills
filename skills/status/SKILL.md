@@ -47,7 +47,7 @@ Note: behind > 0 → **you're not up to date**; uncommitted entries → **work i
 
 ### Step 2 — Roadmap
 
-If `docs/features/index.md` (or `.workflow/features/index.md`) exists, parse it:
+If `docs/mvp/01-mvp.md` (or `.workflow/mvp/01-mvp.md`) exists, parse it:
 - Count features by **Status**; for each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
 - Note any feature flagged `⚠ ADR pending` or `Needs ADR? = yes` with an empty `ADR` cell (a decision owed before building).
 
@@ -74,7 +74,7 @@ Surface anything that makes it unsafe to just dive in:
 **Branch**: <name>  ·  <ahead> ahead / <behind> behind `origin/<base>`
 **Working tree**: clean | <N> files changed (<areas>)
 
-**Roadmap** (`<base path>/features/index.md`):
+**Roadmap** (`<base path>/mvp/01-mvp.md`):
 - done: <n>  ·  in-progress: <n>  ·  planned: <n>
 - In progress:
   - <feature> — <c>/<t> sub-tasks · resume at **<first unchecked>**

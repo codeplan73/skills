@@ -12,7 +12,7 @@ The context-bootstrapper. It gives every later skill (and every AI tool) an accu
 - **Brownfield, undocumented** (code, no `AGENTS.md`): scans the whole project, then **writes the root `AGENTS.md` AND creates nested `<area>/AGENTS.md` files** — using judgment about what is global (→ root) versus area-specific (→ nested).
 - **Brownfield, partially documented** (code + some `AGENTS.md` already): checks the existing root and nested docs **against the whole codebase** and **adds only what's missing** — new global facts, and nested docs for undocumented areas — never clobbering curated content.
 
-Does not create ADRs (/architect owns those). Does not maintain files after changes (/sync owns that). Does not write the feature roadmap (/mvp owns `docs/features/index.md`).
+Does not create ADRs (/architect owns those). Does not maintain files after changes (/sync owns that). Does not write the feature roadmap (/mvp owns `docs/mvp/01-mvp.md`).
 
 ## Context-file convention (AGENTS.md is canonical)
 

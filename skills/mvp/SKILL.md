@@ -1,7 +1,7 @@
 ---
 name: mvp
 compatibility: Built for Claude Code — uses interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill at the very start of a new product, or when planning the next slice of an existing one, to turn a vague idea into a prioritized, super-detailed, buildable roadmap. Run /mvp when you have an idea but don't know what to build first, when starting a greenfield project, or when scoping the next batch of features. Acting as a senior product engineer, it asks comprehensive questions across business, product, development, and go-to-market/SEO, then decomposes the product into features AND breaks every feature down into its ordered build sub-tasks (UI → data model → data integration → auth → SEO/meta → tests), flags which need an architecture decision first, and writes it all to docs/features/index.md. It owns docs/features/index.md. It does NOT design individual features (that's /architect), write code (that's /develop), create ADRs, or write AGENTS.md."
+description: "Use this skill at the very start of a new product, or when planning the next slice of an existing one, to turn a vague idea into a prioritized, super-detailed, buildable roadmap. Run /mvp when you have an idea but don't know what to build first, when starting a greenfield project, or when scoping the next batch of features. Acting as a senior product engineer, it asks comprehensive questions across business, product, development, and go-to-market/SEO, then decomposes the product into features AND breaks every feature down into its ordered build sub-tasks (UI → data model → data integration → auth → SEO/meta → tests), flags which need an architecture decision first, and writes it all to docs/mvp/01-mvp.md. It owns docs/mvp/01-mvp.md. It does NOT design individual features (that's /architect), write code (that's /develop), create ADRs, or write AGENTS.md."
 ---
 
 ## What this skill does
@@ -10,8 +10,8 @@ Turns an idea into an ordered, detailed build plan. It is the entry point when t
 
 1. **Asks comprehensively** — business and product (what it is, who it's for, the MVP boundary, monetization, success metric), capabilities (auth, payments, file upload, search, notifications, admin…), and cross-cutting / go-to-market concerns (SEO, performance, analytics, accessibility, i18n, legal/compliance).
 2. **Decomposes into features and orders them** — by dependency and value, flagging which carry a load-bearing decision (`/architect` first) vs pure implementation (`/develop` directly).
-3. **Breaks every feature into its build sub-tasks** — the explicit, ordered checklist of pieces (UI page, data model, data integration, auth/permissions, SEO/meta, tests), each pointing at the skill/track that builds it. This is the part that makes the roadmap *actionable*, not just a wishlist.
-4. **Writes `docs/features/index.md`** — overview table + per-feature build breakdown + build order.
+3. **Breaks every feature into its build sub-tasks** — small, granular features (one page or unit each), and for every sub-task the **exact skill, in order, with a ready-to-paste prompt** (e.g. `/architect home page — composition, sections, asset strategy` then `/develop home page UI — build to design.md with placeholder data`). The breakdown *is the build script*. This is what makes the roadmap actionable, not a wishlist.
+4. **Writes `docs/mvp/01-mvp.md`** — overview table + per-feature build breakdown + build order.
 
 It does one decomposition pass and hands you a detailed, checkable plan. Walking it — architecting and building each sub-task — is the rest of the workflow.
 
@@ -24,11 +24,11 @@ It does one decomposition pass and hands you a detailed, checkable plan. Walking
 
 ## Artifact ownership
 
-`docs/features/index.md` — created and maintained by this skill. On a brownfield repo where it already exists, **merge**: add new features/sub-tasks, never clobber existing rows or rewrite their status. Writes nothing else — no ADRs, no code, no AGENTS.md.
+`docs/mvp/` — the **feature roadmap**, created and maintained by this skill. The first planning pass writes **`docs/mvp/01-mvp.md`**; a later distinct planning pass (a new slice on a brownfield repo) writes the next number — `docs/mvp/02-<slice>.md`, `03-…` — so each plan is its own numbered document. Clean separation from `/architect`, which owns `docs/adr/` (the ADR files). Other skills find the roadmap by looking in `docs/mvp/` (the numbered file containing the feature). When continuing an existing plan, **merge** into its file: add new features/sub-tasks, never clobber existing rows or rewrite their status. Writes nothing else — no ADR files, no code, no AGENTS.md.
 
 Status lifecycle other skills advance: `/mvp` seeds sub-tasks as **todo**; `/develop` flips one to **in-progress**/**done**; `/sync` reconciles after a change ships.
 
-**Artifact base.** The roadmap lives under `docs/` by default. If `docs/` is a *published* docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` instead (`.workflow/features/index.md`). **Always follow whichever base — `docs/` or `.workflow/` — already exists** (paths here assume `docs/`).
+**Artifact base.** The roadmap lives under `docs/` by default. If `docs/` is a *published* docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` instead (`.workflow/mvp/01-mvp.md`). **Always follow whichever base — `docs/` or `.workflow/` — already exists** (paths here assume `docs/`).
 
 **Concurrency & collaboration.** The roadmap is shared across sessions and teammates. **Re-read it immediately before writing** (it may have changed since you last looked); make **surgical** edits (append new rows in order, never rewrite the file); and if it isn't in the state you expected, **flag rather than clobber**. Append new features with the next free numbers so two people adding features don't collide on a row.
 
@@ -54,11 +54,11 @@ Wait for the answer. Use it as the product idea.
 find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" \
   -o -name "*.go" -o -name "*.rs" \) -not -path '*/node_modules/*' -not -path '*/.git/*' | head -1
 [ -f AGENTS.md ] && echo "has root AGENTS.md"
-[ -f docs/features/index.md ] && echo "has roadmap"
+[ -f docs/mvp/01-mvp.md ] && echo "has roadmap"
 ```
 
 - **Greenfield**: decompose the whole MVP from scratch. Sequence the roadmap so the **foundations come first, gradually**: (1) **coding guidelines & principles** — run `/audit` (greenfield) to capture the engineer's standards/conventions into root `AGENTS.md`; (2) the **stack** decision (`/architect` → ARCHITECTURE ADR); (3) the **design system / UI foundation** if the product has meaningful UI; then (4) data model, auth, and the rest. Don't jump to feature pages before these exist — every later feature builds on them. Surface this ordering in the Build order and the first foundation feature(s).
-- **Brownfield**: read root `AGENTS.md` and the existing `docs/features/index.md` if present, so you plan the *next* slice on top of what's already shipped — never re-list shipped features. If there's no root `AGENTS.md`, note in the report that `/audit` should run first to give later steps real context.
+- **Brownfield**: read root `AGENTS.md` and the existing `docs/mvp/01-mvp.md` if present, so you plan the *next* slice on top of what's already shipped — never re-list shipped features. If there's no root `AGENTS.md`, note in the report that `/audit` should run first to give later steps real context.
 
 ### Step 2 — Round 1: product & business (generate, then `AskUserQuestion`)
 
@@ -87,7 +87,13 @@ Each "yes" becomes either its own feature or a sub-task attached to relevant fea
 
 ### Step 5 — Decompose and break down (you reason; don't ask)
 
-**5a — Feature list.** From the answers, produce features ordered by dependency and value. Foundations first (coding standards, stack, design system, data model, auth, multi-tenancy), then dependents, then explicitly-deferred nice-to-haves.
+**5a — Feature list.** From the answers, produce features ordered by dependency and value. Foundations first, then dependents, then explicitly-deferred nice-to-haves. The foundations, in the order a developer actually sets a project up:
+1. **Coding standards & conventions** — capture them with `/audit` (greenfield) into root `AGENTS.md`, **and** set up the *enforcement tooling* with `/develop` (linter, formatter, stricter compiler config, pre-commit hook). Capturing the rules and wiring the tooling are two sub-tasks — don't stop at the doc.
+2. **Stack & architecture** — `/architect` ARCHITECTURE ADR.
+3. **Design system & UI foundation** — `/architect` → `design.md`, then base components.
+4. Then data model, auth, and feature work.
+
+**Keep features small — one page or one cohesive unit per feature.** Do **not** group distinct screens together: a home page and per-segment landing pages are *separate* features; a shop listing, a product detail page, and a cart are three features, not one "storefront." A feature should be buildable and shippable on its own. If a "feature" would take more than a handful of sub-tasks across unrelated screens, split it. Finer features make the roadmap honest, the prompts specific, and progress visible.
 
 Flag each `Needs ADR?` using the same *invent-test* `/develop` uses — **would building it require a decision the engineer hasn't made?** Flag **yes** when it involves any of:
 - a provider, library, data model, or cross-cutting pattern;
@@ -97,21 +103,26 @@ Flag each `Needs ADR?` using the same *invent-test* `/develop` uses — **would 
 
 Flag **no** only for genuinely pure implementation an existing `design.md`/ADR/convention already covers — a small component, wiring, a content/copy page. When unsure, flag **yes**: an unflagged decision is the expensive miss (a page built with an invented design system is costly to redo).
 
-**5b — Per-feature build breakdown.** This is what makes the roadmap actionable. For **each** feature, generate its ordered build sub-tasks. Use this standard template, dropping rows that don't apply and adding feature-specific ones:
+**5b — Per-feature build breakdown.** This is what makes the roadmap actionable: for **each** feature, list its build sub-tasks **in order**, and for every sub-task give the **exact command + prompt to paste**. The breakdown *is the build script* — someone should walk a feature top to bottom pasting each prompt, no thinking required. Write the prompts **filled in with this feature's specifics**, not the `<placeholder>` form.
 
-| Order | Sub-task | Built by | Notes |
-|---|---|---|---|
-| 1 | **Decision (ADR)** — only if `Needs ADR? = yes` | `/architect` | settle provider / data model / pattern / design system / page composition & behavior |
-| 2 | **Data model** — schema, migrations, entities | `/develop` (logical) | |
-| 3 | **Backend logic & API** — services, endpoints, business rules | `/develop` (logical) | |
-| 4 | **External integration** — provider/webhooks (if any) | `/develop` (logical) | |
-| 5 | **UI pages/components** — the screens | `/develop` (UI) | needs design.md + assets |
-| 6 | **Data integration** — wire UI ↔ API, loading/error/empty states | `/develop` | |
-| 7 | **Auth & permissions** — who can do/see what | `/develop` (logical) | |
-| 8 | **SEO & metadata** — only for public pages | `/develop` (UI) | title, meta, OG, structured data |
-| 9 | **Validation & edge cases** — limits, failures, concurrency | `/develop` | |
-| 10 | **Tests** | `/test` | |
-| 11 | **Sync conventions** | `/sync` | promote decisions into AGENTS.md |
+Standard sub-tasks (drop any that don't apply, add feature-specific ones), in **UI-first order** within the feature:
+
+| # | Sub-task | Command + prompt to paste |
+|---|---|---|
+| 1 | **Decision (ADR)** — only if `Needs ADR? = yes` | `/architect <feature> — <the specific decisions: composition/sections · provider · data model · behavior>` |
+| 2 | **UI (placeholder data)** | `/develop <feature> UI — build to design.md with placeholder data + states` |
+| 3 | **Data model** | `/develop <feature> data model — <entities/tables/fields>` |
+| 4 | **Backend & API** | `/develop <feature> API — <endpoints/actions/queries>` |
+| 5 | **External integration** | `/develop <feature> integration — <provider/webhooks>` |
+| 6 | **Data integration** (replace the mock) | `/develop <feature> wire-up — swap placeholder for real data, loading/error/empty states` |
+| 7 | **Auth & permissions** | `/develop <feature> permissions — <who can do/see what>` |
+| 8 | **SEO & metadata** | `/develop <feature> SEO — title/meta/OG/structured data` |
+| 9 | **Validation & edge cases** | `/develop <feature> edge cases — <the failures>` |
+| 10 | **Tests** | `/test <feature>` |
+| 11 | **Harden** (payments/auth/admin only) | `/harden <feature>` |
+| 12 | **Sync conventions** | `/sync` |
+
+Each rendered sub-task is one checklist line: `- [ ] <sub-task name> — `\`<command + prompt>\``. The skill **and** the order **and** the prompt all live in that line — that's the "which skill, in what order, with what prompt" the breakdown must answer.
 
 **Build order — UI-first, layered (default).** Sequence the *whole roadmap by layer*, not each feature end-to-end. The point is to make the app **visible and clickable as early as possible** — motivating progress, and UI needs no accounts or database to exist. Order the work as:
 
@@ -125,49 +136,65 @@ So a single feature's sub-tasks are **spread across layers**: its UI is built in
 
 Deviate only when a page genuinely can't be prototyped without real data (rare — even then, mock it).
 
-### Step 6 — Write `docs/features/index.md`
+### Step 6 — Write `docs/mvp/01-mvp.md`
 
 Create (or merge into) the roadmap with two parts — an overview table and the detailed breakdown:
 
 ```markdown
 # Feature Roadmap
 
-_Seeded by /mvp · status advanced by /develop and /sync._
+_Seeded by /mvp · status advanced by /develop and /sync. Roadmap files live in `docs/mvp/` (ADRs are in `docs/adr/`)._
 
 ## Overview
 
 | # | Feature | Priority | Needs ADR? | Status | Code area |
 |---|---------|----------|-----------|--------|-----------|
-| 1 | Auth & identity | P0 | yes | planned | — |
-| 2 | Billing | P1 | yes | planned | — |
-| 3 | Marketing site | P0 | no | planned | — |
+| 1 | Coding standards & tooling | P0 | no | planned | — |
+| 2 | Stack & architecture | P0 | yes | planned | — |
+| 3 | Design system & UI foundation | P0 | yes | planned | — |
+| 4 | Home page | P0 | yes | planned | — |
+| 5 | Segment landing pages | P0 | yes | planned | — |
+| 6 | Shop listing (filter & sort) | P0 | yes | planned | — |
+| 7 | Product detail page | P0 | yes | planned | — |
+| 8 | Cart | P0 | yes | planned | — |
+| … | … | … | … | … | — |
+
+_(Granular: home and segment landing are separate features; listing, product, and cart are separate — not one "storefront".)_
 
 ## Build order (UI-first, layered)
 
-**Phase 1 — Foundations**: coding standards (`/audit`) → stack (`/architect`) → design system (`/architect` → `design.md`)
-**Phase 2 — All UI (placeholder data, no auth/DB)**: home → catalog/shop → product → cart → checkout → account → admin — every page, static mock data + placeholder assets, browsable end to end
+**Phase 1 — Foundations**: coding standards + tooling (`/audit` → `/develop`) → stack (`/architect`) → design system (`/architect` → `design.md` → base components)
+**Phase 2 — All UI (placeholder data, no auth/DB)**: home → segment landing → shop listing → product → cart → checkout → account → admin — every page, static mock data + placeholder assets, browsable end to end
 **Phase 3 — Data & auth foundations**: authentication → database + schema → seed data
-**Phase 4 — Integration (page by page)**: wire home → catalog → product → cart → checkout → account → admin to real data + auth + actions, one at a time
+**Phase 4 — Integration (page by page)**: wire home → segment landing → shop → product → cart → checkout → account → admin to real data + auth + actions, one at a time
 **Phase 5 — Harden & test**: per feature as it goes live
 _Deferred: advanced search, analytics dashboard_
 
 ## Build breakdown
 
-### 1. Auth & identity  ·  Needs ADR: yes  ·  Status: planned
-- [ ] Decision (ADR) — provider + session model — `/architect`
-- [ ] Data model — users, sessions, roles — `/develop` (logical)
-- [ ] Backend & API — sign-in/up/reset, session handling — `/develop` (logical)
-- [ ] Integration — wire auth provider + webhooks — `/develop` (logical)
-- [ ] UI — sign-in / sign-up / reset / verify pages — `/develop` (UI)
-- [ ] Data integration — wire forms ↔ API, error/loading states — `/develop`
-- [ ] Permissions — route guards, role checks — `/develop` (logical)
-- [ ] SEO/meta — `noindex` auth pages — `/develop` (UI)
-- [ ] Tests — `/test`
-- [ ] Sync — record auth conventions in `src/auth/AGENTS.md` — `/sync`
+### 1. Coding standards & tooling  ·  Needs ADR: no  ·  Status: planned
+- [ ] Capture standards into `AGENTS.md` — `/audit` _(greenfield: pick architecture style + conventions)_
+- [ ] Set up enforcement tooling — `/develop tooling — ESLint + Prettier + strict tsconfig + husky/lint-staged pre-commit, per the captured standards`
+- [ ] Tests — `/test` _(lint/format run clean)_
+> ADR: — (no decision — conventions captured by /audit) · Code area: —
+
+### 4. Home page  ·  Needs ADR: yes  ·  Status: planned
+- [ ] Decision (ADR) — `/architect home page — composition (hero, featured collections, segment entry points), layout, asset strategy`
+- [ ] UI (placeholder data) — `/develop home page UI — build to design.md with mock collections + placeholder imagery`
+- [ ] Data integration — `/develop home page wire-up — swap mock for real featured collections, loading/empty states`
+- [ ] SEO & metadata — `/develop home page SEO — title/meta/OG/Organization JSON-LD`
+- [ ] Tests — `/test home page`
 > ADR: — · Code area: —
 
-### 2. Billing  ·  Needs ADR: yes  ·  Status: planned
-- [ ] … (same shape, tailored)
+### 5. Segment landing pages  ·  Needs ADR: yes  ·  Status: planned
+- [ ] Decision (ADR) — `/architect segment landing — per-segment layout (dev/gamer/anime), theming, shared vs unique blocks`
+- [ ] UI (placeholder data) — `/develop segment landing UI — build to design.md, mock per-segment data`
+- [ ] Data integration — `/develop segment landing wire-up — real segment catalog, empty states`
+- [ ] SEO & metadata — `/develop segment landing SEO — per-segment title/meta/OG`
+- [ ] Tests — `/test segment landing`
+> ADR: — · Code area: —
+
+### … (every feature gets its own block with filled-in prompts)
 
 ## Legend
 - **Status**: `planned` → `in-progress` (set by /develop) → `done`
@@ -186,7 +213,7 @@ On a brownfield merge: append new features/sub-tasks; leave existing rows and ch
 **Product**: <one line>
 **Scope**: <N> features (<P0 count> P0, <deferred count> deferred), <total sub-task count> build sub-tasks
 **Cross-cutting in scope**: <SEO / analytics / i18n / compliance — or "none">
-**Roadmap**: docs/features/index.md
+**Roadmap**: docs/mvp/01-mvp.md
 **Build order**: <feature 1> → <feature 2> → …
 **First step**: <recommended next command — usually `/architect <first feature>`, or `/audit` first if brownfield has no root AGENTS.md>
 ```
