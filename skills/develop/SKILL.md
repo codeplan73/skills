@@ -45,14 +45,21 @@ If a project exists (even a bare scaffold), proceed.
 
 ### Step 0 — The ADR gate (always first)
 
-Decide whether a **load-bearing decision is owed and unrecorded**. A decision is owed when the work introduces any of:
-- a new external provider, library, or integration (auth, payments, storage, email, search);
-- a new persistence/data model or schema;
-- a cross-cutting pattern (error handling, auth enforcement, caching) not already established.
+Decide whether a **decision is owed and unrecorded**. The test is one question:
 
-It is **not** owed for pure implementation that an existing `design.md`, `AGENTS.md` convention, or a prior ADR already covers — e.g. rendering a page in the existing design system, or wiring already-decided pieces together.
+> **To build this, would you have to *invent* something the engineer hasn't decided?**
 
-**The dangerous case is the false negative — building a real decision without noticing it.** So when you genuinely can't tell whether a choice is load-bearing, treat it as **owed** and ask (the panel below). One extra question is cheap; an unrecorded provider/data-model/pattern decision discovered after the code ships is not.
+If yes, a decision is owed — stop and route to `/architect`, because the ADR it writes *is the build spec* (`/develop` should implement a decision, not make one). Things you'd have to invent:
+
+- **A provider, library, integration, data model, or cross-cutting pattern** — the classic backend decisions (auth provider, DB/ORM, storage, email, caching strategy).
+- **What a whole UI page or screen contains and looks like** — building a page (home, shop, product, order history, dashboard, …) means deciding its **design system** (does a `design.md` exist? if not, which direction?), its **sections/composition** (what's on the page and in what order), its **component inventory**, and the **asset strategy** (what to use when the engineer gave no screenshot and the repo has no images — e.g. fall back to an online source). Those are design decisions. Owed **unless** a `design.md` *and* a page-level spec/ADR already pin them down.
+- **A feature's behavior** — search, filtering, recommendations, a wizard, anything where "what exactly should it do?" is open. `/architect` is where those questions get asked (which fields does search cover? which filters? sort? fuzzy?). Owed unless an ADR already specs the behavior.
+
+It is **not** owed for pure implementation that's already specified: a small bug fix, a single component that matches an existing `design.md`, wiring already-decided pieces together, a copy/content tweak, or anything an existing ADR/`design.md`/`AGENTS.md` already governs.
+
+Do **not** hardcode this to a list of page names or features — apply the *invent-test* to whatever you were asked to build. A "home page", a "shop page", and a "search filter" all fail the test on a fresh project (no design system, no behavior spec) and pass it once an ADR/`design.md` exists.
+
+**The dangerous case is the false negative — building a real decision without noticing it** (which is exactly what "just build the home page" looks like). So when you can't tell, treat it as **owed** and ask (the panel below). One extra question is cheap; a page or feature whose design/behavior you silently invented is expensive to unwind.
 
 **Check, in order:**
 1. If `docs/features/index.md` exists, find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.**

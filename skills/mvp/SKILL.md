@@ -57,7 +57,7 @@ find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" 
 [ -f docs/features/index.md ] && echo "has roadmap"
 ```
 
-- **Greenfield**: decompose the whole MVP from scratch.
+- **Greenfield**: decompose the whole MVP from scratch. Sequence the roadmap so the **foundations come first, gradually**: (1) **coding guidelines & principles** — run `/audit` (greenfield) to capture the engineer's standards/conventions into root `AGENTS.md`; (2) the **stack** decision (`/architect` → ARCHITECTURE ADR); (3) the **design system / UI foundation** if the product has meaningful UI; then (4) data model, auth, and the rest. Don't jump to feature pages before these exist — every later feature builds on them. Surface this ordering in the Build order and the first foundation feature(s).
 - **Brownfield**: read root `AGENTS.md` and the existing `docs/features/index.md` if present, so you plan the *next* slice on top of what's already shipped — never re-list shipped features. If there's no root `AGENTS.md`, note in the report that `/audit` should run first to give later steps real context.
 
 ### Step 2 — Round 1: product & business (generate, then `AskUserQuestion`)
@@ -87,13 +87,21 @@ Each "yes" becomes either its own feature or a sub-task attached to relevant fea
 
 ### Step 5 — Decompose and break down (you reason; don't ask)
 
-**5a — Feature list.** From the answers, produce features ordered by dependency and value. Foundations first (data model, auth, multi-tenancy), then dependents, then explicitly-deferred nice-to-haves. Flag each `Needs ADR?` — **yes** for a load-bearing choice (provider, data model, architecture), **no** for pure implementation an existing convention/design system covers.
+**5a — Feature list.** From the answers, produce features ordered by dependency and value. Foundations first (coding standards, stack, design system, data model, auth, multi-tenancy), then dependents, then explicitly-deferred nice-to-haves.
+
+Flag each `Needs ADR?` using the same *invent-test* `/develop` uses — **would building it require a decision the engineer hasn't made?** Flag **yes** when it involves any of:
+- a provider, library, data model, or cross-cutting pattern;
+- **the design system / UI foundation** — make it an explicit early foundation feature (Needs ADR: yes), not a sub-task buried inside a page. It's cross-cutting: every page depends on it;
+- **any whole page/screen UI** when no design system + page spec exists yet — its composition (sections), components, and asset strategy are design decisions, so route through `/architect`;
+- **a feature with non-trivial behavior** (search, filtering, recommendations) — what it should *do* needs deciding (`/architect` asks: which fields? which filters? sort? fuzzy?).
+
+Flag **no** only for genuinely pure implementation an existing `design.md`/ADR/convention already covers — a small component, wiring, a content/copy page. When unsure, flag **yes**: an unflagged decision is the expensive miss (a page built with an invented design system is costly to redo).
 
 **5b — Per-feature build breakdown.** This is what makes the roadmap actionable. For **each** feature, generate its ordered build sub-tasks. Use this standard template, dropping rows that don't apply and adding feature-specific ones:
 
 | Order | Sub-task | Built by | Notes |
 |---|---|---|---|
-| 1 | **Decision (ADR)** — only if `Needs ADR? = yes` | `/architect` | settle provider / data model / pattern |
+| 1 | **Decision (ADR)** — only if `Needs ADR? = yes` | `/architect` | settle provider / data model / pattern / design system / page composition & behavior |
 | 2 | **Data model** — schema, migrations, entities | `/develop` (logical) | |
 | 3 | **Backend logic & API** — services, endpoints, business rules | `/develop` (logical) | |
 | 4 | **External integration** — provider/webhooks (if any) | `/develop` (logical) | |

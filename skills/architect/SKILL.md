@@ -221,6 +221,11 @@ A design topic is **decision-scoped** if it names a specific component, feature,
 - **Observability** — what to log, metrics, alerts
 - **Configuration & secrets** — new env vars, feature flags, credentials
 - **UX surface (if UI in scope)** — capture the *requirements* (what each screen must show/do, states, accessibility needs); leave pixel/layout detail to `/develop`
+- **UI design (when the topic IS a page/screen, e.g. "home page UI", "shop page UI")** — this is a real design decision and the ADR is the page's build spec. Settle:
+  - **Design system** — does a `design.md` exist? If yes, it's the source of truth. If not, decide the direction (a template like Stripe/Raycast/Linear, a described style, or "extract from existing UI") so `/develop` isn't inventing a look. A design system that doesn't exist yet is itself ADR-worthy (it's cross-cutting — every page depends on it).
+  - **Page composition** — what sections/blocks the page contains and in what order (e.g. home: hero → featured categories → product grid → social proof → footer). This is the "what goes on the page" the engineer alone knows.
+  - **Component inventory** — the reusable components the page needs (cards, nav, filters, carousel) and which already exist vs are net-new.
+  - **Asset strategy** — what to do when no screenshot/design was given and the repo has no images: decide the fallback (real assets the engineer will add, or an online placeholder source like Unsplash/Picsum/pravatar), so `/develop` doesn't stall or invent broken paths.
 
 **Step B — Sort each dimension into INFER / ASK / RECOMMEND** (see *Asks vs acts*):
 - **INFER** — answer it yourself from the prompt/codebase/AGENTS.md. Do not ask.
