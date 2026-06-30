@@ -110,7 +110,7 @@ Read `agent-prompt.md`, fill it, then spawn:
 
 ### 4. Relay the result
 
-The subagent returns a compact summary. Relay:
+**If the subagent errored or returned no parseable summary**, report that and offer to re-run — don't fabricate a result (a genuine `NOTHING_TO_SYNC` is a valid success; a crash or empty output is not). Otherwise relay the compact summary:
 
 ```
 ## /sync complete

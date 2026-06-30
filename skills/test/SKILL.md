@@ -311,7 +311,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 
 ### After subagent completes
 
-The subagent's report differs by branch. Relay the matching format.
+**If the subagent errored or produced no report**, say so and offer to re-run — never report a passing or failing suite it didn't actually produce. Otherwise the report differs by branch; relay the matching format.
 
 **If `RUN_AFTER = yes`** — parse `TESTS_WRITTEN`, `RUN_RESULT`, `BUGS_FOUND`, `NOT_COVERED`, `HARDEN_FLAG`:
 

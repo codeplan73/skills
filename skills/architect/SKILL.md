@@ -256,6 +256,8 @@ Inject into the template:
 
 ### After subagent completes
 
+**First — did it run at all?** If the ADR file is missing or empty (the subagent errored or produced nothing), report the failure and offer to re-run — never fabricate an ADR summary. Only if the file exists, continue:
+
 **Self-check before presenting**: Read the written ADR file. Verify it contains all required sections:
 - All modes: `## Context`, `## Options considered` (unless "Documenting a made decision"), `## Decision`, `## Rationale`, `## Consequences`
 - Feature mode: `## Feature design` with Acceptance criteria and Critical test scenarios populated

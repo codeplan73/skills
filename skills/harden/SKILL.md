@@ -77,7 +77,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 
 ### 4. Relay the result
 
-The subagent writes the checklist and returns a compact summary. Relay:
+**If the subagent errored or wrote no checklist**, report the failure and offer to re-run — don't relay a fabricated or empty result. Otherwise it writes the checklist and returns a compact summary. Relay:
 
 ```
 ## /harden complete

@@ -121,6 +121,8 @@ Before building, read:
 2. **The nearest `AGENTS.md`** to the target code area (proximity — Claude Code auto-loads it; read it explicitly to be sure). This carries decisions synced from earlier features, so you **don't re-ask** what's already settled.
 3. **`design.md`** (UI track only) — the visual source of truth.
 
+**Precedence when they conflict:** the **ADR wins for the feature it governs** — it's the specific, ratified decision; `AGENTS.md` is the general project convention. So if `AGENTS.md` says "tests use Jest" but this feature's ADR says "Vitest for this," follow the ADR *for this feature* — and **flag the conflict** ("ADR <NNNN> diverges from `AGENTS.md` on X — `/sync` should reconcile") rather than silently picking one. (If the ADR is silent on a point, `AGENTS.md` governs.)
+
 This step is why `/develop auth functionality` doesn't re-ask the stack chosen during `/develop auth pages`: `/architect` decided it, `/sync` wrote it into `AGENTS.md`, and you read it here.
 
 **Spec-completeness check (before building, not mid-build).** Confirm the ADR actually contains what you need to build *this* task — for logical work: data model, API surface, security model, key invariants; for UI work: the screens and their states/requirements. If a load-bearing section you need is **missing or left as a placeholder**, do not guess your way through it. Ask via `AskUserQuestion`:

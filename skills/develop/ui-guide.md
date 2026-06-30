@@ -18,7 +18,13 @@ All paths: **component-or-screen → stack detection → styling library → dar
 
 Written for any Agent Skills client on macOS, Linux, or Windows. The detection snippets (`find`, `cat | grep`, `cp`) are POSIX **reference**, not literal scripts — don't assume those utilities exist. Use your agent's own cross-platform file tools to find files, read `package.json`/config, and copy a template to `design.md`. Bundled files (`templates/*.md`, `checklist.md`) are referenced by paths relative to this skill's folder and read by the main agent (this skill runs inline — no subagent). This skill writes app code/CSS, which is inherently cross-platform. If your tool has no interactive-question picker, ask the multiple-choice prompts as plain text with the same options.
 
-## Step 0 — Check for existing design.md
+## Step 0 — Did the ADR already decide the design system?
+
+**Check the governing ADR first** (`/develop` read it in Step 2). If it already settled the **design direction** — a named template, "extract from existing UI", a described style, or page composition — **execute that decision; do not re-ask.** `/architect` already grilled the engineer on this; re-running the picker below would ask the same questions twice. Create `design.md` from the ADR's decision (e.g. "use the Raycast template" → copy that template; "extract from existing UI" → run the Step 0.2 extraction), then proceed to implementation.
+
+Only if **no ADR governs this UI**, or the ADR is **silent on the design system**, fall through to the detection below.
+
+## Step 0.0 — Check for existing design.md
 
 ```bash
 find . -maxdepth 3 -name "design.md" \

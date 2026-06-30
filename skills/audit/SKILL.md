@@ -246,7 +246,7 @@ Relay the full report after the choice is applied.
 
 ### After all phases
 
-Relay the subagent's report:
+**If the subagent errored or wrote no `AGENTS.md`** when it should have (the file is missing/empty), report the failure and offer to re-run — don't relay success it didn't produce. Otherwise relay the subagent's report:
 - What was discovered (2–4 bullets)
 - What was written (file paths)
 - What was proposed or skipped (if existing files were found)

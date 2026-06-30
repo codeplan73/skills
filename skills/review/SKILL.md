@@ -139,7 +139,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 
 ### 5. Relay the result
 
-The subagent writes the findings file and returns a compact summary. Relay:
+**If the subagent errored or wrote no findings file**, report the failure and offer to re-run — don't relay an empty or fabricated review. Otherwise it writes the findings file and returns a compact summary. Relay:
 
 ```
 ## /review complete
