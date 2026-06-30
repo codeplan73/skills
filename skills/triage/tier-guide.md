@@ -2,7 +2,7 @@
 
 ## Before triage — new product or new slice
 
-`/triage` sizes **one change**. If the engineer is starting a whole product or a fresh batch of features ("I want to build X"), that isn't one change — point them to **`/mvp`** first to produce the feature roadmap (`docs/mvp/01-mvp.md`), then triage each feature off that list one at a time.
+`/triage` sizes **one change**. If the engineer is starting a whole product or a fresh batch of features ("I want to build X"), that isn't one change — point them to **`/mvp`** first to produce the feature roadmap (in `docs/mvp/`), then triage each feature off that list one at a time.
 
 In the playbooks below, `/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern). For a medium/full change that reuses already-decided patterns, `/develop`'s ADR gate will confirm none is needed and skip straight to building.
 

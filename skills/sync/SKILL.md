@@ -126,7 +126,7 @@ Read `agent-prompt.md`, fill it, then spawn:
 **Orphans cleaned** (after deletions):
 - `<path>` — <removed orphaned nested doc / fixed broken pointer>
 
-**Roadmap reconciled** (`docs/mvp/01-mvp.md`):
+**Roadmap reconciled** (`docs/mvp/`):
 - `<feature>` — <ticked sub-tasks / status planned→in-progress→done to match the diff>   (or "no roadmap, or already accurate")
 
 **ADRs flagged stale** (run /architect to update or supersede):

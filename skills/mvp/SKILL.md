@@ -11,7 +11,7 @@ Turns an idea into an ordered, detailed build plan. It is the entry point when t
 1. **Asks comprehensively** — business and product (what it is, who it's for, the MVP boundary, monetization, success metric), capabilities (auth, payments, file upload, search, notifications, admin…), and cross-cutting / go-to-market concerns (SEO, performance, analytics, accessibility, i18n, legal/compliance).
 2. **Decomposes into features and orders them** — by dependency and value, flagging which carry a load-bearing decision (`/architect` first) vs pure implementation (`/develop` directly).
 3. **Breaks every feature into its build sub-tasks** — small, granular features (one page or unit each), and for every sub-task the **exact skill, in order, with a ready-to-paste prompt** (e.g. `/architect home page — composition, sections, asset strategy` then `/develop home page UI — build to design.md with placeholder data`). The breakdown *is the build script*. This is what makes the roadmap actionable, not a wishlist.
-4. **Writes `docs/mvp/01-mvp.md`** — overview table + per-feature build breakdown + build order.
+4. **Writes the roadmap under `docs/mvp/`** — overview table + per-feature build breakdown + build order.
 
 It does one decomposition pass and hands you a detailed, checkable plan. Walking it — architecting and building each sub-task — is the rest of the workflow.
 

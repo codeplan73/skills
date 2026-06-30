@@ -21,7 +21,7 @@ Because building is where decisions get silently made, `/develop` **gates on the
 
 ## Artifact ownership
 
-Writes **app code** (and CSS/tokens for UI). Advances the feature's row in `docs/mvp/01-mvp.md` — `planned` → `in-progress` on start, `done` when the build lands — and fills in its `Code area` (and `ADR`) pointers. Never writes ADRs (flags the need and defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); records new area conventions only via `/sync` afterwards.
+Writes **app code** (and CSS/tokens for UI). Advances the feature's row in the roadmap (`docs/mvp/`) — `planned` → `in-progress` on start, `done` when the build lands — and fills in its `Code area` (and `ADR`) pointers. Never writes ADRs (flags the need and defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); records new area conventions only via `/sync` afterwards.
 
 **Artifact base.** The roadmap and ADRs it reads live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Read from whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
@@ -90,7 +90,7 @@ Do **not** hardcode this to a list of page names or features — apply the *inve
 - **options**:
   1. `Architect it first` — "Recommended — capture the decision in an ADR before building, so the build has a spec." → **end here** and output the paste-ready handoff (below). Do not build.
   2. `No — not needed` — "I've judged there's no real decision here; build directly." → proceed to Step 1.
-  3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to Step 1, and leave the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in `docs/mvp/01-mvp.md` so it isn't forgotten.
+  3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to Step 1, and leave the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in the roadmap (`docs/mvp/`) so it isn't forgotten.
 
 The tool appends "Other" as a free-text option automatically.
 
@@ -153,7 +153,7 @@ Then build the track(s):
 ### Step 4 — Update the roadmap and report
 
 - **Only mark what actually landed.** Before ticking anything, confirm the work is really there — files written, build subagent returned success (not an error or empty result), code present. If the build **failed or came back partial** (subagent errored, was interrupted, or left a sub-task half-done): leave that sub-task **unchecked**, keep the feature **`in-progress`**, and report exactly what's incomplete and why. Never mark a sub-task `done` on an unverified or failed build — a roadmap that claims work that isn't there is worse than one that's behind.
-- In `docs/mvp/01-mvp.md`: tick the build sub-task(s) you **verified** complete (`[ ]` → `[x]`), fill in the feature's `Code area` (and `ADR`) pointers, and set its **Status** to `done` only when every sub-task is checked — otherwise leave it `in-progress`.
+- In the roadmap (`docs/mvp/`): tick the build sub-task(s) you **verified** complete (`[ ]` → `[x]`), fill in the feature's `Code area` (and `ADR`) pointers, and set its **Status** to `done` only when every sub-task is checked — otherwise leave it `in-progress`.
 - Relay the track's report (the `## /develop complete` block from `ui-guide.md` and/or `logical-guide.md`).
 - Recommend the next step per tier: usually `/test`, then `/sync` to promote any new area conventions into `AGENTS.md`.
 
