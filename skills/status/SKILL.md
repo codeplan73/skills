@@ -70,7 +70,7 @@ Surface anything that makes it unsafe to just dive in:
 
 People go off-plan — they redo UI, add a feature the roadmap doesn't mention, or write an ADR for something not tracked. `/status` is where that surfaces. Cross-check the roadmap against the code and ADRs:
 - **Unplanned code** → significant code areas/modules (use `AGENTS.md` nested areas + top-level dirs) that **no roadmap feature's `Code area` points to**. That's shipped work the plan doesn't know about.
-- **Orphan ADRs** → files in `docs/adr/` that **no roadmap feature's `ADR` cell links to**. Decisions made outside the plan.
+- **Orphan ADRs** → top-level ADR files in `docs/adr/` that **no roadmap feature's `ADR` cell links to**. (Child ADRs *inside* an umbrella directory are covered by the umbrella's link — not orphans.) Decisions made outside the plan.
 - **Stale `done`** (light touch) → a feature marked `done`/`existing` whose code area has substantial recent churn — its "done" may no longer match reality. Only flag if obvious; don't over-reach.
 
 Report these and the one-command fix: **`/mvp`** to enroll unplanned work / re-run to reconcile drift, **`/architect`** (or a `/mvp` row) to link an orphan ADR. Be conservative — only flag a real mismatch, not every file without a row.

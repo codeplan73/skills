@@ -181,6 +181,8 @@ The ADR's status mirrors its feature's build lifecycle (roadmap: planned→`Prop
 | `Accepted` | The feature is built and verified (roadmap `done`) — the "done and dusted" state. An ADR is NOT `Accepted` until its feature ships. Set by /develop on completion or reconciled by /sync. |
 | `Superseded by [NNNN](NNNN-title.md)` | Replaced by a newer ADR |
 
+**Umbrella child ADRs carry no lifecycle status.** In an umbrella directory (`NNNN-<x>/`), only the `index.md` has a `**Status**:` line — it mirrors the feature. The **child ADRs are spec content**, so **omit the `**Status**:` line on children** (they're governed by the umbrella). `/develop` and `/sync` advance the umbrella `index.md`'s status only, never a child's.
+
 ## Writing rules
 
 - Context describes the problem, not the solution

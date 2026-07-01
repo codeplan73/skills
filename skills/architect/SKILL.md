@@ -242,7 +242,7 @@ Inject into the template:
 4. Context-file contents — `AGENTS.md` (root + the feature area's nested), or `CLAUDE.md` as fallback, or "MISSING"
 5. Existing ADR list (filenames + first line of each)
 6. Related ADR paths (flagged in pre-flight)
-7. The resolved **ADR location** (`$ADR_DIR`), next number, and **shape** — a single file `$ADR_DIR/NNNN-title.md`, or an umbrella directory `$ADR_DIR/NNNN-title/` (`index.md` + child ADRs + `research/`). If umbrella: tell the subagent the child decisions to write and that **any inventory/audit it produces goes in `…/NNNN-title/research/`** — never in `docs/mvp/`, never loose in the code tree.
+7. The resolved **ADR location** (`$ADR_DIR`), next number, and **shape** — a single file `$ADR_DIR/NNNN-title.md`, or an umbrella directory `$ADR_DIR/NNNN-title/` (`index.md` + child ADRs + `research/`). If umbrella: tell the subagent the child decisions to write and that **any inventory/audit it produces goes in `…/NNNN-title/research/`** — never in `docs/mvp/`, never loose in the code tree. Only the umbrella `index.md` carries a `**Status**:` line (it mirrors the feature); **child ADRs omit the lifecycle Status** — they're spec content governed by the umbrella.
 8. Source file count (so subagent knows if there's code to read)
 9. Operation: `create` | `update` | `supersede`
 10. Today's date (from pre-flight `date +%Y-%m-%d`)
