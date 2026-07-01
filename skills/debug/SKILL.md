@@ -73,7 +73,7 @@ Make the **minimal, targeted** change that addresses the proven cause. Don't fix
 ### Optional — run it in a subagent
 
 For a non-trivial hunt, spawn an investigation subagent so the iterative tool use doesn't fill the main context:
-- `model: "sonnet"`
+- `model`: a strong model (e.g. `sonnet` on Claude Code)
 - `description: "Debug: <symptom>"`
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write`
 - `prompt`: this loop + the captured symptom + reproduction + the relevant `AGENTS.md` (inlined). Require it to report the root cause with evidence, not just "fixed it."

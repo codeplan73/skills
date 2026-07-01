@@ -1,6 +1,6 @@
 # Sync Subagent Prompt Template
 
-The main model fills this template and passes it as the haiku subagent's prompt. Placeholders are in ALL_CAPS.
+The main model fills this template and passes it as the subagent's prompt (run on a fast, low-cost model). Placeholders are in ALL_CAPS.
 
 ---
 

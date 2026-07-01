@@ -26,10 +26,7 @@ Only if **no ADR governs this UI**, or the ADR is **silent on the design system*
 
 ## Step 0.0 — Check for existing design.md
 
-```bash
-find . -maxdepth 3 -name "design.md" \
-  -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/.claude/*' | head -5
-```
+Using your file-search tool, look for a `design.md` within about 3 levels of the project root, ignoring `node_modules`, `.git`, and `.claude`.
 
 **Found** — validate before using: must have at least a `colors:` block and a `typography:` block. If either is missing or the file is empty, treat as **not found** and warn the user.
 
@@ -42,14 +39,11 @@ find . -maxdepth 3 -name "design.md" \
 
 Before generating a fresh design system, find out if the project **already has a visual language** you must match. Generating a new one on top of an existing app produces UI that clashes with what's shipped.
 
-```bash
-# Existing styling/tokens/components that imply a design language already exists
-find . -maxdepth 4 \( -name "globals.css" -o -name "tokens.css" -o -name "theme.*" \
-  -o -name "tailwind.config.*" \) -not -path '*/node_modules/*' | head
-find . -maxdepth 4 -type d \( -path '*/components/*' -o -name "ui" \) -not -path '*/node_modules/*' | head
-```
+Using your file-search tool (ignoring `node_modules`), look for signs a design language already exists:
+- Styling/token files: `globals.css`, `tokens.css`, `theme.*`, `tailwind.config.*`.
+- Component directories: a `components/` tree or a `ui` directory.
 
-**If existing UI/styles are found (brownfield) — ask before proceeding** via `AskUserQuestion`:
+**If existing UI/styles are found (brownfield) — ask before proceeding** — present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none:
 - **question**: "There's no `design.md`, but this project already has UI. How should I get the design system?"
 - **header**: "Design system"
 - **options**:
@@ -75,10 +69,9 @@ Determines prop API design, routing integration, and file placement.
 | "component", "button", "card", "input", "modal", "badge", "dropdown", "toggle", "chip" | **Component** |
 | Ambiguous | Ask |
 
-If ambiguous:
+If ambiguous, ask (as above):
 ```
-AskUserQuestion:
-  "Is this a reusable component or a full page?"
+"Is this a reusable component or a full page?"
   - Reusable component — isolated, takes props, no routing
   - Full page / screen — owns layout, integrates with router
 ```
@@ -99,12 +92,7 @@ AskUserQuestion:
 
 ## Stack detection
 
-```bash
-find . -maxdepth 2 \( -name "next.config.*" -o -name "vite.config.*" \
-  -o -name "nuxt.config.*" -o -name "svelte.config.*" \) \
-  -not -path '*/node_modules/*' | head -1
-cat package.json 2>/dev/null | grep -E '"next"|"vite"|"nuxt"|"svelte"|"astro"' | head -5
-```
+Using your file-search tool (ignoring `node_modules`), look near the project root for a framework config file (`next.config.*`, `vite.config.*`, `nuxt.config.*`, `svelte.config.*`). Then read `package.json` and check its dependencies for `next`, `vite`, `nuxt`, `svelte`, or `astro`.
 
 Identifies the framework. Affects routing integration, image primitives, and font loading method.
 
@@ -112,21 +100,10 @@ Identifies the framework. Affects routing integration, image primitives, and fon
 
 ## Styling library, dark mode, and icon detection
 
-```bash
-# Styling
-cat package.json 2>/dev/null | grep -E \
-  '"@shadcn|"@radix-ui|"@mui|"antd|"@chakra-ui|"@mantine|"styled-components|"@emotion|"tailwindcss"' | head -5
-find . -maxdepth 4 -type d -name "ui" -path "*/components/ui" | head -1
-find . -maxdepth 4 \( -name "*.module.css" -o -name "*.module.scss" \) -not -path '*/node_modules/*' | head -3
-
-# Dark mode strategy
-cat package.json 2>/dev/null | grep '"next-themes"'
-grep -r "darkMode" tailwind.config.* 2>/dev/null | head -2
-
-# Icon library
-cat package.json 2>/dev/null | grep -E \
-  '"lucide-react|"@heroicons|"phosphor-react|"@phosphor-icons|"react-icons|"@tabler/icons' | head -3
-```
+Using your file-search and read tools (ignoring `node_modules`):
+- **Styling** — read `package.json` and check dependencies for `@shadcn`, `@radix-ui`, `@mui`, `antd`, `@chakra-ui`, `@mantine`, `styled-components`, `@emotion`, or `tailwindcss`. Also look for a `components/ui` directory (shadcn) and for any `*.module.css` / `*.module.scss` files.
+- **Dark mode strategy** — check `package.json` for `next-themes`, and search any `tailwind.config.*` for a `darkMode` setting.
+- **Icon library** — check `package.json` dependencies for `lucide-react`, `@heroicons`, `phosphor-react`, `@phosphor-icons`, `react-icons`, or `@tabler/icons`.
 
 **Styling decision:**
 
@@ -179,10 +156,7 @@ Read the full file. Extract:
 
 Run stack, styling, and dark mode detection. Find existing token files:
 
-```bash
-find . -not -path '*/node_modules/*' \
-  \( -name "globals.css" -o -name "tokens.css" -o -name "tailwind.config.*" \) | head -5
-```
+Using your file-search tool (ignoring `node_modules`), find existing token files: `globals.css`, `tokens.css`, or `tailwind.config.*`.
 
 Compare existing token values against `design.md`. Add absent tokens freely. If conflicts exist between the token file and `design.md`, **do not silently overwrite** — list them in the report and let the engineer decide.
 
@@ -245,16 +219,17 @@ templates/raycast.md   (lines 1–30)
 ```
 Read the full selected file in B2, after the user chooses.
 
+Ask (as above) — question 1:
 ```
-AskUserQuestion 1 — "What mood should this UI have?"
+"What mood should this UI have?"
   - Dark & focused       → near-black, precise, technical (Raycast)
   - Light & professional → white/off-white, trustworthy (Stripe or Supabase)
   - Bold & editorial     → strong personality (PostHog or Nike)
   - Custom               → describe a style, brand, or paste a design.md URL
 ```
 
+Then ask (as above) — question 2 (only for Light or Bold):
 ```
-AskUserQuestion 2 — (only for Light or Bold)
   Light: Stripe vs Supabase
   Bold:  PostHog vs Nike
   Dark:  auto-select Raycast
@@ -397,15 +372,10 @@ Many UIs need real visual content — hero images, avatars, product/gallery phot
 
 **Step 1 — Does this build need image/media assets at all?** If it's a pure form, table, or text layout, skip this section.
 
-**Step 2 — Look for matching project assets** (use your file tools):
-```bash
-find . -type d \( -iname "assets" -o -iname "images" -o -iname "img" -o -iname "media" -o -iname "public" \) \
-  -not -path '*/node_modules/*' -not -path '*/.git/*' | head
-# then scan those dirs for files whose names plausibly match what the UI needs (hero, avatar, logo, product, …)
-```
+**Step 2 — Look for matching project assets** (use your file tools): search (ignoring `node_modules` and `.git`) for asset directories named `assets`, `images`, `img`, `media`, or `public`; then scan those dirs for files whose names plausibly match what the UI needs (hero, avatar, logo, product, …).
 Also check `design.md`/the design reference for named or pictured assets.
 
-**Step 3 — If no matching assets are found, ask** via `AskUserQuestion` (do **not** silently invent paths, emoji, or blank boxes):
+**Step 3 — If no matching assets are found, ask** (as above; do **not** silently invent paths, emoji, or blank boxes):
 - **question**: "This UI needs <list what — e.g. a hero image + 3 product photos> but I found no matching assets in the project. How should I source them?"
 - **header**: "Assets"
 - **options**:
@@ -475,10 +445,7 @@ Build with the HTML element that most precisely describes the content. The eleme
 
 Every visual value — colour, font, size, spacing, radius, shadow, duration, easing — comes from the CSS custom properties defined in the token file. No hardcoded hex codes, no hardcoded `px` values that duplicate a token.
 
-Run a grep to verify before calling the phase complete:
-```bash
-grep -rn "#[0-9a-fA-F]\{3,6\}\|rgb(\|hsl(\|: [0-9]\+px" <new-files>
-```
+Before calling the phase complete, use your search tool to scan the changed files for hardcoded values: hex colors (e.g. `#fff`, `#1a2b3c`), `rgb(`/`hsl(` color functions, and raw pixel values (e.g. `: 16px`).
 
 Any match that isn't a `0`, a `1px` border that has no token equivalent, or a known constant is a violation. Replace with the corresponding `var(--token)`.
 

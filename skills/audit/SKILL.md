@@ -77,7 +77,7 @@ Never create a nested AGENTS.md for every subfolder — only where distinct conv
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS. Other shell snippets (file counts, `find`, `[ -f ]`) are POSIX **reference**, not literal scripts — use your agent's own cross-platform file tools (search/glob, read, write) to list and count source files and check existence instead.
 - **Bundled files**: the pattern presets (`patterns/*.md`) and `agent-prompt.md` are referenced by paths relative to this skill's folder; the main agent reads them and injects the needed text **into the subagent prompt** — subagents can't resolve skill-relative paths.
-- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a Task/subagent tool, and the multiple-choice steps assume an interactive picker (use whatever your agent provides — a subagent tool, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: do the subagent's work inline yourself (use a cheaper model where the step calls for one), and ask any multiple-choice question as plain text with the same options.
+- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a subagent capability, and the multiple-choice steps assume an interactive picker (use whatever your agent provides — a subagent capability, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: do the subagent's work inline yourself (use a cheaper model where the step calls for one), and ask any multiple-choice question as plain text with the same options.
 
 ## Execution
 
@@ -85,28 +85,13 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 **Don't decide on a file count alone** — a scaffold inflates it, an unfamiliar language zeroes it out. Gather several signals:
 
-```bash
-# 1. Context files: AGENTS.md present → ROOT_EXISTS; content-ful CLAUDE.md only → ROOT_LEGACY; neither → ROOT_MISSING
-#    (use your file tools to check existence of AGENTS.md / CLAUDE.md at the root)
+1. **Context files.** Using your file tools, check for a root `AGENTS.md` / `CLAUDE.md`: AGENTS.md present → `ROOT_EXISTS`; a content-ful CLAUDE.md only → `ROOT_LEGACY`; neither → `ROOT_MISSING`.
 
-# 2. Source count — broad extension set across ecosystems
-find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \
-  -o -name "*.py" -o -name "*.go" -o -name "*.rs" -o -name "*.java" -o -name "*.rb" \
-  -o -name "*.swift" -o -name "*.kt" -o -name "*.php" -o -name "*.cs" -o -name "*.dart" \
-  -o -name "*.ex" -o -name "*.exs" -o -name "*.scala" -o -name "*.c" -o -name "*.cpp" \
-  -o -name "*.h" -o -name "*.lua" -o -name "*.clj" \) \
-  -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/dist/*' -not -path '*/build/*' \
-  -not -name "*.config.*" | wc -l
+2. **Source count.** Using your file tools, count the project's source files across the common ecosystems (extensions like `.ts/.tsx/.js/.jsx/.py/.go/.rs/.java/.rb/.swift/.kt/.php/.cs/.dart/.ex/.exs/.scala/.c/.cpp/.h/.lua/.clj`), excluding vendored/generated dirs (`node_modules`, `.git`, `dist`, `build`) and config files (`*.config.*`).
 
-# 3. Established-project signals
-git log --oneline 2>/dev/null | wc -l                                   # commit history depth
-ls package.json pyproject.toml go.mod Cargo.toml composer.json \
-   *.csproj pubspec.yaml mix.exs Gemfile 2>/dev/null                    # a real manifest?
+3. **Established-project signals.** Run `git log --oneline` to gauge commit-history depth. Using your file tools, check for a real manifest (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `composer.json`, `*.csproj`, `pubspec.yaml`, `mix.exs`, `Gemfile`).
 
-# 4. Monorepo signal
-ls pnpm-workspace.yaml turbo.json 2>/dev/null; grep -l '"workspaces"' package.json 2>/dev/null
-find . -maxdepth 2 -path '*/apps/*/package.json' -o -path '*/packages/*/package.json' 2>/dev/null | head
-```
+4. **Monorepo signal.** Using your file tools, check for workspace markers (`pnpm-workspace.yaml`, `turbo.json`, or a `"workspaces"` field in `package.json`) and for any `apps/*/package.json` or `packages/*/package.json` near the root.
 
 **Pick the phase. Two questions, in order: (1) is there real code to scan? (source files OR a manifest) (2) if yes, is it built (git history) or just scaffolded (no history)?**
 
@@ -137,7 +122,7 @@ Note `MONOREPO=yes` + the workspace list in the subagent prompt.
 
 ### Phase 0 — Classify (only when pre-flight is ambiguous)
 
-Don't guess. Ask once via `AskUserQuestion`:
+Don't guess. Ask once — present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none:
 - **question**: "I can't tell if this is a new project or an existing codebase — <state why: e.g. 'a manifest exists but I see no source in a language I recognise', or 'files look like untouched scaffolding'>. Which is it?"
 - **header**: "Project state"
 - **options**:
@@ -150,7 +135,7 @@ Then route to the chosen phase.
 
 **Trigger**: pre-flight classified **clearly greenfield**, or Phase 0 → `New project`.
 
-**Step 1 — Ask coding patterns** (main model calls `AskUserQuestion`):
+**Step 1 — Ask coding patterns** (main model asks, as above):
 
 Question 1 — Architecture style (single-select):
 - Read `patterns/clean-architecture.md` for label/description
@@ -169,8 +154,8 @@ Question 2 — Additional standards (multi-select):
 - If a named pattern was selected: the main model already read all four files in Step 1 — do not re-read. Use the full content of the matching file as `SELECTED_PATTERNS`.
 - If "Other" was selected (free-text input): no pattern files were read in Step 1. Use the engineer's exact typed text as `SELECTED_PATTERNS` — pass it directly, no file to read.
 
-**Step 3 — Spawn subagent** with:
-- `model: "sonnet"`
+**Step 3 — Spawn a subagent** with:
+- `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
 - `description: "Audit: greenfield setup — create root AGENTS.md + CLAUDE.md pointer"`
 - Tools: `Read`, `Bash`, `Write`
 - `prompt`: filled `agent-prompt.md` template with `PHASE=greenfield`, `SELECTED_PATTERNS=<file contents>`, `ADDITIONAL_STANDARDS=<selections>`, and **`MONOREPO_OR_NO`** (`yes — apps: web, api, …` if detected). The subagent writes root `AGENTS.md` + its `CLAUDE.md` pointer — **and, if `MONOREPO=yes`, a nested `AGENTS.md` (+ pointer) per workspace** seeded from each scaffold's manifest, with the root pointers baked in.
@@ -183,8 +168,8 @@ Question 2 — Additional standards (multi-select):
 
 The subagent doesn't just write root — it **identifies the major areas with distinct conventions** (e.g. `src/auth`, `src/payments`, `src/api`) and creates a nested `AGENTS.md` for each that warrants one, deciding by judgment what is global (→ root) vs area-specific (→ nested). Root stays short; area detail lives nested.
 
-**Spawn subagent** with:
-- `model: "sonnet"`
+**Spawn a subagent** with:
+- `model`: a strong model
 - `description: "Audit: whole-repo scan — root + nested AGENTS.md"`
 - Tools: `Read`, `Bash`, `Write`, `Edit` (`Edit` to add nested pointers into the root it just wrote)
 - `prompt`: filled `agent-prompt.md` with `PHASE=whole-repo`, AGENTS.md noted as MISSING. The subagent writes root `AGENTS.md`, creates each warranted nested `<area>/AGENTS.md` (+ its `CLAUDE.md` pointer), and adds one pointer line per nested doc into root's `## Context files`.
@@ -196,28 +181,25 @@ The subagent doesn't just write root — it **identifies the major areas with di
 **Trigger**: a path or area name was given (e.g. `/audit src/auth`).
 
 **Pre-flight additionally**:
-1. Check the area path exists:
-   ```bash
-   [ -e <area-path> ] && echo "EXISTS" || echo "NOT_FOUND"
-   ```
-   If `NOT_FOUND`: stop immediately. Tell the engineer: "Path `<area>` not found. Check the path and try again." Do not spawn a subagent.
+1. Using your file tools, check whether the area path exists.
+   If it does not exist: stop immediately. Tell the engineer: "Path `<area>` not found. Check the path and try again." Do not spawn a subagent.
 2. Read root `AGENTS.md` (the canonical file).
    - If root AGENTS.md is **missing** (and no legacy CLAUDE.md to migrate): run Phase 2 fully first (spawn whole-repo subagent, wait for it to write root AGENTS.md + CLAUDE.md pointer), then continue with Phase 3.
    - If only a legacy root `CLAUDE.md` exists: run the legacy migration above first.
    - If root AGENTS.md **exists**: proceed directly.
 3. Check if `<area>/AGENTS.md` exists — note present or missing.
 
-**Spawn subagent** with:
-- `model: "sonnet"`
+**Spawn a subagent** with:
+- `model`: a strong model
 - `description: "Audit: area scan — <area>"`
 - Tools: `Read`, `Bash`, `Write`, `Edit`
 - `prompt`: filled `agent-prompt.md` with `PHASE=area`, `AREA=<path>`, root and nested `AGENTS.md` contents injected. The subagent writes the area's content to `<area>/AGENTS.md` and creates `<area>/CLAUDE.md` as a pointer.
 
 Note: the subagent adds the nested `AGENTS.md` pointer line to root `AGENTS.md` using the **Edit** tool — it does not re-create root AGENTS.md.
 
-**After subagent runs**, parse the report for the `Root gaps flagged` section:
+**After the subagent runs**, parse the report for the `Root gaps flagged` section:
 - If `ROOT_GAPS: none` → relay the full report, done.
-- If gaps exist → call `AskUserQuestion`:
+- If gaps exist → ask (as above):
   - Question: "I found things in `<area>` not reflected in root AGENTS.md. What should I do?"
   - Option 1: `Add them now` — description: "I'll apply the additions immediately"
   - Option 2: `Show me the diff` — description: "Print exactly what would change; I'll apply it manually"
@@ -237,17 +219,17 @@ Relay the full report after the choice is applied.
 
 **Pre-flight additionally**:
 1. Read root `AGENTS.md` (inject its contents).
-2. List all nested AGENTS.md paths: `find . -name AGENTS.md -not -path '*/node_modules/*' -not -path '*/.git/*'` — inject the list.
+2. Using your file tools, list all nested `AGENTS.md` paths (excluding `node_modules` and `.git`) — inject the list.
 
-**Spawn subagent** with:
-- `model: "sonnet"`
+**Spawn a subagent** with:
+- `model`: a strong model
 - `description: "Audit: gap-fill — codebase vs existing docs"`
 - Tools: `Read`, `Bash`, `Write`, `Edit`
 - `prompt`: filled `agent-prompt.md` with `PHASE=gap-fill`, root AGENTS.md contents + nested paths injected. The subagent scans the codebase and finds three kinds of gap: (a) **global facts missing from root** (a command, stack element, or project-wide rule) → returns as `ROOT_GAPS` proposals; (b) **areas with distinct conventions but no nested doc** → creates the nested doc (+ pointer); (c) **existing nested docs missing something** → returns as `PROPOSED_ADDITIONS`. It never overwrites curated content.
 
-**After subagent runs**, handle proposals before applying:
+**After the subagent runs**, handle proposals before applying:
 - Nested docs it created for clearly-undocumented areas → already written; list them in the relay.
-- `ROOT_GAPS` and `PROPOSED_ADDITIONS` to existing files → present via `AskUserQuestion` (`Add them now` / `Show me the diff` / `Skip for now`), exactly as in Phase 3, then apply with `Edit` (verbatim, no paraphrase) on `Add them now`.
+- `ROOT_GAPS` and `PROPOSED_ADDITIONS` to existing files → ask (as above) (`Add them now` / `Show me the diff` / `Skip for now`), exactly as in Phase 3, then apply with `Edit` (verbatim, no paraphrase) on `Add them now`.
 - `CONTRADICTIONS` (docs the code disproves) → **surface to the engineer, do not auto-fix** — these touch possibly-curated lines. Relay each as "`<doc>` says *X*, but the code/ADR shows *Y*" and let them decide (correct it, or update the code). Never silently overwrite.
 
 ---

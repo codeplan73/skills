@@ -53,7 +53,7 @@ Two independent choices — **where** the ADR lives (repo shape) and **what shap
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS. Other shell snippets (`mkdir -p`, `date`, `find`, `ls`, `cat`, `wc`) are POSIX **reference**, not literal scripts — use your agent's own cross-platform file tools (read, search/glob, write, create-dir) and your knowledge of today's date instead. Creating `docs/adr/` should use your write tool, not `mkdir`.
 - **Bundled files**: the fallback question files (`questions/*.md`), `agent-prompt.md`, and `adr-template.md` are referenced by paths relative to this skill's folder. The main agent reads them; the **ADR template text is injected into the subagent prompt** (subagents can't resolve skill-relative paths).
-- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a Task/subagent tool, and the multiple-choice rounds assume an interactive picker (use whatever your agent provides — a subagent tool, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: do the research/drafting inline yourself, and ask the question rounds as plain text with the same options.
+- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a subagent capability, and the multiple-choice rounds assume an interactive picker (use whatever your agent provides — a subagent, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: do the research/drafting inline yourself, and ask the question rounds as plain text with the same options.
 
 ## Execution
 
@@ -69,35 +69,15 @@ Wait for their answer. Use it as the design topic before running pre-flight.
 
 ### Pre-flight (main model)
 
-```bash
-# Freshness (teams): if behind the remote, a teammate may have added ADRs or changed this feature
-git fetch --quiet 2>/dev/null
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-git rev-list --count HEAD..origin/$BASE 2>/dev/null   # >0 → warn "pull first" before deciding
+Run these steps (the `git` commands are literal and behave the same on every OS; everything else, do with your agent's own file tools):
 
-# Resolve the ADR location = the roadmap workspace, mirrored into docs/adr/:
-#   single repo → docs/adr/ ; monorepo workspace → docs/adr/<workspace>/ ; repo-wide → docs/adr/_root/
-# (Determine <workspace> the same way as the roadmap — from the topic/path/roadmap row. Call it ADR_DIR.)
-mkdir -p "$ADR_DIR"
-
-# Today's date — inject into ADR
-date +%Y-%m-%d
-
-# List existing ADRs IN THIS LOCATION — for numbering and detecting related decisions (numbering is per-location)
-find "$ADR_DIR" -name "[0-9]*.md" -o -name "index.md" | sort
-
-# Check if codebase has source files — informs how much reading the subagent should do
-find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" \
-  -o -name "*.go" -o -name "*.rs" -o -name "*.java" \) \
-  -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/dist/*' | wc -l
-
-# Read project context — this is the source of truth for the stack and the project's community skills.
-#   read root AGENTS.md (fall back to CLAUDE.md, else MISSING), AND the nested <area>/AGENTS.md for
-#   this feature's area if one exists (e.g. src/auth/AGENTS.md for an auth feature).
-
-# (Optional) list installed skills dirs for AVAILABILITY only — .claude/skills/, .agents/skills/, skills/
-#   relevance is decided by AGENTS.md + the feature, not by name-matching this list.
-```
+- **Freshness (teams):** if behind the remote, a teammate may have added ADRs or changed this feature. `git fetch` quietly, pick the base branch (use `main` if `git rev-parse --verify main` succeeds, otherwise `master`), then count commits behind with `git rev-list --count HEAD..origin/<base>`. If the count is >0, warn "pull first" before deciding.
+- **Resolve the ADR location** = the roadmap workspace, mirrored into `docs/adr/`: single repo → `docs/adr/`; monorepo workspace → `docs/adr/<workspace>/`; repo-wide → `docs/adr/_root/`. (Determine `<workspace>` the same way as the roadmap — from the topic/path/roadmap row. Call it `ADR_DIR`.) Create that directory with your write tool if it doesn't exist.
+- **Today's date** — use today's date (inject it into the ADR).
+- **List existing ADRs IN THIS LOCATION** — using your file tools, list the ADR files in `$ADR_DIR` (files named `NNNN-*.md` plus any `index.md`), for numbering and detecting related decisions (numbering is per-location).
+- **Check if the codebase has source files** — using your file tools, count the source files (e.g. `.ts`, `.tsx`, `.js`, `.py`, `.go`, `.rs`, `.java`), excluding `node_modules/`, `.git/`, and `dist/`. This informs how much reading the subagent should do.
+- **Read project context** — this is the source of truth for the stack and the project's community skills. Read root `AGENTS.md` (fall back to `CLAUDE.md`, else MISSING), AND the nested `<area>/AGENTS.md` for this feature's area if one exists (e.g. `src/auth/AGENTS.md` for an auth feature).
+- **(Optional)** list installed skills dirs for AVAILABILITY only — `.claude/skills/`, `.agents/skills/`, `skills/`. Relevance is decided by AGENTS.md + the feature, not by name-matching this list.
 
 From the ADR list (all paths below are relative to `$ADR_DIR`, the resolved location):
 - **Next number**: highest existing number in `$ADR_DIR` + 1, zero-padded to 4 digits; `0001` if none. (An umbrella directory `NNNN-<x>/` counts as one number.) **Collision guard (teams):** re-list `$ADR_DIR` immediately before the subagent writes; if the chosen `NNNN` already exists, bump to the next free number. **Never overwrite an existing ADR** — after writing, confirm no concurrent run took the same number.
@@ -158,7 +138,7 @@ A design topic is **decision-scoped** if it names a specific component, feature,
 **If product-scoped**: do not start the deep questioning yet. Instead:
 
 1. Tell the engineer: "This describes a full product — /architect works one decision at a time. Let me help you pick the first foundational decision."
-2. Generate 4 **foundational first-decision** options tailored to the product type and ask via `AskUserQuestion` (question: "Which foundational decision should we design first?", header: "First decision"). For most products these are the tech stack/architecture, the auth/identity approach, the core domain data model, and the single most important product-specific concern — worded for what the engineer described.
+2. Generate 4 **foundational first-decision** options tailored to the product type and present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none (question: "Which foundational decision should we design first?", header: "First decision"). For most products these are the tech stack/architecture, the auth/identity approach, the core domain data model, and the single most important product-specific concern — worded for what the engineer described.
 3. After the engineer selects: update the design topic to that specific decision and proceed to Framing.
 
 ---
@@ -177,7 +157,7 @@ State it: *"Reading this as a new **FEATURE** on your **Next.js + Supabase** sta
 
 ---
 
-### Deep questioning — feature-specific, technical (main model generates, then calls `AskUserQuestion`)
+### Deep questioning — feature-specific, technical (main model generates, then asks as above)
 
 **Generate the questions from the feature** — specific to whatever is being designed, never from a fixed list.
 
@@ -212,7 +192,7 @@ State it: *"Reading this as a new **FEATURE** on your **Next.js + Supabase** sta
 - **RECOMMEND** — expertise decides it (provider/library/pattern/architecture). The subagent makes the call and justifies it; do **not** ask.
 
 **Step C — Ask every ASK question, in as many batched rounds as it takes.** This is the heart of the skill — do not truncate to hit a number.
-- Group the ASK questions by dimension and present them via `AskUserQuestion`, **up to 4 per call**. Run **multiple rounds** until every un-inferable, decision-relevant question is answered. A non-trivial feature legitimately needs 2–4 rounds (e.g. round 1 scope & data, round 2 auth & rules, round 3 integrations & edge cases). Stop only when there is genuinely nothing left that the engineer alone can settle — not at an arbitrary cap.
+- Group the ASK questions by dimension and ask (as above), **up to 4 per call**. Run **multiple rounds** until every un-inferable, decision-relevant question is answered. A non-trivial feature legitimately needs 2–4 rounds (e.g. round 1 scope & data, round 2 auth & rules, round 3 integrations & edge cases). Stop only when there is genuinely nothing left that the engineer alone can settle — not at an arbitrary cap.
 - Quality bar per question: maps to a real, feature-specific decision (never a generic placeholder like "how complex is the data model?"); concrete options drawn from the actual choices, each with a one-line tradeoff; multi-select where answers aren't exclusive.
 - **Cite the basis on options that carry a recommendation.** Where an option is "the recommended way," append a short `(basis: …)` — a **project source** (`your AGENTS.md`, an ADR, an installed skill, the existing stack) or a **named practice** (`idempotency for money ops`). At question time you have no web tools, so **name the source/practice — never a URL**. The subagent web-verifies any links later, in the ADR.
 - Between rounds, briefly fold prior answers in ("Given org-scoped roles, the next questions are about invitation flow…") so the rounds feel like one coherent interview, not a form.
@@ -243,9 +223,9 @@ Wait for their answer. If (A): re-run the source-file count for that path. If (B
 
 ### Subagent spawn
 
-After the deep questioning, read `agent-prompt.md` and `adr-template.md` (relative paths — the main agent resolves them). Fill the template **and inline the full `adr-template.md` text into the prompt** — the subagent writes the ADR from that structure and can't resolve skill paths itself. Then spawn:
+After the deep questioning, read `agent-prompt.md` and `adr-template.md` (relative paths — the main agent resolves them). Fill the template **and inline the full `adr-template.md` text into the prompt** — the subagent writes the ADR from that structure and can't resolve skill paths itself. Then spawn a subagent:
 
-- `model: "sonnet"`
+- `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
 - `description: "Architect: <mode> — research and draft ADR"`
 - Tools: `Read`, `Bash`, `Write`, `Edit`, `WebSearch`, `WebFetch` — the web tools are for **verifying** citation links (the subagent must fetch-to-confirm before linking; see the sourcing rules in `agent-prompt.md`). If the client has no web tools, the subagent cites project sources + named practices only (no links) — that's fine.
 - `prompt`: filled template with all engineer answers, the inferred framing, and the injected ADR template

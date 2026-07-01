@@ -7,7 +7,7 @@ description: "Use this skill to write the human-facing prose about a change — 
 
 ## What this skill does
 
-Generates one of four document types from the real change history, on a cheap model (haiku) in a subagent:
+Generates one of four document types from the real change history, on a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents) in a subagent:
 
 | Type | Source | Audience | Output |
 |---|---|---|---|
@@ -29,17 +29,17 @@ PR text, `CHANGELOG.md`, `docs/releases/`, `docs/postmortems/` — owned by this
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` (and optionally `gh`) are the only CLIs, and behave the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `command -v`, or `node -e` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
 - **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them and passes the chosen template's text **into the subagent prompt** — subagents can't resolve skill-relative paths.
-- **No subagent / interactive-question support?** The drafting normally runs in a cheap-model subagent, and the doc-type pick uses an interactive picker (use whatever your agent provides — a subagent tool, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: write the document inline yourself following the template, and ask the doc-type question as plain text.
+- **No subagent / interactive-question support?** The drafting normally runs in a subagent on a fast, low-cost model, and the doc-type pick uses an interactive picker (use whatever your agent provides — a subagent, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: write the document inline yourself following the template, and ask the doc-type question as plain text.
 
 ## Execution
 
 ### 1. Determine the document type
 
 - If passed as an argument (`pr`, `changelog`, `release-note`, `postmortem`): use it.
-- Otherwise infer from context where obvious (on a feature branch ahead of base → `pr`; just tagged a version → `release-note`), then **confirm or ask** with one MCQ:
+- Otherwise infer from context where obvious (on a feature branch ahead of base → `pr`; just tagged a version → `release-note`), then **confirm or ask** with one question. Present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none:
 
 ```
-AskUserQuestion — "What should I write?"
+"What should I write?"
   header: "Doc type"
   options:
     - label: "PR description"        → pr
@@ -52,25 +52,27 @@ AskUserQuestion — "What should I write?"
 
 The main model collects lightweight history; the subagent reads the diff and files.
 
+Run these `git`/`gh` commands as shown; do the non-command steps with your agent's own file tools and your own branching logic.
+
 ```bash
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-CUR=$(git rev-parse --abbrev-ref HEAD)
+# base branch: use `main` if it exists, otherwise `master`
+git rev-parse --verify main
+# current branch
+git rev-parse --abbrev-ref HEAD
 
-# pr / changelog: the branch change set
-git log --oneline "$BASE..HEAD" 2>/dev/null | head -40
-git diff --name-only "$BASE...HEAD" 2>/dev/null
+# pr / changelog: the branch change set (BASE = the base branch above)
+git log --oneline "BASE..HEAD"
+git diff --name-only "BASE...HEAD"
 
-# release-note: needs tags. If none exist, fall back gracefully.
-git tag --sort=-creatordate 2>/dev/null | head -5 || echo "NO_TAGS"
-
-# context for the "why"
-find docs/adr -name "[0-9]*.md" 2>/dev/null | xargs ls -t 2>/dev/null | head -3   # paths only
-
-# pr only: is gh usable, is there a remote, does a PR already exist?
-command -v gh >/dev/null 2>&1 && echo "GH_INSTALLED"
-git remote >/dev/null 2>&1 && [ -n "$(git remote)" ] && echo "HAS_REMOTE"
-gh pr view --json number -q .number 2>/dev/null && echo "PR_EXISTS"   # prints the PR number if one exists
+# release-note: needs tags. List them; if there are none, fall back gracefully (treat as NO_TAGS).
+git tag --sort=-creatordate
 ```
+
+- **context for the "why"**: list the ADR files under `docs/adr/` (names starting with a digit) and take the 3 most recently modified — paths only — using your file/glob tools.
+- **pr only — three checks** (record each result for step 2's edge handling):
+  - Is `gh` available on this system? (GH_INSTALLED)
+  - Does the repo have a git remote? Run `git remote`; a non-empty result means HAS_REMOTE.
+  - Does a PR already exist? Run `gh pr view --json number -q .number`. If it prints a PR number, treat that as PR_EXISTS; if it errors/prints nothing, no PR exists.
 
 **Per-type edge handling the main model resolves before spawning:**
 - **release-note range**: if tags exist, the range is `<previous-tag>..<latest-tag>` (or a range the engineer named). **If `NO_TAGS`**, don't guess — ask: "No version tags found. Give me a version name and range (e.g. `v1.0.0`, covering `<commit>..HEAD`), or I'll cover all commits since the first one." Pass the resolved range/version to the subagent.
@@ -80,9 +82,9 @@ gh pr view --json number -q .number 2>/dev/null && echo "PR_EXISTS"   # prints t
 ### 3. Spawn the document subagent
 
 Read `agent-prompt.md` (lean) and the **one** template for the chosen type:
-`templates/<type>.md`. Fill and spawn:
+`templates/<type>.md`. Fill and spawn a subagent:
 
-- `model`: `"haiku"` for `pr`, `changelog`, `release-note` (drafting from real material is well-bounded). **`"sonnet"` for `postmortem`** — root-cause synthesis and contributing-factor analysis need stronger reasoning than a cheap model gives.
+- `model`: a fast, low-cost model for `pr`, `changelog`, `release-note` (drafting from real material is well-bounded). **A strong model (e.g. `sonnet` on Claude Code) for `postmortem`** — root-cause synthesis and contributing-factor analysis need stronger reasoning than a cheap model gives.
 - `description: "Document: <type>"`
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write`, `Edit` (Edit for appending to `CHANGELOG.md`; Bash for `gh` only when the engineer opts to create/update a PR)
 - `prompt`: filled template with:

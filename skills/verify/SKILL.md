@@ -40,7 +40,7 @@ Written for any Agent Skills client on macOS, Linux, or Windows. Run/launch snip
 ### Step 0a — Refactor mode: before/after diff (spawn a subagent)
 
 Only in refactor mode. Because it drives the app twice and holds two output sets, **run it in a subagent** (keeps the main context clean):
-- `model: "sonnet"` · `description: "Verify: before/after diff — <scope>"` · Tools: `Read`, `Bash`, `Grep`, `Glob` (+ browser/HTTP driving)
+- `model`: a strong model (e.g. `sonnet` on Claude Code) · `description: "Verify: before/after diff — <scope>"` · Tools: `Read`, `Bash`, `Grep`, `Glob` (+ browser/HTTP driving)
 - Its job:
   1. Identify the **affected surfaces** from the diff — the endpoints, queries, or pages the refactor touches (e.g. `getAllCourses`, `getCourseBySlug`, the KB list). Pick representative ones per changed area.
   2. **Capture BEFORE** — from the pre-change state: `git stash` the working change (or check out `$BASE` in a worktree), start the app, hit each surface, and save the raw responses/rendered output. Then **restore** the change (`git stash pop` / return to the branch).
@@ -50,11 +50,7 @@ Only in refactor mode. Because it drives the app twice and holds two output sets
 
 ### Step 1 — Scope the observable behaviors *(feature mode)*
 
-```bash
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-git diff --name-status "$BASE"...HEAD 2>/dev/null
-git diff --name-status 2>/dev/null           # uncommitted too
-```
+Pick the base branch `BASE`: `git rev-parse --verify main` — if it succeeds use `main`, otherwise `master`. Then list changed files with `git diff --name-status "$BASE"...HEAD` and `git diff --name-status` (uncommitted too).
 
 From the changed files, write the **2–5 concrete things a human could watch** to know the change works — e.g. "the /pricing page renders all three tiers and the CTA opens checkout", "POST /invites returns 201 and emails the invitee", "the export CLI writes a non-empty CSV". If a feature roadmap exists (in `docs/mvp/`), use the relevant feature's acceptance criteria / sub-tasks to anchor these. Keep them observable, not internal.
 

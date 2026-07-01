@@ -105,8 +105,8 @@ Written for any Agent Skills client on macOS, Linux, or Windows. Bundled files (
 
 ### Spawning
 
-Spawn an Agent with:
-- `model: "haiku"`
+Spawn a subagent with:
+- `model`: a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents)
 - `description: "Triage: recommend tier, playbook, severity"`
 - `prompt`: the filled template from `agent-prompt.md`
 - No tools (all context is injected; haiku must not read files or browse)
@@ -117,7 +117,7 @@ Haiku signals it needs clarification by outputting a JSON object with `"type": "
 
 1. Check if the haiku output is valid JSON containing `"type": "TRIAGE_QUESTIONS"`. If it is, treat it as a questions block and parse the `questions` array — each entry has a `question`, `header`, and three `options` (label + description).
 2. **If the output is not valid JSON, cannot be parsed, or lacks `"type": "TRIAGE_QUESTIONS"`**: fall back to asking the questions as plain numbered text in chat. Collect the engineer's text answers and continue to step 4.
-3. Call `AskUserQuestion` with those questions and options exactly as structured. Do not rewrite them. The tool automatically appends "Other" as a free-text fourth option.
+3. Present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none, with those questions and options exactly as structured. Do not rewrite them. The picker automatically appends "Other" as a free-text fourth option.
 4. Collect the user's answers from the tool result.
 5. Re-spawn the haiku agent using the same filled template, appending the answers under a `CLARIFICATIONS` section at the bottom.
 6. Relay the final recommendation verbatim.

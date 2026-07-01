@@ -13,7 +13,7 @@ Closes the loop on a change by syncing the durable knowledge to reality:
 2. **Creates a nested AGENTS.md for a brand-new area** introduced by the change — because the diff *is* the whole area, so it has enough context to write an accurate one. It adds the one root pointer line too.
 3. **Flags stale ADRs** — decisions the change may have contradicted or outgrown — and recommends running /architect to update or supersede them. It does not edit ADRs.
 
-Runs on a cheap model (haiku) in a subagent. Acts — no upfront questions.
+Runs on a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents) in a subagent. Acts — no upfront questions.
 
 **Canonical file:** durable context lives in the tool-agnostic **`AGENTS.md`** (read by every agent); **`CLAUDE.md` is only a pointer** that imports its sibling AGENTS.md via Claude Code's `@AGENTS.md` directive (Claude auto-loads it; other tools read AGENTS.md directly). /sync edits `AGENTS.md` for content and never writes content into `CLAUDE.md`. When it creates a nested `AGENTS.md`, it also creates the sibling `CLAUDE.md` pointer (body: a line of context plus `@AGENTS.md`). It treats `CLAUDE.md` pointers and `AGENTS.md` files only as targets, never as a change source.
 
@@ -49,7 +49,7 @@ Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** n
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `ls`, or `xargs` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
 - **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them. Anything a subagent needs is passed **into its prompt as text** — subagents can't resolve skill-relative paths.
-- **No subagent support?** The maintenance normally runs in a cheap-model subagent. On a tool without one, do the AGENTS.md updates and ADR-staleness checks inline yourself — same conservative rules.
+- **No subagent support?** The maintenance normally runs in a subagent on a fast, low-cost model. On a tool without one, do the AGENTS.md updates and ADR-staleness checks inline yourself — same conservative rules.
 
 ## Execution
 
@@ -59,20 +59,12 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 Use `--name-status` (not `--name-only`) so the subagent can tell **A**dded from **M**odified from **D**eleted — the net-new-area and orphan-cleanup logic both depend on it.
 
-```bash
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-CUR=$(git rev-parse --abbrev-ref HEAD)
-if [ "$CUR" = "$BASE" ]; then
-  echo "MODE=uncommitted BASE=$BASE"
-  git diff --name-status HEAD 2>/dev/null
-  git ls-files --others --exclude-standard 2>/dev/null | sed 's/^/A\t/'   # untracked = added
-else
-  MB=$(git merge-base "$BASE" HEAD)
-  echo "MODE=branch BASE=$BASE MERGE_BASE=$MB"
-  git diff --name-status "$MB" 2>/dev/null
-  git ls-files --others --exclude-standard 2>/dev/null | sed 's/^/A\t/'
-fi
-```
+Pick the base branch: use `main` if `git rev-parse --verify main` succeeds, otherwise `master`. Read the current branch with `git rev-parse --abbrev-ref HEAD`.
+
+- **If the current branch *is* the base** (mode `uncommitted`): get the changed files with `git diff --name-status HEAD`, then list untracked files with `git ls-files --others --exclude-standard` and treat each as **A**dded (prefix them with an `A` status, matching the `--name-status` format).
+- **Otherwise** (mode `branch`): compute the merge base with `git merge-base "$BASE" HEAD`, get the changed files with `git diff --name-status <merge-base>`, then list untracked files with `git ls-files --others --exclude-standard` and treat each as **A**dded, as above.
+
+Note the mode, base, and merge base for the subagent.
 
 De-duplicate. Then **filter the list to source files** the subagent should sync *from*:
 - **Drop documentation and config**: `AGENTS.md` (any level), `docs/**` (ADRs, reviews, etc.), `*.md`, `test-preferences.json`, lock files, generated output. /sync reads these as *targets/context*, never as the source of a change to record — syncing a doc from a doc is noise.
@@ -83,25 +75,24 @@ De-duplicate. Then **filter the list to source files** the subagent should sync 
 
 ### 2. Locate the context files and ADRs (paths only — do NOT read them here)
 
-```bash
-[ -f AGENTS.md ] && echo "root: AGENTS.md"
-find . -name AGENTS.md -not -path './node_modules/*' -not -path './.git/*' 2>/dev/null   # root + nested
-find docs/adr -name "[0-9]*.md" 2>/dev/null | sort                                        # all ADRs
-find docs/mvp -name "*.md" 2>/dev/null                                             # feature roadmap(s) — incl. per-workspace subdirs in a monorepo (docs/mvp/<workspace>/)
-```
+Using your agent's file-search/glob tools:
+- Note whether a root `AGENTS.md` exists.
+- Find every `AGENTS.md` (root + nested), excluding `node_modules/` and `.git/`.
+- Find all ADRs under `docs/adr/` whose names start with a digit, sorted.
+- Find the feature roadmap file(s) under `docs/mvp/` — including per-workspace subdirs in a monorepo (`docs/mvp/<workspace>/`).
 
 The subagent reads these itself. The main model passes the **paths** (plus the changed-file list and diff command). The one inline exception is root AGENTS.md contents — short and useful for the subagent to anchor on.
 
 For each changed file, note its nearest enclosing directory that has a `AGENTS.md` (root or nested) — that's the context file most likely to need an update.
 
-### 3. Spawn the sync subagent
+### 3. Spawn the subagent
 
-Read `agent-prompt.md`, fill it, then spawn:
+Read `agent-prompt.md`, fill it, then spawn a subagent with:
 
-- `model: "haiku"`  (cheap — this is bounded maintenance, not open-ended reasoning)
-- `description: "Sync: update AGENTS.md + flag stale ADRs"`
+- Model: a fast, low-cost model (cheap — this is bounded maintenance, not open-ended reasoning)
+- Description: "Sync: update AGENTS.md + flag stale ADRs"
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write` — `Edit` for maintaining existing docs; `Write` strictly for a **net-new-area** nested AGENTS.md. The "no root creation / no ADR edits / no shallow nested docs for established areas" boundaries are rule-based (in the agent prompt), since the tool grant alone can't express them.
-- `prompt`: filled template with:
+- Prompt: filled template with:
   1. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, the **name-status** changed-source list + exact `git diff` command
   2. The separate **deleted-paths** list (for orphan cleanup)
   3. Root AGENTS.md contents (inline) + the list of nested AGENTS.md paths

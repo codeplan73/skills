@@ -85,10 +85,7 @@ The project is new — no source files yet. Your job: create a root AGENTS.md th
 
 **Step 1 — Minimal discovery**
 
-```bash
-find . -maxdepth 2 -not -path '*/.git/*' | sort
-find docs/adr -name "[0-9]*.md" 2>/dev/null | sort   # did /architect already choose the stack?
-```
+Using your file tools, list the top couple of levels of the project (excluding `.git`), and check `docs/adr/` for numbered ADR files (`NNNN-*.md`) — did /architect already choose the stack?
 
 Read `package.json` / `pyproject.toml` / `go.mod` if present — note language and package manager. **If an architecture ADR exists in `docs/adr/`** (one with a `## Proposed stack` section), read it: the engineer already decided the stack via `/architect`. Use it to populate `## Stack` — do not leave placeholders or contradict it. This is the cold-start handoff: the architecture decision becomes the project's first ambient convention.
 
@@ -102,10 +99,7 @@ For `## Rules`: use the SELECTED_PATTERNS content injected above as the basis. I
 
 **Step 2b — Per-workspace nested AGENTS.md (monorepo only)**
 
-If `MONOREPO_OR_NO` is `yes`, then for **each** workspace listed (`apps/*`, `packages/*`):
-```bash
-cat <workspace>/package.json 2>/dev/null   # (or its manifest) — read its stack, deps, scripts
-```
+If `MONOREPO_OR_NO` is `yes`, then for **each** workspace listed (`apps/*`, `packages/*`), read its `<workspace>/package.json` (or its manifest) with your file tools — its stack, deps, and scripts.
 Even though no features are built yet, the scaffold declares the workspace's **stack and commands** — capture them so `/architect` and `/develop` can read that workspace's stack from *its* doc (they won't look in root). Write `<workspace>/AGENTS.md` using the nested template: `## Stack` from its manifest, `## Commands` from its scripts (scoped — e.g. `pnpm --filter <name> dev`), and inherit the root's `## Rules` by reference. Create the sibling `<workspace>/CLAUDE.md` pointer, and add a pointer line for each under root's `## Context files`. Skip a workspace that's an empty placeholder with no manifest.
 
 **Step 3 — Report** (use the report format at the bottom of this file). List every per-workspace doc created.
@@ -118,17 +112,14 @@ A codebase exists but no AGENTS.md. Your job: explore enough to write an accurat
 
 **Step 1 — Discover**
 
-```bash
-find . -maxdepth 3 -not -path '*/.git/*' -not -path '*/node_modules/*' \
-  -not -path '*/.next/*' -not -path '*/dist/*' -not -path '*/build/*' | sort
-```
+Using your file tools, list the project tree a few levels deep, skipping vendored/generated dirs (`.git`, `node_modules`, `.next`, `dist`, `build`).
 
 Then read whichever exist:
 - `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` — stack and deps
 - `.github/workflows/` — CI and deploy patterns
 - Main entry point (`src/index.*`, `main.*`, `app.*`, `server.*`)
 - Test config (`jest.config.*`, `pytest.ini`, `vitest.config.*`)
-- Any existing `AGENTS.md` files: `find . -name "AGENTS.md" -not -path '*/.git/*'`
+- Any existing `AGENTS.md` files — using your file tools, find all `AGENTS.md` (excluding `.git`).
   - If nested AGENTS.md files are found (i.e. not the root): collect their paths. Add a pointer line for each under `## Context files` when writing root AGENTS.md. Format: `- [<path>](<path>) — <one-line description inferred from the file's ## Overview section>`.
 
 **Step 2 — Extract durable knowledge**
@@ -167,9 +158,7 @@ Root AGENTS.md exists. A specific area needs study. Your job: (1) check if root 
 
 **Step 1 — Explore the area**
 
-```bash
-find SCOPE_OR_AREA -type f | sort
-```
+Using your file tools, list all files under `SCOPE_OR_AREA`.
 
 Read:
 - Key source files (entry points, main modules — not every file, use judgement)
@@ -227,10 +216,7 @@ The existing root AGENTS.md is injected above. Read every nested AGENTS.md (path
 
 **Step 2 — Scan the codebase**
 
-```bash
-find . -maxdepth 3 -not -path '*/.git/*' -not -path '*/node_modules/*' \
-  -not -path '*/.next/*' -not -path '*/dist/*' -not -path '*/build/*' | sort
-```
+Using your file tools, list the project tree a few levels deep, skipping vendored/generated dirs (`.git`, `node_modules`, `.next`, `dist`, `build`).
 Read the manifest(s), CI config, entry points, and a sample of each major area. Build a picture of the real stack, commands, conventions, and the major areas.
 
 **Step 3 — Find four kinds of finding**

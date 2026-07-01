@@ -40,18 +40,12 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 Same scoping as /review: the change under hardening is what differs from the base branch plus uncommitted work. Gather **names and the base ref only**; the subagent reads the diff and files.
 
-```bash
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-CUR=$(git rev-parse --abbrev-ref HEAD)
-if [ "$CUR" = "$BASE" ]; then
-  echo "MODE=uncommitted BASE=$BASE"
-  git diff --name-only HEAD 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null
-else
-  MB=$(git merge-base "$BASE" HEAD)
-  echo "MODE=branch BASE=$BASE MERGE_BASE=$MB"
-  git diff --name-only "$MB" 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null
-fi
-```
+Pick the base branch: use `main` if `git rev-parse --verify main` succeeds, otherwise `master`. Read the current branch with `git rev-parse --abbrev-ref HEAD`.
+
+- **If the current branch *is* the base** (mode `uncommitted`): gather changed names with `git diff --name-only HEAD` plus the untracked files from `git ls-files --others --exclude-standard`.
+- **Otherwise** (mode `branch`): compute the merge base with `git merge-base "$BASE" HEAD`, then gather changed names with `git diff --name-only <merge-base>` plus the untracked files from `git ls-files --others --exclude-standard`.
+
+Note the mode, base, and merge base for the subagent.
 
 De-duplicate; drop lock/generated files from the count. **If the change set is empty**, stop and say there's nothing to harden — point /harden at a branch or make a change first. Do not spawn.
 
@@ -66,14 +60,14 @@ Test signal — three states, not a yes/no:
 
 Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical — or `CLAUDE.md` as fallback; short), the recent ADR **paths**, the latest review **path**, the diff scope, and the test signal.
 
-### 3. Spawn the hardening subagent
+### 3. Spawn the subagent
 
-Read two bundled files from this skill's folder (relative paths — you, the main agent, can resolve them): `agent-prompt.md` (the spawn template) and `harden-guide.md` (the threat rubric). Fill the template **and inline the full `harden-guide.md` text into it** — the subagent can't resolve skill paths, so it must receive the rubric as prompt text. Then spawn:
+Read two bundled files from this skill's folder (relative paths — you, the main agent, can resolve them): `agent-prompt.md` (the spawn template) and `harden-guide.md` (the threat rubric). Fill the template **and inline the full `harden-guide.md` text into it** — the subagent can't resolve skill paths, so it must receive the rubric as prompt text. Then spawn a subagent with:
 
-- `model: "sonnet"`  (override to `opus` only if triage marked the change `critical` — deeper reasoning for high blast radius)
-- `description: "Harden: <N> changed files"`
+- Model: a strong model (e.g. `sonnet`, or `opus` for critical work, on Claude Code) — use the stronger option only if triage marked the change `critical` (deeper reasoning for high blast radius)
+- Description: "Harden: <N> changed files"
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write` — **no `Edit`** by default (it produces a checklist, not edits). If the engineer later approves a specific fix, re-spawn with `Edit` for that one item.
-- `prompt`: filled template with:
+- Prompt: filled template with:
   1. The full `harden-guide.md` content (injected, not referenced)
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, changed-file list + the exact `git diff` command
   3. Project-context contents (inline) — `AGENTS.md`, or `CLAUDE.md` fallback

@@ -42,21 +42,14 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 This is the whole point of the skill, so get it right. **Do not rely on self-introspection** — the model executing this skill cannot reliably name itself, and the "You are powered by…" line in the system prompt is written at session start and goes **stale** the moment the user switches with `/model`. Detect from durable config instead, then confirm.
 
-**1a — Detect the author model (best effort).** The author model is whatever is generating code in this session. Gather hints cheaply:
-
-```bash
-echo "ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-unset}"
-for f in .claude/settings.local.json .claude/settings.json "$HOME/.claude/settings.json"; do
-  [ -f "$f" ] && grep -o '"model"[[:space:]]*:[[:space:]]*"[^"]*"' "$f" | sed "s|^|$f: |"
-done
-```
+**1a — Detect the author model (best effort).** The author model is whatever is generating code in this session. Gather hints cheaply: using your file tools, read `ANTHROPIC_MODEL` from the env if set, and check `.claude/settings.local.json`, `.claude/settings.json`, and the user-level `.claude/settings.json` in the home directory for a `"model"` value.
 
 Map any detected id to a family: `claude-opus-*` → `opus`, `claude-sonnet-*` → `sonnet`, `claude-haiku-*` → `haiku`, `claude-fable-*` → `fable`. Use the system-prompt value only as a last-resort weak hint, and treat it as possibly stale.
 
-**1b — Confirm the author model (one question — this guard is worth it).** A wrong guess here silently reviews code with the same model and defeats the skill, so confirm before spawning. Pre-select the detected family as the recommended option:
+**1b — Confirm the author model (one question — this guard is worth it).** A wrong guess here silently reviews code with the same model and defeats the skill, so confirm before spawning. Pre-select the detected family as the recommended option. Present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none:
 
 ```
-AskUserQuestion — "Which model wrote this code? I'll review on a different one."
+"Which model wrote this code? I'll review on a different one."
   header: "Author model"
   options:
     - label: "<detected> (detected — recommended)"   # e.g. "opus (detected — recommended)"
@@ -69,7 +62,7 @@ AskUserQuestion — "Which model wrote this code? I'll review on a different one
 
 If detection was unambiguous **and** the user passed an explicit `with <model>` reviewer override, you may skip this question and proceed — the override already settles which model reviews. Otherwise ask.
 
-**1c — Map to the contrasting Claude reviewer.** No API keys, no external setup — the `Agent` tool spawns a different Claude model and that model does the review:
+**1c — Map to the contrasting Claude reviewer.** No API keys, no external setup — a subagent spawns a different-model reviewer and that model does the review:
 
 | Author model | Reviewer model to spawn |
 |---|---|
@@ -93,24 +86,11 @@ State the final choice plainly before spawning:
 
 Keep the main context lean: gather **file names and the base ref only**. The subagent runs the actual `git diff` and reads files.
 
-```bash
-# Base branch
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-CUR=$(git rev-parse --abbrev-ref HEAD)
-
-if [ "$CUR" = "$BASE" ]; then
-  # Working directly on the base branch — review uncommitted work
-  echo "MODE=uncommitted BASE=$BASE"
-  git diff --name-only HEAD 2>/dev/null
-  git ls-files --others --exclude-standard 2>/dev/null
-else
-  # Feature branch — review everything that differs from the base (the PR-equivalent)
-  MB=$(git merge-base "$BASE" HEAD)
-  echo "MODE=branch BASE=$BASE MERGE_BASE=$MB"
-  git diff --name-only "$MB" 2>/dev/null            # committed-since-branch + uncommitted
-  git ls-files --others --exclude-standard 2>/dev/null
-fi
-```
+Determine the base branch and current branch, then choose a mode (apply the branching logic yourself — don't rely on shell `if`/variables):
+- Base branch `BASE`: `git rev-parse --verify main` — if it succeeds use `main`, otherwise `master`.
+- Current branch `CUR`: `git rev-parse --abbrev-ref HEAD`.
+- **If `CUR` equals `BASE`** (working directly on the base branch) → `MODE=uncommitted`. Gather changed names with `git diff --name-only HEAD` plus untracked files via `git ls-files --others --exclude-standard`.
+- **Otherwise** (feature branch — review everything that differs from the base, the PR-equivalent) → `MODE=branch`. Resolve the merge base with `git merge-base "$BASE" HEAD`, then gather names with `git diff --name-only <merge-base>` (committed-since-branch + uncommitted) plus untracked files via `git ls-files --others --exclude-standard`.
 
 If the user passed `uncommitted`, force `MODE=uncommitted` regardless of branch.
 

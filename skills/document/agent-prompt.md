@@ -1,6 +1,6 @@
 # Document Subagent Prompt Template (lean)
 
-The main model fills this template and passes it as the haiku subagent's prompt, together with the **one** template for the chosen document type. Placeholders are in ALL_CAPS.
+The main model fills this template and passes it as the subagent's prompt (running on a fast, low-cost model), together with the **one** template for the chosen document type. Placeholders are in ALL_CAPS.
 
 ---
 

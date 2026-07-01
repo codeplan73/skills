@@ -20,7 +20,7 @@ It does one decomposition pass and hands you a detailed, checkable plan. Walking
 
 **Senior product engineer role.** You are scoping a product you'll be judged on shipping — be thorough across *all* dimensions, not just the fun ones. Same **infer / ask / recommend** discipline as /architect:
 - **INFER** what the idea already tells you (product category, obvious capabilities) — don't ask it.
-- **ASK** the un-inferable across business, product, and go-to-market — in as many batched rounds as needed (up to 4 questions per `AskUserQuestion` call).
+- **ASK** the un-inferable across business, product, and go-to-market — in as many batched rounds as needed (up to 4 questions per round; present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none).
 - **RECOMMEND** the build order, the per-feature sub-task breakdown, and which features need an ADR — those are expert calls; present them, don't make the engineer sequence their own backlog.
 
 ## Artifact ownership
@@ -55,12 +55,10 @@ Wait for the answer. Use it as the product idea.
 
 ### Step 1 — Greenfield or brownfield?
 
-```bash
-find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" \
-  -o -name "*.go" -o -name "*.rs" \) -not -path '*/node_modules/*' -not -path '*/.git/*' | head -1
-[ -f AGENTS.md ] && echo "has root AGENTS.md"
-ls docs/mvp/*.md 2>/dev/null | sort        # existing roadmap files — note the HIGHEST number
-```
+Using your agent's own file-search tools, detect the following (skip anything under `node_modules/` and `.git/`):
+- **Any source files** — look for at least one `.ts`, `.tsx`, `.js`, `.py`, `.go`, or `.rs` file. Presence of source ⇒ brownfield; none ⇒ greenfield.
+- **A root `AGENTS.md`** — note whether it exists.
+- **Existing roadmap files** — list the Markdown files under `docs/mvp/` and note the HIGHEST existing number.
 
 - **Greenfield**: decompose the whole MVP from scratch. Sequence the roadmap so the **foundations come first, gradually**: (1) **coding guidelines & principles** — run `/audit` (greenfield) to capture the engineer's standards/conventions into root `AGENTS.md`; (2) the **stack** decision (`/architect` → ARCHITECTURE ADR); (3) the **design system / UI foundation** if the product has meaningful UI; then (4) data model, auth, and the rest. Don't jump to feature pages before these exist — every later feature builds on them. Surface this ordering in the Build order and the first foundation feature(s).
 - **Brownfield**: read root `AGENTS.md` (and every `ls`-ed roadmap file under `docs/mvp/`) so you plan the *next* slice on top of what's already there. Two things to do:
@@ -84,7 +82,7 @@ ls docs/mvp/*.md 2>/dev/null | sort        # existing roadmap files — note the
 - **Each feature's `Code area` points into its workspace** (`apps/web/...`). Foundations are per-workspace, **except** genuinely shared ones (the monorepo tooling, a shared UI package) which live in `_root` and the apps depend on.
 - **A feature spanning workspaces** (e.g. an endpoint in `api` + a page in `web`) → plan it in `_root` with sub-tasks tagged by workspace, or split into coordinated per-workspace features. Don't bury cross-app work in one app's roadmap.
 
-### Step 2 — Round 1: product & business (generate, then `AskUserQuestion`)
+### Step 2 — Round 1: product & business (generate, then ask as above)
 
 Generate questions tailored to *this* idea; infer and skip what's stated. Cover:
 - **MVP boundary** — the smallest version that delivers the core value (the most important question; everything hangs off it).
@@ -93,11 +91,11 @@ Generate questions tailored to *this* idea; infer and skip what's stated. Cover:
 - **Success metric** — what "working" looks like (signups, activation, revenue) — informs analytics features.
 - **Hard constraints** — deadline, budget, team size, compliance scope.
 
-### Step 3 — Round 2: capabilities (generate, then `AskUserQuestion`)
+### Step 3 — Round 2: capabilities (generate, then ask as above)
 
 Multi-select of the cross-cutting capabilities the product plausibly needs, tailored to its type — e.g. authentication, multi-tenant orgs, payments/billing, email/notifications, file/media upload, search, realtime, admin panel, public API. Confirm which are in scope for *this* slice vs deferred. Each selected capability becomes one or more features.
 
-### Step 4 — Round 3: cross-cutting & go-to-market (generate, then `AskUserQuestion`)
+### Step 4 — Round 3: cross-cutting & go-to-market (generate, then ask as above)
 
 These are routinely forgotten and belong in the plan from day one. Ask which apply:
 - **SEO** — public/marketing pages, metadata, sitemap, structured data, OG/social cards, SSR/SSG needs (skip for purely internal/auth-walled apps).
@@ -250,7 +248,7 @@ On a brownfield merge: append new features/sub-tasks; leave existing rows and ch
 ### Step 6b — Ground the recommendations (sourcing subagent)
 
 After writing the roadmap, spawn a **sourcing subagent** to add verified references — a real subagent is used here so links are *fetched-and-confirmed*, not fabricated by the main model:
-- `model: "haiku"` · `description: "MVP: source & reference the roadmap"`
+- `model`: a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents) · `description: "MVP: source & reference the roadmap"`
 - Tools: `Read`, `Edit`, `WebSearch`, `WebFetch`
 - `prompt`: give it the roadmap file path and its recommendations. Its job: for the load-bearing recommendations, confirm each `(basis: …)` is sound, and where a **canonical source is worth linking** (an official doc, a named standard/practice), **web-search + fetch to confirm it exists and says what's claimed**, then add a **`## References`** section at the end of the roadmap — *Project sources* (verifiable), *Practices & standards* (named), *Links* (web-verified only, else "none verified"). **Never invent a URL; an unverified link must not appear.** Keep it lean — the few load-bearing sources, not every line.
 - If the client has no web tools/subagents, do this inline with named practices + project sources only (no links) — that's an acceptable degrade.

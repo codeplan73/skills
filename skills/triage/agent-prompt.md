@@ -1,6 +1,6 @@
 # Triage Subagent Prompt Template
 
-The main model fills this template and passes it verbatim as the haiku agent's prompt.
+The main model fills this template and passes it verbatim as the prompt for a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents) run as a subagent.
 Placeholders are in ALL_CAPS.
 
 ---

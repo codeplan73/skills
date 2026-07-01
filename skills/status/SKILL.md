@@ -35,14 +35,13 @@ None. Chat output only.
 
 ### Step 1 — Git state
 
-```bash
-git rev-parse --abbrev-ref HEAD                      # current branch
-git status --short                                   # uncommitted + staged + untracked
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-git fetch --quiet 2>/dev/null                        # refresh remote view (skip if offline)
-git rev-list --left-right --count origin/$BASE...HEAD 2>/dev/null   # behind <tab> ahead
-git log --oneline -8                                 # recent history
-```
+Using `git` (portable on every OS), gather:
+- **Current branch** — `git rev-parse --abbrev-ref HEAD`
+- **Uncommitted + staged + untracked** — `git status --short`
+- **Base branch** — use `main` if `git rev-parse --verify main` succeeds, otherwise `master`
+- **Refresh the remote view** — `git fetch` quietly (skip if offline)
+- **Behind / ahead of the remote** — `git rev-list --left-right --count origin/<base>...HEAD`
+- **Recent history** — `git log --oneline -8`
 
 Note: behind > 0 → **you're not up to date**; uncommitted entries → **work in progress**; ahead > 0 → **unpushed commits**.
 

@@ -48,16 +48,14 @@ If a project exists (even a bare scaffold), proceed.
 
 Before mutating anything, a quick safety pass (skip silently if it's a solo, offline, or non-git context):
 
-```bash
-git fetch --quiet 2>/dev/null
-git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
-git rev-list --count HEAD..origin/$BASE 2>/dev/null   # commits you're BEHIND
-git status --short                                     # uncommitted work
-```
+- `git fetch` quietly to update remote refs.
+- Determine the base branch with `git` (`main` if it exists, else `master`).
+- With `git`, count the commits you're BEHIND the remote base (`git rev-list --count HEAD..origin/<base>`).
+- With `git`, check for uncommitted work (`git status --short`).
 
 - **Behind the remote** (count > 0) → **stop and warn**: "You're N commits behind `origin/$BASE` — a teammate may have already changed or shipped this. Pull first, then re-run." Don't build on stale code.
 - **Uncommitted work in the area you're about to touch** → warn: "You have uncommitted changes here — commit or stash first so this build doesn't tangle with them." Let them proceed if they insist.
-- **Feature already `in-progress` by someone else** → if the roadmap marks this feature `in-progress` AND its `Code area` has **recent commits by another author** (`git log --format='%an' -- <area> | head` shows names other than yours), warn: "*<feature>* looks like it's mid-build by someone else — coordinate before continuing it." Confirm before proceeding.
+- **Feature already `in-progress` by someone else** → if the roadmap marks this feature `in-progress` AND its `Code area` has **recent commits by another author** (use `git log --format='%an' -- <area>` and check whether the recent author names include anyone other than you), warn: "*<feature>* looks like it's mid-build by someone else — coordinate before continuing it." Confirm before proceeding.
 
 These are warnings, not hard blocks (the engineer may have a reason) — but surface them; silent stale/duplicate builds are the worst team foot-gun.
 
@@ -86,7 +84,7 @@ Do **not** hardcode this to a list of page names or features — apply the *inve
 2. **Open the governing ADR via the row's `ADR` pointer — read only that file** (plus its umbrella `index.md` if it's a nested child). It's the spec; proceed. Only if the row has **no** pointer *and* no ADR is linked, do a **targeted** look for one matching this feature's scope in its `docs/adr/<workspace>/` — never a blanket read of every ADR.
 3. Check whether the decision is already captured in the **nearest** `AGENTS.md` (the workspace/area one — synced from an earlier feature, e.g. "auth uses Clerk"). If so, proceed without a new ADR.
 
-**If a decision is owed and nothing records it — do not guess, and do not silently stop. Ask the engineer** via `AskUserQuestion` (single-select):
+**If a decision is owed and nothing records it — do not guess, and do not silently stop. Ask the engineer** — present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none (single-select):
 
 - **question**: "This looks like it needs an architecture decision first — `<name the specific load-bearing choice, e.g. 'which auth provider + session model'>`. How do you want to handle it?"
 - **header**: "ADR first?"
@@ -130,7 +128,7 @@ Before building, read:
 
 This step is why `/develop auth functionality` doesn't re-ask the stack chosen during `/develop auth pages`: `/architect` decided it, `/sync` wrote it into `AGENTS.md`, and you read it here.
 
-**Spec-completeness check (before building, not mid-build).** Confirm the ADR actually contains what you need to build *this* task — for logical work: data model, API surface, security model, key invariants; for UI work: the screens and their states/requirements. If a load-bearing section you need is **missing or left as a placeholder**, do not guess your way through it. Ask via `AskUserQuestion`:
+**Spec-completeness check (before building, not mid-build).** Confirm the ADR actually contains what you need to build *this* task — for logical work: data model, API surface, security model, key invariants; for UI work: the screens and their states/requirements. If a load-bearing section you need is **missing or left as a placeholder**, do not guess your way through it. Ask (as above):
 - **question**: "The ADR for this is missing `<section>` — I need it to build correctly. How do you want to proceed?"
 - **header**: "ADR gap"
 - **options**: `Update the ADR first` (recommended — end with a paste-ready `/architect <feature> — fill in <section>` handoff) · `Tell me the answer now` (engineer supplies it inline; proceed, and note it should be backfilled into the ADR) · `Use your best judgment` (proceed on a stated assumption, surfaced in the report for review).
@@ -154,7 +152,7 @@ Then build the track(s):
 - **UI track** → follow `ui-guide.md` **inline** (interactive/visual: component-or-screen → stack/styling/dark-mode detection → asset resolution → tokens → font → the five phases → accessibility). Keep it on the main thread so design/asset questions stay responsive.
 
 - **Logical track — normal build** → build **inline**, following `logical-guide.md` (ground in the ADR → data layer → core logic → interface → integration → correctness pass). Interactive and simplest.
-- **Logical track — very large single build** → *optionally* isolate it in **one subagent** (`model: "sonnet"`, tools `Read, Bash, Write, Edit, Grep, Glob`) to keep the main context lean. **Give it a *slim* brief** — the `logical-guide.md` text, the **relevant sections** of the ADR (not the whole doc if it's an umbrella), the **nearest** `AGENTS.md`, the collected answers, and the exact sub-tasks. Inlining every doc in full is a top token sink; inline only what *this* build needs.
+- **Logical track — very large single build** → *optionally* isolate it in **one subagent** (a strong model (e.g. `sonnet`/`opus` on Claude Code), tools `Read, Bash, Write, Edit, Grep, Glob`) to keep the main context lean. **Give it a *slim* brief** — the `logical-guide.md` text, the **relevant sections** of the ADR (not the whole doc if it's an umbrella), the **nearest** `AGENTS.md`, the collected answers, and the exact sub-tasks. Inlining every doc in full is a top token sink; inline only what *this* build needs.
 
 - **Logical track — big rollout** → do it in two stages:
   1. **Primitive first, serially** — one subagent builds the shared thing the rollout depends on (the helper/module/schema) and confirms it typechecks.

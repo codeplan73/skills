@@ -81,10 +81,10 @@ Record the class next to each file path — it goes into the subagent prompt.
 
 `E2E_RELEVANT = yes` if any file is **page/flow**; otherwise `no`.
 
-**Large diff guard.** If the scope has **more than 15** source files, do not dump them all into one subagent. Prioritise by class (logic and api/server first — they carry the most risk and are cheapest to test well), and ask:
+**Large diff guard.** If the scope has **more than 15** source files, do not dump them all into one subagent. Prioritise by class (logic and api/server first — they carry the most risk and are cheapest to test well), and ask. Present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none:
 
 ```
-AskUserQuestion — "<N> changed files is a lot for one pass. How should I focus?"
+Ask — "<N> changed files is a lot for one pass. How should I focus?"
   header: "Scope size"
   options:
     - label: "Logic & API first (recommended)"
@@ -111,10 +111,10 @@ Read `test-preferences.json` at the project root (use your file tool; treat "not
 
 #### 3. No uncommitted changes
 
-If Step 1 produced an empty scope, do not ask the framework questions. Tell the engineer and offer fallbacks:
+If Step 1 produced an empty scope, do not ask the framework questions. Tell the engineer and offer fallbacks (ask as above):
 
 ```
-AskUserQuestion — "No uncommitted source changes found. What should I test?"
+Ask — "No uncommitted source changes found. What should I test?"
   header: "No changes"
   options:
     - label: "The last commit"
@@ -140,7 +140,7 @@ Using your file tools (not shell utilities), determine:
 
 **Q0 — No test setup at all? Don't assume they want one.** If **no** test tool is installed (detection above found none) — likely for the whole repo, or for *this* package in a monorepo — first check whether the project **deliberately has no test runner**:
 - Look in the nearest `AGENTS.md` and the governing ADR for a stated convention (e.g. "CI is lint + format + typecheck only", "no test runner — typecheck + `/verify` is the gate"). If found, **respect it** — do **not** push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, and point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite — ran the typecheck gate; use `/verify` to confirm behavior."
-- If there's no stated convention, **ask** (don't default to installing): `AskUserQuestion` — "This has no test setup. How do you want to gate changes here?" → options: `Set up a test framework` (→ proceed to Q1, install with confirmation) · `No test runner — typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
+- If there's no stated convention, **ask** (don't default to installing, ask as above): "This has no test setup. How do you want to gate changes here?" → options: `Set up a test framework` (→ proceed to Q1, install with confirmation) · `No test runner — typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
 - In a **monorepo**, this is **per package** — a package with no tests by design gates on typecheck/`/verify` even if a sibling package has a full suite. Apply per resolved package root.
 
 Skip Q1 unless the engineer chose "set up a framework".
@@ -158,7 +158,7 @@ Filter by detected language. If a tool is already installed, list it first with 
 | Other | free-text |
 
 ```
-AskUserQuestion — "Which framework for unit & integration tests?"
+Ask (as above) — "Which framework for unit & integration tests?"
   header: "Framework"
   options: [filtered list]
 ```
@@ -168,7 +168,7 @@ AskUserQuestion — "Which framework for unit & integration tests?"
 Page/flow files were changed, so an E2E layer is worth offering:
 
 ```
-AskUserQuestion — "Pages/flows changed. Add end-to-end tests too?"
+Ask (as above) — "Pages/flows changed. Add end-to-end tests too?"
   header: "E2E"
   options:
     - label: "Playwright (recommended)"
@@ -182,7 +182,7 @@ AskUserQuestion — "Pages/flows changed. Add end-to-end tests too?"
 **Q3 — Component testing addon** (JS/TS only, when any **component** or **page/flow** file is in scope and React/Vue/Svelte is detected)
 
 ```
-AskUserQuestion — "Add component testing support?"
+Ask (as above) — "Add component testing support?"
   header: "Components"
   options:
     - label: "Yes — Testing Library (recommended)"
@@ -207,7 +207,7 @@ For the chosen unit tool, E2E tool (if any), and addon (if any), check whether i
 **Any missing** → confirm before installing:
 
 ```
-AskUserQuestion — "<missing tools> not installed. Install now?"
+Ask (as above) — "<missing tools> not installed. Install now?"
   header: "Install"
   options:
     - label: "Yes — install and continue"
@@ -216,7 +216,7 @@ AskUserQuestion — "<missing tools> not installed. Install now?"
       description: "Skip install; write tests I can run once I install the tools myself"
 ```
 
-If yes, run with the detected package manager (`pnpm` shown; swap for npm/yarn/bun):
+If yes, install with the project's package manager (the examples below show `pnpm`; substitute the detected npm/yarn/bun, or the language's package manager for Python/Go):
 
 ```bash
 pnpm add -D vitest                                            # unit
@@ -285,7 +285,7 @@ What the main model passes to the subagent:
 #### 7.5 Ask whether to run the suite (always)
 
 ```
-AskUserQuestion — "Tests will be written for <N> changed files. Run the suite after writing?"
+Ask (as above) — "Tests will be written for <N> changed files. Run the suite after writing?"
   header: "Run tests?"
   options:
     - label: "Yes — run and fix to green"
@@ -300,7 +300,7 @@ Set `RUN_AFTER = yes | no` from the answer and pass it to the subagent.
 
 Read two bundled files from this skill's folder (relative paths — you, the main agent, can resolve them): `agent-prompt.md` (the spawn template) and `writing-guide.md` (the strategy/rules/report rubric). Fill the template **and inline the full `writing-guide.md` text into it** — the subagent cannot resolve skill paths itself, so it must receive the guide as prompt text. Then spawn:
 
-- `model: "sonnet"`
+- `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
 - `description: "Test: <tool> suite for <N> changed files"`
 - Tools: `Read`, `Bash`, `Write`, `Edit`
 - `prompt`: filled template with:

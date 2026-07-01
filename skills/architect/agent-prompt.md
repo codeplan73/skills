@@ -213,10 +213,7 @@ You are designing a new feature from scratch. Apply first-principles thinking. D
 
 **Step 1 — Targeted discovery**
 
-If SOURCE_FILE_COUNT > 0:
-```bash
-find . -maxdepth 3 -not -path '*/.git/*' -not -path '*/node_modules/*' | sort
-```
+If SOURCE_FILE_COUNT > 0: using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`) to orient yourself.
 Read only: existing data models or schemas this feature touches, the entry point or router where this feature lives, and RELATED_ADR_PATHS in full.
 
 If SOURCE_FILE_COUNT is 0: skip. Proceed to Step 2.
@@ -299,10 +296,7 @@ You are choosing the foundational tech stack. Apply comprehensive stack evaluati
 
 **Step 1 — Establish product shape and read existing code if present**
 
-If SOURCE_FILE_COUNT > 0 (rebuilding or re-platforming an existing system):
-```bash
-find . -maxdepth 3 -not -path '*/.git/*' -not -path '*/node_modules/*' | sort
-```
+If SOURCE_FILE_COUNT > 0 (rebuilding or re-platforming an existing system): using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`) to orient yourself.
 Read: the existing stack manifest (`package.json`, `go.mod`, `Cargo.toml`), any existing ADRs in RELATED_ADR_PATHS, and the main entry point. Understand what currently exists before proposing a replacement. Note constraints the existing system imposes (data formats, API contracts, integrations).
 
 If SOURCE_FILE_COUNT is 0: skip file reading.
@@ -377,9 +371,7 @@ You are improving or replacing something in a live system. Read the existing cod
 
 **Step 1 — Read the existing system**
 
-```bash
-find . -maxdepth 3 -not -path '*/.git/*' -not -path '*/node_modules/*' | sort
-```
+Using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`) to orient yourself.
 
 Read: files directly related to the thing being changed, RELATED_ADR_PATHS in full, any other ADR that overlaps.
 
@@ -428,10 +420,7 @@ You are defining a standard pattern that every file in the codebase must follow.
 
 **Step 1 — Sample the current state**
 
-```bash
-find . -maxdepth 4 -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" -o -name "*.go" \) \
-  -not -path '*/node_modules/*' -not -path '*/.git/*' | head -50
-```
+Using your file tools, list a sample of the codebase's source files (e.g. `.ts`, `.tsx`, `.js`, `.py`, `.go`), excluding `node_modules/` and `.git/` — enough to see the competing patterns (around 50 files is plenty).
 
 Read 4–6 representative files that show the current inconsistency — not the whole codebase. You need enough examples to identify the competing patterns, not a full audit. Also read RELATED_ADR_PATHS if any exist.
 
