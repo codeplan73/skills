@@ -137,7 +137,14 @@ Using your file tools (not shell utilities), determine:
 - **Language & framework** — read `package.json` and look for `next`/`vite`/`nuxt`/`svelte`/`react`; or `pyproject.toml` (pytest/unittest) → Python; `go.mod` → Go; `Cargo.toml` → Rust.
 - **Already-installed test tools** — in `package.json` look for `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*` (common ones; if the project already uses a different runner — `bun test`, `node:test`, `ava`, `deno test`, etc. — detect and use that instead of installing a new one).
 
-**Q1 — Framework for unit/integration** (always asked on first run)
+**Q0 — No test setup at all? Don't assume they want one.** If **no** test tool is installed (detection above found none) — likely for the whole repo, or for *this* package in a monorepo — first check whether the project **deliberately has no test runner**:
+- Look in the nearest `AGENTS.md` and the governing ADR for a stated convention (e.g. "CI is lint + format + typecheck only", "no test runner — typecheck + `/verify` is the gate"). If found, **respect it** — do **not** push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, and point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite — ran the typecheck gate; use `/verify` to confirm behavior."
+- If there's no stated convention, **ask** (don't default to installing): `AskUserQuestion` — "This has no test setup. How do you want to gate changes here?" → options: `Set up a test framework` (→ proceed to Q1, install with confirmation) · `No test runner — typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
+- In a **monorepo**, this is **per package** — a package with no tests by design gates on typecheck/`/verify` even if a sibling package has a full suite. Apply per resolved package root.
+
+Skip Q1 unless the engineer chose "set up a framework".
+
+**Q1 — Framework for unit/integration** (asked on first run when the engineer opted to set up tests)
 
 Filter by detected language. If a tool is already installed, list it first with `(already installed)` appended and treat it as recommended.
 

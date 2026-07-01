@@ -56,9 +56,14 @@ De-duplicate; drop lock/generated files from the count. **If the change set is e
 
 ### 2. Gather lightweight pointers (do NOT read heavy files here)
 
-Paths and cheap signals only. Using your file tools: list the 3 most-recent ADR files under `docs/adr/` (paths only), note whether `test-preferences.json` exists (`HAS_TESTS`), and find the latest file under `docs/reviews/` (its findings inform what's already known).
+Paths and cheap signals only. Using your file tools: list the 3 most-recent ADR files under `docs/adr/` (paths only), resolve the **test signal** (below), and find the latest file under `docs/reviews/` (its findings inform what's already known).
 
-Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical — or `CLAUDE.md` as fallback; short), the recent ADR **paths**, the latest review **path**, the diff scope, and whether tests exist.
+Test signal — three states, not a yes/no:
+- `TESTS = configured` — `test-preferences.json` names a framework. "Add a test for this" is valid advice.
+- `TESTS = none-by-design` — `test-preferences.json` records a `"gate"` (e.g. `typecheck+verify`) with no framework, **or** `AGENTS.md`/an ADR states a "no test runner" convention. Don't say "add a test" or "no test harness" as a weakness — the gate is typecheck + `/verify`; frame the "verify with" as that gate.
+- `TESTS = none-yet` — no runner and no stated convention.
+
+Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical — or `CLAUDE.md` as fallback; short), the recent ADR **paths**, the latest review **path**, the diff scope, and the test signal.
 
 ### 3. Spawn the hardening subagent
 
@@ -72,7 +77,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, changed-file list + the exact `git diff` command
   3. Project-context contents (inline) — `AGENTS.md`, or `CLAUDE.md` fallback
   4. Recent ADR paths + latest review path (read if relevant; inline their text if your client gives subagents no file access)
-  5. `HAS_TESTS` (so it can say "add a test for this" vs "no test harness")
+  5. The **test signal** (`configured` / `none-by-design` / `none-yet`) — on `none-by-design`, "verify with" is the typecheck + `/verify` gate, never "add a test harness"
   6. Output path: `docs/hardening/<date>-<branch>.md`
 
 ### 4. Relay the result

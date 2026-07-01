@@ -89,7 +89,7 @@ Overall posture (from the worst items):
 
 Be honest. Don't inflate a watch item to must-fix, and never bury a real outage risk. If likelihood is genuinely uncertain, say so and explain the conditions that trigger it rather than guessing.
 
-For each item, if `HAS_TESTS = yes`, name the specific test that would prove the fix (so /test can add it). If `HAS_TESTS = no`, note that there's no regression safety net.
+For each item, the "verify with" depends on the **test signal**: if `TESTS = configured`, name the specific test that would prove the fix (so /test can add it); if `TESTS = none-by-design`, name the typecheck/`/verify` check that proves it (the project's real gate — don't call it a missing safety net); if `TESTS = none-yet`, note there's no regression safety net.
 
 ---
 

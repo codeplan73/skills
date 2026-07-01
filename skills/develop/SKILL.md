@@ -142,15 +142,27 @@ A thin ADR caught here is a 30-second question; caught mid-build it's a wrong gu
 
 **Gather any remaining inline answers** (the Step 2 spec-gap answer, the UI asset/template questions, an ambiguous business rule) — these need the engineer, so collect them *before* handing off to a build run.
 
+**Build inline by default — subagents only when they earn it.** Inline (on the main thread) is the default for most builds: it stays interactive (you can ask mid-build), it's simpler, and it avoids the token cost of inlining a guide+ADR into a subagent brief. Escalate to a subagent only for:
+- **A very large *single* build** (many files / long) that would bloat a long session's main context → isolate it in **one subagent** (you've already gathered the answers, so it won't need to ask).
+- **A big multi-file *rollout* of an already-decided pattern** (e.g. "apply the shared SQL builders to 6 routers", "swap inline inputs across 17 files") → **fan out** (below). This is the case where subagents clearly pay — one giant context holding 17 files is the slow, 10k-token path; small parallel ones are faster and cheaper.
+
+Everything else — a normal feature slice, a page, an endpoint — **build inline**. Don't reach for a subagent by default.
+
 Then build the track(s):
-- **UI track** → follow `ui-guide.md` **inline** (it is interactive and visual: component-or-screen → stack/styling/dark-mode detection → asset resolution → token sync → font → the five implementation phases → accessibility). Keep it on the main thread so the design/asset questions stay responsive.
-- **Logical track** → once all open answers are collected, **spawn a build subagent** to write the code (keeps the main context lean for a large build):
-  - `model: "sonnet"`
-  - `description: "Develop (logical): <feature>"`
-  - Tools: `Read`, `Bash`, `Write`, `Edit`, `Grep`, `Glob`
-  - `prompt`: the full `logical-guide.md` text + the governing ADR (inlined) + the nearest `AGENTS.md` (inlined) + the collected answers + the exact sub-tasks to build. Subagents can't resolve skill paths, so inline everything it needs.
-  - If the change is small (a single endpoint or helper), skip the subagent and do it inline — spawning has overhead.
-- **Both** → build the logical track first (so the UI has a real interface to bind to), then the UI track.
+
+- **UI track** → follow `ui-guide.md` **inline** (interactive/visual: component-or-screen → stack/styling/dark-mode detection → asset resolution → tokens → font → the five phases → accessibility). Keep it on the main thread so design/asset questions stay responsive.
+
+- **Logical track — normal build** → build **inline**, following `logical-guide.md` (ground in the ADR → data layer → core logic → interface → integration → correctness pass). Interactive and simplest.
+- **Logical track — very large single build** → *optionally* isolate it in **one subagent** (`model: "sonnet"`, tools `Read, Bash, Write, Edit, Grep, Glob`) to keep the main context lean. **Give it a *slim* brief** — the `logical-guide.md` text, the **relevant sections** of the ADR (not the whole doc if it's an umbrella), the **nearest** `AGENTS.md`, the collected answers, and the exact sub-tasks. Inlining every doc in full is a top token sink; inline only what *this* build needs.
+
+- **Logical track — big rollout** → do it in two stages:
+  1. **Primitive first, serially** — one subagent builds the shared thing the rollout depends on (the helper/module/schema) and confirms it typechecks.
+  2. **Fan out the rollout** — `parallel` subagents, **one per file or small router-group**, each with a *tiny* brief: "apply `<primitive>` (signature: …) to `<file>` per the pattern in ADR `<link>`; preserve exact behavior." Each carries only its own file + the primitive's API — **not** the full guide, not the other files. This is what makes a 17-file change cheap and fast instead of one bloated context.
+  3. **Gate once at the end** — run the package-wide typecheck/lint and `/verify` after the fan-out, not per subagent.
+
+- **Both** → logical first (so the UI has a real interface to bind to), then UI.
+
+**Follow the ADR's verify protocol.** If the ADR specifies how to verify (common on projects with **no test runner** — e.g. "`pnpm -F <pkg> typecheck` must pass after every sub-task", or "diff API responses before/after"), **run exactly that** after each sub-task/batch, and don't mark a sub-task done until it passes. Don't assume a test suite exists — do what the ADR says.
 
 ### Step 4 — Update the roadmap and report
 

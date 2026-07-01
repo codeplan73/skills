@@ -118,7 +118,10 @@ De-duplicate the file list. Exclude lock files and generated output (`dist/`, `b
 
 ### 3. Gather lightweight pointers (do NOT read heavy files here)
 
-Paths and cheap signals only — the subagent reads on demand. Using your file tools: list the 3 most-recent ADR files under `docs/adr/` (paths only), and note whether `test-preferences.json` exists (is the project tested?).
+Paths and cheap signals only — the subagent reads on demand. Using your file tools: list the 3 most-recent ADR files under `docs/adr/` (paths only), and resolve the **test signal** — one of three states, not a yes/no:
+- `TESTS = configured` — `test-preferences.json` names a framework (a runner is set up). Judge test adequacy normally.
+- `TESTS = none-by-design` — `test-preferences.json` records a `"gate"` (e.g. `typecheck+verify`) with no framework, **or** the nearest `AGENTS.md`/governing ADR states a "no test runner" convention. This is deliberate — the gate is typecheck + `/verify`, not a suite.
+- `TESTS = none-yet` — no runner and no stated convention. A genuine gap.
 
 Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical — or `CLAUDE.md` as fallback; short), the 3 recent ADR **paths**, the base ref / merge-base, and the diff scope. The subagent reads ADRs only if they govern the changed code, runs `git diff` itself, and reads the changed files and their tests.
 
@@ -134,7 +137,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, and the changed-file list with the exact `git diff` command to run
   3. Project-context contents (inline) — `AGENTS.md`, or `CLAUDE.md` fallback — the conventions the review must enforce
   4. Recent ADR paths (read if relevant), or inline the relevant ADR text if your client gives subagents no file access
-  5. Whether the project has tests configured (so it can judge test adequacy)
+  5. The **test signal** (`configured` / `none-by-design` / `none-yet`) so it judges test adequacy correctly — never nag for tests on a `none-by-design` project
   6. Output path for findings: `docs/reviews/<date>-<branch>.md`
 
 ### 5. Relay the result

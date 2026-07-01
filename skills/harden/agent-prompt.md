@@ -38,7 +38,7 @@ PROJECT_CONTEXT
 
 - **Recent ADR paths**: ADR_PATHS  (constraints and decisions the change must hold up under)
 - **Latest review path**: REVIEW_PATH  (issues already found — don't re-report; build on them)
-- **Tests configured**: HAS_TESTS  (yes → recommend specific tests for each risk; no → note the absence of a safety net)
+- **Test signal**: TEST_SIGNAL  (`configured` → recommend a specific test for each risk · `none-by-design` → "verify with" is the typecheck/`/verify` gate, don't call it a missing safety net · `none-yet` → note the absence of a safety net)
 
 ## Where to write the checklist
 

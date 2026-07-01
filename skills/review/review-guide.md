@@ -27,14 +27,20 @@ You do not modify the code. You report.
 
 ## Judging test adequacy
 
-If the project has tests configured (`HAS_TESTS = yes`):
+The **test signal** has three states — judge accordingly:
+
+`TESTS = configured` (a runner is set up):
 - New or changed logic that isn't covered by a test is at least a **Minor**, and a **Major** if it's branching logic, error handling, or security-relevant.
 - Look for tests that assert nothing meaningful, only cover the happy path, or test mocks instead of behavior — call these out.
 - A change to existing behavior with no corresponding test update is a finding.
 
-If `HAS_TESTS = no`: note the absence once at the verdict level (don't repeat per file), and weigh correctness findings more heavily since there's no safety net.
+`TESTS = none-by-design` (the project deliberately has no test runner — it gates on typecheck + `/verify`):
+- **Do not raise "missing tests" / "add coverage" findings, and do not call it a "no safety net."** The safety net is the typecheck/`/verify` gate — treat that as the equivalent of tests. Nagging for a suite the project chose not to have is noise.
+- Instead, weight correctness/security findings on their own merit, and where a change is risky, point to what the gate should catch (e.g. "typecheck won't catch this runtime shape — `/verify` should exercise it").
 
-Do not write tests — that's /test's job. Flag the gap.
+`TESTS = none-yet` (no runner, no stated convention — a genuine gap): note the absence **once** at the verdict level (don't repeat per file), and weigh correctness findings more heavily since there's no safety net.
+
+Do not write tests — that's /test's job. Flag a gap only when it's `none-yet`.
 
 ---
 

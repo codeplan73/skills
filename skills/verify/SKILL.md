@@ -1,7 +1,7 @@
 ---
 name: verify
 compatibility: Built for Claude Code — uses subagents and can drive a browser/CLI. Installs on any Agent Skills client but is tuned for Claude Code.
-description: "Use this skill to confirm a change actually works by running the real app and watching its behavior — not just that tests pass. Run /verify after /develop and before /review, or any time you need to see a feature work end to end: it launches the app, exercises the changed flow, and checks the observable result (UI, an API response, CLI output, a job). It complements /test with runtime confirmation, reporting what worked, what didn't, and what /test should lock in. It doesn't write code."
+description: "Use this skill to confirm a change actually works by running the real app and watching its behavior — not just that tests pass. Run /verify after /develop and before /review, or any time you need to see a feature work end to end: it launches the app, exercises the changed flow, and checks the observable result (UI, an API response, CLI output, a job). For a **behavior-preserving refactor** (or a project with no test runner), it runs a before/after diff — capturing the affected outputs pre- and post-change and proving they're identical — which is the regression gate a refactor needs. Complements /test with runtime confirmation; reports what worked, what didn't, and what /test should lock in. It doesn't write code."
 ---
 
 ## What this skill does
@@ -31,7 +31,23 @@ Written for any Agent Skills client on macOS, Linux, or Windows. Run/launch snip
 
 ## Execution
 
-### Step 1 — Scope the observable behaviors
+### Step 0 — Pick the mode
+
+- **Feature mode** (default) — the change *adds or alters* behavior. Confirm it does the new thing (Steps 1–5 below).
+- **Refactor / regression mode** — the change is **behavior-preserving** (a refactor, a dedup, a rename; the task or the ADR says *"behavior must not change"*). Here "works" means **identical before and after** — so instead of checking against *expected*, you **capture the observable outputs before the change, capture them after, and diff**. This is the safety net for projects with **no test runner**, and it's exactly what a "diff API responses before/after" ADR asks for — automate it.
+
+### Step 0a — Refactor mode: before/after diff (spawn a subagent)
+
+Only in refactor mode. Because it drives the app twice and holds two output sets, **run it in a subagent** (keeps the main context clean):
+- `model: "sonnet"` · `description: "Verify: before/after diff — <scope>"` · Tools: `Read`, `Bash`, `Grep`, `Glob` (+ browser/HTTP driving)
+- Its job:
+  1. Identify the **affected surfaces** from the diff — the endpoints, queries, or pages the refactor touches (e.g. `getAllCourses`, `getCourseBySlug`, the KB list). Pick representative ones per changed area.
+  2. **Capture BEFORE** — from the pre-change state: `git stash` the working change (or check out `$BASE` in a worktree), start the app, hit each surface, and save the raw responses/rendered output. Then **restore** the change (`git stash pop` / return to the branch).
+  3. **Capture AFTER** — with the change applied, start the app, hit the same surfaces the same way, save the outputs.
+  4. **Diff** before vs after per surface. For a behavior-preserving change they must be **byte-identical** (modulo intentional, documented differences). Report any diff as a **regression**.
+- Relay: which surfaces were diffed, identical vs differing, and the exact diff for any that changed → run `/debug`. Then stop (skip the feature-mode steps — nothing new to confirm).
+
+### Step 1 — Scope the observable behaviors *(feature mode)*
 
 ```bash
 git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
