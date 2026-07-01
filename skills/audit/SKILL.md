@@ -39,11 +39,11 @@ From the argument or task description:
 
 | Input | Phase triggered |
 |---|---|
+| No argument, **ambiguous** (scaffolded but no git history) | Phase 0 — ask new-vs-existing, then route |
 | No argument, **new project** (no/boilerplate code, no AGENTS.md) | Phase 1 — greenfield setup (ask standards → seed root) |
 | No argument, **established codebase**, no root AGENTS.md | Phase 2 — whole-repo scan (create root **+ judged nested**) |
-| No argument, codebase exists, root AGENTS.md **already exists** | Phase 4 — gap-fill (audit codebase vs existing docs, add what's missing) |
-| No argument, **ambiguous** (scaffolded but no git history) | Phase 0 — ask new-vs-existing, then route |
 | Path or area name (e.g. `auth`, `src/payments`) | Phase 3 — area scan |
+| No argument, codebase exists, root AGENTS.md **already exists** | Phase 4 — gap-fill (audit codebase vs existing docs, add what's missing) |
 
 The choice is made from **several signals** (source count, git history, manifests), not a file count alone — see Pre-flight. A content-ful legacy `CLAUDE.md` with no `AGENTS.md` is migrated, then treated as Phase 4.
 

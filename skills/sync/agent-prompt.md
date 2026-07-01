@@ -103,6 +103,8 @@ An ADR's status mirrors its feature's build lifecycle. The exact values and thei
 - `Accepted` — the feature is built and verified, "done and dusted" (roadmap `done`). An ADR is **not** `Accepted` until its feature ships.
 - `Superseded` — replaced by a later ADR (you do not set this from roadmap status; flag it under `STALE_ADRS` instead).
 
+For an **umbrella decision**, reconcile the linked `index.md` (child ADRs carry no status and are not reconciled).
+
 This applies **only to ADRs that link to a buildable roadmap feature.** A **standalone decision ADR** — a foundational/stack or cross-cutting standard that no roadmap feature links to — is *decision-status*: `Proposed` when written, `Accepted` once ratified. It is **not** feature-mirrored. Leave it exactly as-is: do **not** reconcile it, and do **not** flag it under `STALE_ADRS` as an unresolvable mismatch or drift merely because no feature links to it. Only genuinely stale/superseded standalone ADRs (Step 5) get flagged.
 
 For each ADR whose linked feature appears in the reconciled roadmap:

@@ -9,14 +9,16 @@ description: "Use this skill after a change is complete to keep durable knowledg
 
 Closes the loop on a change by syncing the durable knowledge to reality:
 
-1. **Maintains existing AGENTS.md** — root and nested — so commands, conventions, and constraints stay accurate after the change. Surgical, additive edits only; it never rewrites curated prose.
-2. **Creates a nested AGENTS.md for a brand-new area** introduced by the change — because the diff *is* the whole area, so it has enough context to write an accurate one. It adds the one root pointer line too.
-3. **Reconciles each linked ADR's Status line** — the ADR's status mirrors its feature's build lifecycle, so sync brings the ADR `**Status**:` line in line with the shipped feature's roadmap status as a safety net: `planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted` (an ADR is not `Accepted` until its feature ships and is verified). For an umbrella decision it reconciles the linked `index.md` (child ADRs carry no status and aren't reconciled). It edits **only** the `**Status**:` line — never ADR content — and re-reads the file just before writing. **Only ADRs linked to a roadmap feature are reconciled or flagged this way.** A **standalone decision ADR** (a foundational/stack or cross-cutting standard that no buildable roadmap feature links to) is decision-status — `Proposed` when written, `Accepted` once ratified — **not** feature-mirrored: sync leaves it alone and must **not** flag it as an unresolvable mismatch or drift just because no feature links it. If a *feature-linked* ADR's mismatch can't be safely resolved, it **flags** rather than guessing.
-4. **Flags stale ADRs** — decisions the change may have contradicted or outgrown, or that a later ADR supersedes — and recommends running /architect to update or supersede them. It does not edit ADR content.
+1. **Maintains existing AGENTS.md** — root and nested — so commands, conventions, and constraints stay accurate after the change.
+2. **Creates a nested AGENTS.md for a brand-new area** the change introduced wholesale (plus the root pointer line).
+3. **Reconciles each linked ADR's Status line** to its feature's roadmap status — the `**Status**:` line only, never ADR content.
+4. **Flags stale ADRs** the change contradicted/outgrew or a later ADR supersedes, and recommends /architect. It does not edit ADR content.
+
+These four behaviors, plus roadmap reconciliation, follow the detailed rules in **`agent-prompt.md`** (the single source of truth — including the canonical-file/CLAUDE.md-pointer model, net-new-area creation test, idempotency, the ADR Status-line mapping and standalone-vs-feature-linked distinction, stale-ADR flagging, and roadmap sub-task reconciliation). SKILL.md below covers only orchestration.
 
 Runs on a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents) in a subagent. Acts — no upfront questions.
 
-**Canonical file:** durable context lives in the tool-agnostic **`AGENTS.md`** (read by every agent); **`CLAUDE.md` is only a pointer** that imports its sibling AGENTS.md via Claude Code's `@AGENTS.md` directive (Claude auto-loads it; other tools read AGENTS.md directly). /sync edits `AGENTS.md` for content and never writes content into `CLAUDE.md`. When it creates a nested `AGENTS.md`, it also creates the sibling `CLAUDE.md` pointer (body: a line of context plus `@AGENTS.md`). It treats `CLAUDE.md` pointers and `AGENTS.md` files only as targets, never as a change source.
+**Canonical file:** durable context lives in the tool-agnostic **`AGENTS.md`**; **`CLAUDE.md` is only a pointer** to it. /sync edits/creates `AGENTS.md` (and its `CLAUDE.md` pointer) and treats both only as targets, never as a change source — see `agent-prompt.md` for the exact rules.
 
 ## Boundaries (these keep the skill from sprawling)
 
@@ -40,7 +42,7 @@ The dividing line on creation is **context, not policy**: create only when this 
 
 ## Artifact ownership
 
-Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Also **reconciles the roadmap** — scoped to the **relevant workspace's** roadmap file for the shipped change, not every file under `docs/mvp/` — it's the **universal sub-task reconciler**: it ticks *any* completed sub-task it can verify from repo **evidence**, not only the diff's source changes. `/develop` ticks its own sub-tasks as it builds; `/sync` sweeps the rest — the `/test`, `/harden`, `/audit`/tooling, and `/sync` sub-tasks that those skills don't tick themselves — and advances feature status. It never adds, removes, or reorders features/sub-tasks (that's /mvp). It also **reconciles each linked ADR's `**Status**:` line** to that feature's roadmap status (`planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`) — the Status line only, never ADR content; if a feature-linked ADR's mismatch can't be safely resolved it flags it. A **standalone decision ADR** (no linked buildable feature) is decision-status and is left alone — never reconciled or flagged as drift for lacking a feature link. Writes nothing else.
+Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change (never creates or restructures root — that's /audit). Also **reconciles the roadmap** — scoped to the **relevant workspace's** roadmap file for the shipped change, not every file under `docs/mvp/` — as the **universal sub-task reconciler** (it ticks any sub-task it can verify from repo evidence, sweeping the `/test`/`/harden`/`/audit`/`/sync` sub-tasks other skills don't tick, and advances feature status), and **reconciles each linked ADR's `**Status**:` line** to that feature's roadmap status. It never adds/removes/reorders features or sub-tasks, never edits ADR content, and writes nothing else — see `agent-prompt.md` for the exact evidence, mapping, standalone-ADR, and idempotency rules.
 
 **Artifact base.** The ADRs and roadmap it reads/reconciles live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Use whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
@@ -51,7 +53,7 @@ Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** n
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `ls`, or `xargs` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
 - **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them. Anything a subagent needs is passed **into its prompt as text** — subagents can't resolve skill-relative paths.
-- **No subagent support?** The maintenance normally runs in a subagent on a fast, low-cost model. On a tool without one, do the AGENTS.md updates and ADR-staleness checks inline yourself — same conservative rules.
+- **No subagent support?** The maintenance normally runs in a subagent on a fast, low-cost model. On a tool without one, do the AGENTS.md updates, roadmap/ADR-Status reconciliation, and ADR-staleness checks inline yourself, following the exact rules in **`agent-prompt.md`** (they are the authoritative rules for both the subagent and this inline path).
 
 ## Execution
 
