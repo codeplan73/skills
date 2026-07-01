@@ -1,0 +1,6 @@
+- Make sure adr files are per apps like docs/adr/api/001.md
+- Multiple mvps and adrs generated per develop task when refactoring a whole app
+- Add recommendations when showing options in short and in detail in generated md file stating the source of recommendation or options
+- It's reading all mvp files even when current feature is not associated with it
+- adr file status should not be "accepted" until that adr feature is done and dusted
+- after refactoring task, it did not remove unused code
