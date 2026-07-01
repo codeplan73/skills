@@ -115,6 +115,20 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 - [ ] <Action item or open question>
 <!-- Omit section if there are no follow-up actions. -->
 
+## References
+
+<!-- What this decision is grounded in. Group as below; omit empty groups. NEVER fabricate a URL —
+     name the source/practice instead. Every link here must have been web-verified by the subagent. -->
+
+**Project sources** (verifiable, in this repo):
+- <e.g. `AGENTS.md` — the auth convention · ADR 0003 · the installed `stripe` skill · already on Supabase>
+
+**Practices & standards**:
+- <named practice/principle the decision rests on — e.g. idempotency keys for money ops · strangler pattern · OWASP session guidance>
+
+**Links** (web-verified only):
+- <Title — https://real-fetched-url> · <or "none verified">
+
 <!-- Enhancement mode only, when migration is non-trivial. -->
 ## Migration plan
 

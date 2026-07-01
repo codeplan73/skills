@@ -244,6 +244,16 @@ _Deferred: advanced search, analytics dashboard_
 
 On a brownfield merge: append new features/sub-tasks; leave existing rows and checkbox states untouched.
 
+**Basis on recommendations.** Where the roadmap *recommends* something the engineer didn't dictate — the build order rationale, a suggested capability, "recommendation — add analytics", flagging a feature `Needs ADR` — append a short `(basis: …)`: a **project source** (`your AGENTS.md`, an ADR, the existing stack) or a **named practice** (`UI-first for fast feedback`, `foundations before features`). You have no web tools here, so **name the source/practice — never a URL.**
+
+### Step 6b — Ground the recommendations (sourcing subagent)
+
+After writing the roadmap, spawn a **sourcing subagent** to add verified references — a real subagent is used here so links are *fetched-and-confirmed*, not fabricated by the main model:
+- `model: "haiku"` · `description: "MVP: source & reference the roadmap"`
+- Tools: `Read`, `Edit`, `WebSearch`, `WebFetch`
+- `prompt`: give it the roadmap file path and its recommendations. Its job: for the load-bearing recommendations, confirm each `(basis: …)` is sound, and where a **canonical source is worth linking** (an official doc, a named standard/practice), **web-search + fetch to confirm it exists and says what's claimed**, then add a **`## References`** section at the end of the roadmap — *Project sources* (verifiable), *Practices & standards* (named), *Links* (web-verified only, else "none verified"). **Never invent a URL; an unverified link must not appear.** Keep it lean — the few load-bearing sources, not every line.
+- If the client has no web tools/subagents, do this inline with named practices + project sources only (no links) — that's an acceptable degrade.
+
 ### Step 7 — Report and hand off
 
 ```

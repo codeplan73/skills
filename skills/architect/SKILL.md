@@ -213,6 +213,7 @@ State it: *"Reading this as a new **FEATURE** on your **Next.js + Supabase** sta
 **Step C — Ask every ASK question, in as many batched rounds as it takes.** This is the heart of the skill — do not truncate to hit a number.
 - Group the ASK questions by dimension and present them via `AskUserQuestion`, **up to 4 per call**. Run **multiple rounds** until every un-inferable, decision-relevant question is answered. A non-trivial feature legitimately needs 2–4 rounds (e.g. round 1 scope & data, round 2 auth & rules, round 3 integrations & edge cases). Stop only when there is genuinely nothing left that the engineer alone can settle — not at an arbitrary cap.
 - Quality bar per question: maps to a real, feature-specific decision (never a generic placeholder like "how complex is the data model?"); concrete options drawn from the actual choices, each with a one-line tradeoff; multi-select where answers aren't exclusive.
+- **Cite the basis on options that carry a recommendation.** Where an option is "the recommended way," append a short `(basis: …)` — a **project source** (`your AGENTS.md`, an ADR, an installed skill, the existing stack) or a **named practice** (`idempotency for money ops`). At question time you have no web tools, so **name the source/practice — never a URL**. The subagent web-verifies any links later, in the ADR.
 - Between rounds, briefly fold prior answers in ("Given org-scoped roles, the next questions are about invitation flow…") so the rounds feel like one coherent interview, not a form.
 - Before finishing: re-scan the Step A checklist and confirm no load-bearing dimension is still unanswered. If one is, ask it.
 
@@ -245,7 +246,7 @@ After the deep questioning, read `agent-prompt.md` and `adr-template.md` (relati
 
 - `model: "sonnet"`
 - `description: "Architect: <mode> — research and draft ADR"`
-- Tools: `Read`, `Bash`, `Write`, `Edit`
+- Tools: `Read`, `Bash`, `Write`, `Edit`, `WebSearch`, `WebFetch` — the web tools are for **verifying** citation links (the subagent must fetch-to-confirm before linking; see the sourcing rules in `agent-prompt.md`). If the client has no web tools, the subagent cites project sources + named practices only (no links) — that's fine.
 - `prompt`: filled template with all engineer answers, the inferred framing, and the injected ADR template
 
 The **inferred MODE** (from Framing) is already one of `FEATURE` / `ARCHITECTURE` / `ENHANCEMENT` / `CROSS-CUTTING` — inject it directly.
