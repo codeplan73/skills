@@ -45,7 +45,7 @@ Status lifecycle — **`/mvp` sets the *initial* status, the pipeline advances i
 
 ## Portability (any OS, any agent)
 
-Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to look for source files and read/write Markdown. The planning runs inline; a brief sourcing subagent runs afterward (Step 6b, via your agent's subagent tool). If your tool has no interactive-question picker, ask the multiple-choice prompts as plain text with the same options.
+Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to look for source files and read/write Markdown. The planning runs inline; an **optional** sourcing subagent runs afterward **only if the engineer opts into web-sourced links** (Step 6b, via your agent's subagent tool). If your tool has no interactive-question picker, ask the multiple-choice prompts as plain text with the same options.
 
 ## Execution
 
@@ -163,9 +163,16 @@ On a brownfield merge: append new features/sub-tasks; leave existing rows and ch
 
 **Basis on recommendations.** Where the roadmap *recommends* something the engineer didn't dictate — the build order rationale, a suggested capability, "recommendation — add analytics", flagging a feature `Needs ADR` — append a short `(basis: …)`: a **project source** (`your AGENTS.md`, an ADR, the existing stack) or a **named practice** (`UI-first for fast feedback`, `foundations before features`). You have no web tools here, so **name the source/practice — never a URL.**
 
-### Step 6b — Ground the recommendations (sourcing subagent)
+### Step 6b — Ground the recommendations (sourcing subagent — ask first)
 
-After writing the roadmap, spawn a **sourcing subagent** to add verified references — a real subagent is used here so links are *fetched-and-confirmed*, not fabricated by the main model:
+Adding **web-verified reference links** runs a subagent that web-searches and fetches pages to confirm them — useful, but it **costs extra tokens**. So **ask the engineer first** (present as your agent's interactive option picker — `AskUserQuestion` on Claude Code — or plain-text options if it has none):
+- **question**: "Add web-sourced reference links to the roadmap? I'll run a subagent that web-searches and fetches to verify official docs/standards — it costs some extra tokens. Either way the roadmap already names its sources."
+- **header**: "Web sources"
+- **options**: `No — skip it (no web, no extra tokens)` · `Yes — fetch & verify links`
+
+**If they decline** (or there's no answer, or the agent has no web tools): **skip the subagent** — the roadmap's `(basis: …)` named sources stand on their own; add a one-line `## References` note ("Links: none — web sourcing skipped"). You're done.
+
+**If they say yes**, spawn a **sourcing subagent** to add verified references — a real subagent so links are *fetched-and-confirmed*, not fabricated by the main model:
 - `model`: a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents) · `description: "MVP: source & reference the roadmap"`
 - Tools: `Read`, `Edit`, `WebSearch`, `WebFetch`
 - `prompt`: give it the roadmap file path and its recommendations. Its job: for the load-bearing recommendations, confirm each `(basis: …)` is sound, and where a **canonical source is worth linking** (an official doc, a named standard/practice), **web-search + fetch to confirm it exists and says what's claimed**, then add a **`## References`** section at the end of the roadmap — *Project sources* (verifiable), *Practices & standards* (named), *Links* (web-verified only, else "none verified"). **Never invent a URL; an unverified link must not appear.** Keep it lean — the few load-bearing sources, not every line.
