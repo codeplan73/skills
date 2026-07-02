@@ -237,7 +237,11 @@ Wait for their answer. If (A): re-run the source-file count for that path. If (B
 
 ### Subagent spawn
 
-After the deep questioning, read `agent-prompt.md` and `adr-template.md` (relative paths — the main agent resolves them). Fill the template **and inline the full `adr-template.md` text into the prompt** — the subagent writes the ADR from that structure and can't resolve skill paths itself.
+After the deep questioning, read `agent-prompt.md` and `adr-template.md` (relative paths — the main agent resolves them). Fill the template and inline the ADR structure (see below) — the subagent writes the ADR from that and can't resolve skill paths itself.
+
+**Inject only the resolved MODE's block.** `agent-prompt.md`'s `## Instructions by mode` section has four blocks (`### FEATURE mode`, `### ARCHITECTURE mode`, `### ENHANCEMENT mode`, `### CROSS-CUTTING mode`), but **only one mode runs per call.** In the filled prompt, include **only the block matching the resolved MODE** and drop the other three — they're ~200 lines the subagent never uses. Keep everything else verbatim: the persona ("Who you are / How you think / What you do NOT do"), Step 0 and Step 0b, `## Expert rules that apply to all modes`, `## Report format`, and all the context placeholders.
+
+**Inline the ADR skeleton, not the template's reference/meta sections.** From `adr-template.md`, inline the **ADR section structure + field guidance the subagent fills** — everything between `=== ADR TEMPLATE START ===` and `=== ADR TEMPLATE END ===` (Context, Options considered, Decision, Rationale, the mode-specific design section, Consequences, Follow-up, References, etc.). You **MAY omit the trailing reference/meta sections** — `## Filename conventions`, the `## Status values` table, the umbrella-structure / child-status notes, and the `## Writing rules` commentary — those are **main-agent guidance** for status, shape, and naming (the main agent resolves the filename, shape, and initial `**Status**:` and injects them via the placeholders), not material the subagent needs to *write* the ADR body. The `**Status**:` line the subagent should write is already conveyed by the "On the initial `**Status**:` line" rule in `## Expert rules that apply to all modes`. Do **not** edit `adr-template.md` — this only changes what gets inlined.
 
 **Web-verified links — ask first.** The subagent can add **web-verified reference links** (fetch-to-confirm official docs/standards), but that runs web fetches and **costs extra tokens**. Before spawning, ask the engineer (your agent's interactive option picker — `AskUserQuestion` on Claude Code — or plain-text options if it has none):
 - **question**: "Include web-verified reference links in the ADR? I'll give the subagent web tools to fetch-and-confirm official docs/standards — it costs some extra tokens. Either way the ADR cites its sources by name."
@@ -266,7 +270,8 @@ Inject into the template:
 9. Operation: `create` | `update` | `supersede`
 10. Today's date (from pre-flight `date +%Y-%m-%d`)
 11. Documentation context (if "already built" path was taken — the engineer's free-text answers about why this was chosen, alternatives, and tradeoffs)
-12. Community skills: for each skill relevant to this feature (identified from `AGENTS.md`, per pre-flight), inject its full content under a labelled section. For a relevant-but-not-installed one, list its name only. If none are relevant, inject "none detected".
+12. Community skills — **pass paths + relevance notes, not full content (read on demand).** For each skill relevant to this feature (identified from `AGENTS.md`, per pre-flight), inject a **one-line pointer**: its name, its real project path, and a one-line note on why it's relevant here — e.g. `` `supabase` (`.claude/skills/supabase/`) — RLS + auth conventions relevant here ``. The skills live at a real path the subagent can Read, so the subagent opens a skill file **on demand, only if it materially shapes this decision** — the content stays authoritative when consulted, it's just not front-loaded in full (a project with several installed skills would otherwise dump thousands of tokens most ADRs never use). For a relevant-but-not-installed one, list its name only. If none are relevant, inject "none detected".
+    - **FALLBACK — subagents that cannot read files:** on a client whose subagents lack file-read tools, inline each relevant skill's **full content** under a labelled section as before (the subagent can't fetch it on demand), so the knowledge is still present.
 
 ---
 

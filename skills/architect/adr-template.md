@@ -12,12 +12,14 @@ File path: `docs/adr/NNNN-kebab-case-title.md`
 
 ## Context
 
+<!-- DECISION RECORD (the WHY — human context; /develop skips this) -->
 <What is the problem or decision to be made? What forces are at play — technical constraints,
 team capabilities, cost, performance requirements, compliance? What is the consequence of not
 deciding? 2–4 paragraphs. Do not mention options here — only the problem space.>
 
 ## Options considered
 
+<!-- DECISION RECORD (the WHY — human context; /develop skips this) -->
 ### Option 1: <Name>
 
 <One paragraph describing this option.>
@@ -43,6 +45,7 @@ deciding? 2–4 paragraphs. Do not mention options here — only the problem spa
 
 ## Decision
 
+<!-- BUILD SPEC (the WHAT — /develop reads this) -->
 **Chosen option**: Option N — <Name>
 
 <One sentence stating the decision clearly.>
@@ -52,10 +55,12 @@ deciding? 2–4 paragraphs. Do not mention options here — only the problem spa
 
 ## Rationale
 
+<!-- DECISION RECORD (the WHY — human context; /develop skips this) -->
 <Why this option over the others? Reference the specific constraints and forces from Context.
 Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 
 <!-- Feature design mode only. Include immediately after Rationale. -->
+<!-- BUILD SPEC (the WHAT — /develop reads this) -->
 ## Feature design
 
 **Data model sketch**:
@@ -88,6 +93,7 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 - Auth/permission: <who is denied and what they receive>
 
 <!-- Architecture mode only. Include immediately after Rationale. -->
+<!-- BUILD SPEC (the WHAT — /develop reads this) -->
 ## Proposed stack
 
 | Layer | Choice | Reason |
@@ -101,6 +107,7 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 
 ## Consequences
 
+<!-- BUILD SPEC (the WHAT — /develop reads this: the constraints the build must honor) -->
 **Positive**:
 - <what improves>
 
@@ -189,6 +196,15 @@ The ADR's status mirrors its feature's build lifecycle (roadmap: planned→`Prop
 **Umbrella child ADRs carry no lifecycle status.** In an umbrella directory (`NNNN-<x>/`), only the `index.md` has a `**Status**:` line — it mirrors the feature. The **child ADRs are spec content**, so **omit the `**Status**:` line on children** (they're governed by the umbrella). `/develop` and `/sync` advance the umbrella `index.md`'s status only, never a child's.
 
 **A directory ADR is a self-mapping manifest.** In a directory ADR (`NNNN-<x>/`), the top file (`index.md`, or the ADR file for a single decision with research) opens with a **`## Structure`** section listing and linking **every** child ADR and **every** research file — one line each: what it is + which decision it supports. Each **child ADR** links its own evidence in a **`## References`** section. **Research files are named by their owner**: `research/NNNN-<topic>.md` for the child numbered `NNNN`, or `research/_shared-<topic>.md` for umbrella-wide evidence — so every file's ownership is obvious, and a developer building a child follows *that child's* `## References` to exactly the research it needs. **Children are flat files by default** — give a child its own subfolder only when it accumulates multiple research/asset files. Each child ADR is **self-sufficient to build from**; `research/` is **optional depth** (the evidence trail), not required reading for `/develop`. Any **cross-child contract** (how children connect) belongs in the umbrella `index.md`.
+
+## Audience split — build spec vs decision record
+
+An ADR serves two audiences, and its sections divide cleanly between them:
+
+- **Build spec** (what `/develop` reads to build): **`## Decision`**, the design/spec section (**`## Feature design`** for a FEATURE ADR, **`## Proposed stack`** for an ARCHITECTURE ADR, or the equivalent spec table — e.g. `## Standard definition`), and **`## Consequences`** (the constraints the build must honor). This is the WHAT — the implementable spec.
+- **Decision record** (human / future decision-maker context — the WHY): **`## Context`**, **`## Options considered`**, and **`## Rationale`**. This is decision history, not build input; `/develop` can skip it unless a specific constraint sends it back to the reasoning.
+
+The full reasoning always stays in the ADR — this split only labels which sections each audience needs; it does not remove or reorder anything.
 
 ## Writing rules
 

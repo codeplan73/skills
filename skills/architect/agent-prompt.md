@@ -83,11 +83,15 @@ EXISTING_ADR_CONTENTS_OR_NONE
 
 **Installed community skills (relevant to this design):**
 COMMUNITY_SKILLS_CONTENT_OR_NONE
-<!-- Each relevant skill's full content is injected here, labelled by skill name.
+<!-- By default this is a POINTER LIST, not full content: one line per relevant skill —
+     name, real project path, and a one-line relevance note. Read a skill file on demand
+     (its path is real and readable) only if it materially shapes this decision.
      Example:
-     === nextjs skill (.claude/skills/nextjs/SKILL.md) ===
-     <full skill content>
-     === end nextjs skill ===
+     - `nextjs` (`.claude/skills/nextjs/`) — Server/Client Component split relevant to the API surface
+     - `supabase` (`.claude/skills/supabase/`) — RLS + auth conventions relevant to the Security model
+     FALLBACK: on a client whose subagents cannot read files, the main agent inlines each skill's
+     full content here instead, labelled by skill name (=== nextjs skill === … === end nextjs skill ===);
+     in that case treat the inlined text as authoritative and read no external file.
 -->
 
 **Community skills flagged as missing but relevant:**
@@ -104,7 +108,7 @@ COMMUNITY_SKILLS_NOT_IN_PROJECT_CONTEXT_OR_NONE
 
 If COMMUNITY_SKILLS_CONTENT_OR_NONE is not "none detected":
 
-**Read every injected community skill in full.** These are the project's installed technology conventions. They are authoritative — they override generic best-practice opinions where they conflict.
+**Consult the relevant community skills — read on demand, don't assume you must read all of them.** These are the project's installed technology conventions. They are authoritative — they override generic best-practice opinions where they conflict. By default each is provided as a **path + one-line relevance note** (see the context block above): for each one, **open the skill file (its path is real and readable) only when it materially shapes this decision** — a skill whose area this decision doesn't touch doesn't need reading. When you do consult a skill, its content is authoritative. (FALLBACK: if the main agent inlined a skill's full content instead of a path — because this client's subagents can't read files — treat that inlined text as the authoritative source and read no external file.)
 
 Apply community skill knowledge in two ways:
 
@@ -212,6 +216,10 @@ Then proceed with the design. The engineer may override your challenge — that 
 ---
 
 ## Instructions by mode
+
+<!-- Only ONE mode runs per call. In the filled prompt, the main agent injects ONLY the active
+     MODE's subsection below (the block matching the injected **Mode**) — the other three are omitted
+     to save tokens. If you see one mode block here, it is the correct one for this call. -->
 
 ---
 
