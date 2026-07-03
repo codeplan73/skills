@@ -30,27 +30,34 @@ Write the chosen file with two parts — an overview table and the detailed brea
 
 _Seeded by /roadmap · status advanced by /develop and /sync. Roadmap files live in `docs/roadmap/` (ADRs are in `docs/adr/`)._
 
-**Build approach:** Tracer Bullet — vertical slices; each feature built end-to-end through every layer, working.
-_(The chosen approach — Tracer Bullet · Skateboard · Facade (prototype-grade) · Journey — is recorded here by /roadmap as a project-wide convention: /audit and /sync persist it into root `AGENTS.md`, and /architect, /develop, and /verify read and honor it so the whole build follows it consistently.)_
+**Build approach (project default):** Tracer Bullet — vertical slices; each feature built end-to-end through every layer, working.
+_(The chosen approach — Tracer Bullet · Skateboard · Facade (prototype-grade) · Journey — is recorded here by /roadmap as the project-wide **default** convention: /audit and /sync persist it into root `AGENTS.md`, and /architect, /develop, and /verify read and honor it so the whole build follows it consistently. Any single feature may **override** it via its own **Approach** (column below); precedence is the row's Approach if set, else this default.)_
 
 ## Overview
 
-| # | Feature | Priority | Needs ADR? | Status | Code area |
-|---|---------|----------|-----------|--------|-----------|
-| 1 | Coding standards & tooling | P0 | no | planned | — |
-| 2 | Stack & architecture | P0 | yes | planned | — |
-| 3 | Design system & UI foundation | P0 | yes | planned | — |
-| 4 | Home page | P0 | yes | planned | — |
-| 5 | Segment landing pages | P0 | yes | planned | — |
-| 6 | Shop listing (filter & sort) | P0 | yes | planned | — |
-| 7 | Product detail page | P0 | yes | planned | — |
-| 8 | Cart | P0 | yes | planned | — |
-| … | … | … | … | … | — |
+The **Approach** column is the per-feature override: blank/`inherit` = builds by the project default above; a named approach = that feature overrides the default. Record a value only when it differs from the default.
+
+| # | Feature | Priority | Approach | Needs ADR? | Status | Code area |
+|---|---------|----------|----------|-----------|--------|-----------|
+| 1 | Stack & architecture | P0 | inherit | yes | planned | — |
+| 2 | Scaffold project (chosen stack) | P0 | inherit | no | planned | — |
+| 3 | Coding standards & tooling (`/audit`) | P0 | inherit | no | planned | — |
+| 4 | Data model | P0 | inherit | yes | planned | — |
+| 5 | Design system & UI foundation | P0 | inherit | yes | planned | — |
+| 6 | Walking-skeleton slice | P0 | inherit | no | planned | — |
+| 7 | Home page | P0 | inherit | yes | planned | — |
+| 8 | Segment landing pages | P0 | inherit | yes | planned | — |
+| 9 | Shop listing (filter & sort) | P0 | inherit | yes | planned | — |
+| 10 | Product detail page | P0 | inherit | yes | planned | — |
+| 11 | Cart | P0 | Facade | yes | planned | — |
+| … | … | … | … | … | … | — |
+
+_(Approach example: Cart is prototyped **Facade**-style first to demo the flow, overriding the Tracer-Bullet default; every other row inherits.)_
 
 <!-- Brownfield: already-built features are enrolled here above the planned ones, with status `existing`
      (complete, no breakdown) or `in-progress` (partial — finish via /develop), e.g.
-| — | Auth | — | — | existing | `src/auth/` |
-| — | Product catalog | — | — | existing | `src/catalog/` |
+| — | Auth | — | inherit | — | existing | `src/auth/` |
+| — | Product catalog | — | inherit | — | existing | `src/catalog/` |
 — `existing` ≠ `done`: it predates the workflow. Code area filled; complete ones get no breakdown. -->
 
 _(Granular: home and segment landing are separate features; listing, product, and cart are separate — not one "storefront".)_
@@ -59,7 +66,7 @@ _(Granular: home and segment landing are separate features; listing, product, an
 
 Foundations always lead (Step 4); the feature phases after them are ordered by the header's **Build approach** — don't hardcode a single sequence. The example below is under **Tracer Bullet** (vertical slices); a Skateboard, Facade, or Journey build phases the same features differently.
 
-**Phase 1 — Foundations**: coding standards + tooling (`/audit` → `/develop`) → stack (`/architect`) → data model (`/architect`) → design system (`/architect` → `design.md` → base components) → walking-skeleton slice
+**Phase 1 — Foundations** (scaffold before audit): standards *preferences* (light — may ride along with the stack decision) → stack (`/architect` → ARCHITECTURE ADR) → **scaffold the project with the chosen stack** → coding standards + tooling (`/audit` reads the **real scaffolded project**, then enforcement tooling via `/develop`) → data model (`/architect`) → design system (`/architect` → `design.md` → base components) → walking-skeleton slice. `/audit` and tooling come **after** stack-decision + scaffold, never before.
 **Phase 2 — Slice: home** (end-to-end): data → API → UI → integration → SEO → tests, shipping something real before the next slice
 **Phase 3 — Slice: shop listing** (end-to-end): filter & sort working against real data, states, tests
 **Phase 4 — Slice: product detail** (end-to-end) → **Slice: cart** (end-to-end) → … one working slice at a time
@@ -68,27 +75,39 @@ _Deferred: advanced search, analytics dashboard_
 
 ## Build breakdown
 
-### 1. Coding standards & tooling  ·  Needs ADR: no  ·  Status: planned
-- [ ] Capture standards into `AGENTS.md` — `/audit` _(greenfield: pick architecture style + conventions)_
+### 2. Scaffold project (chosen stack)  ·  Needs ADR: no  ·  Approach: inherit  ·  Status: planned
+- [ ] Initialize the project with the stack from the ARCHITECTURE ADR — `/develop scaffold — framework init, dependency install, directory layout, runnable dev server/build, per the stack ADR`
+- [ ] Smoke-check it runs — `/test` _(dev server boots / build passes)_
+> ADR: — (executes the stack decision; makes none) · Code area: — · _Must land before `/audit` (step 3) — `/audit` reads this real project._
+
+### 3. Coding standards & tooling (`/audit`)  ·  Needs ADR: no  ·  Approach: inherit  ·  Status: planned
+- [ ] Capture standards + tooling into `AGENTS.md` from the **scaffolded project** — `/audit` _(greenfield, after scaffold: reads the real stack/structure, not a guess)_
 - [ ] Set up enforcement tooling — `/develop tooling — ESLint + Prettier + strict tsconfig + husky/lint-staged pre-commit, per the captured standards`
 - [ ] Tests — `/test` _(lint/format run clean)_
-> ADR: — (no decision — conventions captured by /audit) · Code area: —
+> ADR: — (no decision — conventions captured by /audit, after stack-decision + scaffold) · Code area: —
 
-### 4. Home page  ·  Needs ADR: yes  ·  Status: planned
+### 7. Home page  ·  Needs ADR: yes  ·  Approach: inherit  ·  Status: planned
 - [ ] Decision (ADR) — `/architect home page — composition (hero, featured collections, segment entry points), layout, asset strategy`
 - [ ] UI (placeholder data) — `/develop home page UI — build to design.md with mock collections + placeholder imagery`
 - [ ] Data integration — `/develop home page wire-up — swap mock for real featured collections, loading/empty states`
 - [ ] SEO & metadata — `/develop home page SEO — title/meta/OG/Organization JSON-LD`
 - [ ] Tests — `/test home page`
-> ADR: — · Code area: —
+> ADR: — · Approach: inherit (project default) · Code area: —
 
-### 5. Segment landing pages  ·  Needs ADR: yes  ·  Status: planned
+### 11. Cart  ·  Needs ADR: yes  ·  Approach: **Facade** (override)  ·  Status: planned
+- [ ] Decision (ADR) — `/architect cart — line items, quantity, totals, persistence`
+- [ ] UI (placeholder data) — `/develop cart UI — clickable cart on mock line items + states`
+- [ ] Data integration — `/develop cart wire-up — swap mock for real cart, loading/empty states`
+- [ ] Tests — `/test cart`
+> ADR: — · Approach: **Facade** — overrides the Tracer-Bullet default; demo the flow on placeholder data first, then wire the back · Code area: —
+
+### 8. Segment landing pages  ·  Needs ADR: yes  ·  Approach: inherit  ·  Status: planned
 - [ ] Decision (ADR) — `/architect segment landing — per-segment layout (dev/gamer/anime), theming, shared vs unique blocks`
 - [ ] UI (placeholder data) — `/develop segment landing UI — build to design.md, mock per-segment data`
 - [ ] Data integration — `/develop segment landing wire-up — real segment catalog, empty states`
 - [ ] SEO & metadata — `/develop segment landing SEO — per-segment title/meta/OG`
 - [ ] Tests — `/test segment landing`
-> ADR: — · Code area: —
+> ADR: — · Approach: inherit (project default) · Code area: —
 
 ### … (every feature gets its own block with filled-in prompts)
 
@@ -96,6 +115,7 @@ _Deferred: advanced search, analytics dashboard_
 - **Status**: `planned` → `in-progress` → `done` (pipeline: /roadmap seeds → /develop builds → /sync reconciles). Plus **`existing`** — a pre-existing feature enrolled by /roadmap for context (built before this workflow; no breakdown; `done` is reserved for pipeline-verified work). Plus **`dropped`** — a de-scoped feature kept for history (set by /roadmap on re-planning; excluded from active work; never deleted).
 - **Sub-task checkbox**: `todo` `[ ]` → `done` `[x]` — `/develop` ticks its own sub-tasks as it builds; **`/sync` sweeps the rest** (`/test`, `/harden`, tooling, `/sync`) from repo evidence
 - **Needs ADR?**: `yes` → run `/architect` before building · `no` → `/develop` directly
+- **Approach**: per-feature override of the header **Build approach** default — `inherit`/blank = project default; a named approach = this feature overrides it. Precedence: row Approach if set, else the default.
 - **Priority**: P0 (MVP-critical) · P1 (MVP) · P2 (deferred)
 ```
 
@@ -105,6 +125,8 @@ _Deferred: advanced search, analytics dashboard_
 ## /roadmap complete
 
 **Product**: <one line>
+**Behavior**: <plan | replan | add — inferred from the situation, not a typed subcommand>
+**Build approach (project default)**: <name — one-line principle> · **Per-feature overrides**: <feature → approach, … — or "none (all inherit)">
 **Roadmap file**: <docs/roadmap/NN-name.md> — <created new | merged into latest | new slice (next number) because <reason>>
 **Existing plans read** (re-run): <N files, M features already on the roadmap — or "none (first plan)">
 **Existing features enrolled** (brownfield): <count as `existing` + count as `in-progress` (partial) — or "n/a (greenfield)">

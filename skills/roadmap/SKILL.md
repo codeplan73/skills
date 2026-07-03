@@ -2,7 +2,7 @@
 name: roadmap
 compatibility: Built for Claude Code — uses interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Use this skill to turn a product idea into a living, coarse, spec-driven roadmap — and to keep it current as you ship. Run /roadmap to plan a new product or the next slice of an existing one, `/roadmap replan` after a feature or phase ships to reconcile and queue what's next, and `/roadmap add <feature>` to enroll one ad-hoc feature. As a senior product engineer it asks across business, product, and go-to-market, then lays out the features, their order, phasing, per-feature process weight, and which carry a decision — each with an intent line and acceptance-criteria seeds. It writes the roadmap to docs/roadmap/. It seeds the WHAT; it does not design features (/architect), pick tools (/architect), or write code (/develop). Build tasks are derived from each feature's ADR, not guessed here."
+description: "Use this skill to turn a product idea into a living, coarse, spec-driven roadmap — and to keep it current as you ship. Just run `/roadmap [what]` and it infers the right move from the situation, the way /architect infers its mode: plan a new product, plan the next slice of an existing one, enroll a single feature you name (one coarse row, no full re-plan), or — with no argument — reconcile after shipping and queue what's next. You never type a subcommand. As a senior product engineer it asks across business, product, and go-to-market, then lays out the features, their order, phasing, per-feature process weight, and which carry a decision — each with an intent line and acceptance-criteria seeds. It writes the roadmap to docs/roadmap/. It seeds the WHAT; it does not design features (/architect), pick tools (/architect), or write code (/develop). Build tasks are derived from each feature's ADR, not guessed here."
 ---
 
 ## What this skill does
@@ -11,13 +11,13 @@ Turns an idea into an **ordered, coarse, living plan** — and keeps that plan h
 
 A roadmap here is deliberately **coarse and small**. Each feature row carries only: its order, its phasing, its status, a process **weight**, whether it **needs an ADR**, an **ADR pointer**, a **code area**, plus a one- or two-line **intent** and a few **acceptance-criteria seeds** (definition-of-done seeds — the WHAT). It does **not** hold an exhaustive build-task breakdown. Those tasks are **derived from each feature's ADR** when `/architect` designs it — `/roadmap` seeds the *what*; `/architect` designs the *how* and fills the tasks; `/develop` builds them.
 
-Three modes:
+**One command, inferred intent.** You always run `/roadmap [what]` — never a subcommand. The skill reads the situation (is there a roadmap yet? did you name a single feature or none? is this a brownfield repo?) and does the right thing, the way `/architect` infers its mode. The three behaviors below are what it *infers into*, not modes you select:
 
-| Mode | When | What it does |
+| Behavior | Inferred when | What it does |
 |---|---|---|
-| **plan** (default) | New product, or scoping the next slice of an existing one | Full pass: ask → decompose into coarse feature rows → order + phase → write the roadmap |
-| **replan** | After a feature or phase ships | Reconcile what shipped, enroll needs that surfaced during the build, reorder, queue the next slice. **This is the normal living rhythm, not a rare event.** |
-| **add** | An engineer invents one ad-hoc feature | Enroll **one** coarse row (intent + order + weight + Needs ADR) without re-planning the whole product |
+| **plan** (default) | No roadmap yet + a product-sized idea, or you ask for the next slice of an existing one | Full pass: ask → decompose into coarse feature rows → order + phase → write the roadmap |
+| **replan** | Roadmap exists + **no argument** | Reconcile what shipped, enroll needs that surfaced during the build, reorder, queue the next slice. **This is the normal living rhythm, not a rare event** — run bare `/roadmap` again to reconcile. |
+| **add** | Roadmap exists + the argument names a **single feature** | Enroll **one** coarse row (intent + order + weight + Needs ADR) without re-planning the whole product — run `/roadmap <a feature>` to enroll one |
 
 It seeds the plan and hands you a coarse, checkable list. Architecting each feature (which fills its build tasks) and building them is the rest of the workflow.
 
@@ -79,14 +79,16 @@ Written for any Agent Skills client on macOS, Linux, or Windows. Detection snipp
 
 ## Execution
 
-### Step 0 — Mode & idea check
+### Step 0 — Infer intent & idea check
 
-Determine the mode from how `/roadmap` was invoked:
-- **`/roadmap replan`** (or a re-run described as "reconcile / what's next") → **replan mode** (see the *Replan* section) — the normal rhythm after shipping.
-- **`/roadmap add <feature>`** → **add mode** (see the *Add* section) — enroll one row, no full re-plan.
-- **`/roadmap <idea>`** or bare `/roadmap` → **plan mode**, below.
+`/roadmap` takes **no subcommand** — you always infer the behavior from the situation (whether a roadmap already exists, and what the argument is). Do the detection in Step 1 (locate the roadmap) first if you need to, then infer:
+- **Roadmap exists + no argument** (or a re-run described as "reconcile / what's next") → **replan behavior** (see the *Replan* section) — the normal rhythm after shipping; the engineer just runs bare `/roadmap` again.
+- **Roadmap exists + the argument names a single feature** → **add behavior** (see the *Add* section) — enroll one row, no full re-plan; the engineer runs `/roadmap <a feature>`.
+- **No roadmap yet + a product-sized idea**, or a request to scope the **next slice** (including brownfield) → **plan behavior**, below.
 
-If plan mode and no idea was provided (`/roadmap` with no argument and no existing roadmap to extend): **stop and ask** before anything else:
+When intent is ambiguous (e.g. an argument that could be a whole new slice *or* a single feature on an existing roadmap), infer the most likely reading from scope and say which behavior you chose in the report; if truly unclear, ask a one-line clarifying question.
+
+If plan behavior and no idea was provided (`/roadmap` with no argument and no existing roadmap to extend): **stop and ask** before anything else:
 
 "What are you building? Describe the product or the slice of it you want to plan — one or two sentences about what it does and who it's for."
 
@@ -158,15 +160,19 @@ The **build approach** is the most far-reaching call the roadmap makes: it decid
 
 **Record it — this is the propagation source.** Write the chosen approach into the **roadmap header** as `Build approach: <name> — <one-line principle>`. It is a **project-wide convention, not just a roadmap note**: `/audit` and `/sync` persist it into the root `AGENTS.md`, and `/architect`, `/develop`, and `/verify` **read and honor it** — so the entire build follows the chosen approach consistently. It also sets the **Phasing** column values for feature rows (which slice / journey each belongs to).
 
+**This header value is the project *default* — any single feature may override it.** Most features inherit it; occasionally one feature is best built a different way (e.g. a clickable Facade prototype of one screen inside an otherwise Tracer-Bullet product). So each feature carries an optional per-feature **Approach** (Step 5) that overrides the default just for that row. **Precedence:** a feature builds by its row **Approach** if one is set, else by the project default. Record an override on a row **only when it differs** from the default — leave the row's Approach empty (inherit) otherwise.
+
 ### Step 4 — Foundations-first sequencing (a principle every build approach obeys)
 
-The chosen build approach decides how features are sliced — but **no approach starts a feature slice before the ground it stands on exists**. A working skeleton before features is a principle, not a preference: reason from it the same way whichever approach you recommended. So sequence the roadmap so these lead, each an explicit **foundation feature** (not a sub-task buried in a page). The order below is the reasoned default — a cheaper foundation precedes anything that depends on it:
+The chosen build approach decides how features are sliced — but **no approach starts a feature slice before the ground it stands on exists**. A working skeleton before features is a principle, not a preference: reason from it the same way whichever approach you recommended. So sequence the roadmap so these lead, each an explicit **foundation feature** (not a sub-task buried in a page). The order below is the reasoned default — a cheaper foundation precedes anything that depends on it. **Crucially, the stack must be decided and the project scaffolded before `/audit` runs**: `/audit` seeds root `AGENTS.md` conventions + tooling *from the real project*, so running it before the project exists is premature — it would capture conventions and tooling for a stack that isn't there yet.
 
-1. **Coding standards & conventions** — run `/audit` (greenfield) to capture the engineer's standards into root `AGENTS.md`. `Needs ADR: no` (captured by `/audit`, not designed).
-2. **Stack & architecture** — `/architect` → ARCHITECTURE ADR. `Needs ADR: yes`. This is where tools/providers get chosen — not here.
-3. **Data model** — an **explicit, non-skippable foundation feature** (`Needs ADR: yes`). The core entities, relationships, and persistence shape that every later feature builds on. Never fold this into another feature or skip it — a wrong data model is the most expensive thing to redo.
-4. **Design system / UI foundation** — `/architect` → `design.md`, then base components (`Needs ADR: yes`) — if the product has meaningful UI. Cross-cutting: every page depends on it.
-5. **Walking-skeleton slice** — a **thin vertical slice wired end-to-end** (DB → API → UI), doing **one trivial real thing** (e.g. a single record you can create and see rendered). It proves the whole stack is connected before feature work piles on. Weight `medium`, and it usually leans on the foundation ADRs above rather than needing its own.
+1. **Standards preferences** — the engineer's light, un-inferable standards *preferences* (architecture style leanings, formatting taste). Keep this **light** — it's a preference capture, and it may be folded into the stack decision below rather than its own foundation feature. The heavy convention + tooling capture is `/audit`, which comes **after** scaffold (step 4). `Needs ADR: no`.
+2. **Stack decision** — `/architect` → ARCHITECTURE ADR. `Needs ADR: yes`. This is where tools/providers/frameworks get chosen — not here. **Nothing tooling-related runs before this.**
+3. **Scaffold the project** — an **explicit foundation feature** (not an implicit sub-step): initialize the project with the chosen stack (framework scaffold, dependency install, directory layout, a runnable dev server / build). This turns the ARCHITECTURE ADR into a real, running skeleton on disk. `Needs ADR: no` (it executes the stack decision; it doesn't make one). Weight `medium`. Without this step there is no real project for `/audit` to read.
+4. **Coding standards & tooling (`/audit`)** — run `/audit` (greenfield) to capture the engineer's standards into root `AGENTS.md` **and** seed enforcement tooling — now reading the **real, scaffolded project** (its actual stack, structure, and manifests) rather than guessing. `Needs ADR: no` (captured by `/audit`, not designed). **This runs after stack-decision + scaffold, never before.**
+5. **Data model** — an **explicit, non-skippable foundation feature** (`Needs ADR: yes`). The core entities, relationships, and persistence shape that every later feature builds on. Never fold this into another feature or skip it — a wrong data model is the most expensive thing to redo.
+6. **Design system / UI foundation** — `/architect` → `design.md`, then base components (`Needs ADR: yes`) — if the product has meaningful UI. Cross-cutting: every page depends on it.
+7. **Walking-skeleton slice** — a **thin vertical slice wired end-to-end** (DB → API → UI), doing **one trivial real thing** (e.g. a single record you can create and see rendered). It proves the whole stack is connected before feature work piles on. Weight `medium`, and it usually leans on the foundation ADRs above rather than needing its own.
 
 **Then** the feature slices, ordered and phased per Step 3. The **Phasing** column marks each row as `Foundation`, `Skeleton`, the slice/journey it belongs to (e.g. `Slice 2`), or `Deferred`; the **Order** column is the integer build sequence across the whole roadmap.
 
@@ -178,6 +184,7 @@ From the answers, produce the feature list — foundations first (Step 4), then 
 - **Intent (1–2 lines)** — what it is and why it matters. The one-liner a teammate reads to know what this row is for.
 - **Acceptance-criteria seeds** — a few bullet "definition of done" seeds: the **WHAT**, the observable outcomes that mean this feature works (e.g. "user can filter the list by category and the URL reflects the filter"; "empty and error states render"; "SEO metadata present"). These are **seeds, not a spec** — `/architect` refines them into the ADR's full requirements and acceptance criteria. Don't over-specify; capture the load-bearing outcomes.
 - **Weight** — `lean` / `medium` / `full` (see *Artifact ownership*). Set the initial call from risk, scope, and compliance sensitivity.
+- **Approach (optional per-feature override)** — defaults to **inherit the project default** (the header's Build approach). Only when a feature is genuinely best built a different way, run a **Build-approach decision panel for THAT feature**: offer **`(recommended) inherit the project default`** as the top option, plus the named approaches (Tracer Bullet · Skateboard · Facade (prototype-grade) · Journey · Other) as overrides. Same decision-panel + capability-first + no-hardcoded-tool conventions as Step 3. **Record the Approach on the row only when it differs from the default**; leave it empty (inherit) otherwise. Precedence: row Approach if set, else the project default.
 - **Needs ADR?** — use the *invent-test*: **would building it require a decision the engineer hasn't made?** Flag **yes** when it involves a provider/library choice, a data model, a cross-cutting pattern, the design system, a whole page/screen with no spec yet, or non-trivial behavior (search, filtering, recommendations). Flag **no** only for genuinely pure implementation an existing `design.md`/ADR/convention already covers. When unsure, flag **yes** — an unflagged decision is the expensive miss. A `full`-weight feature is almost always `yes`.
 - **One decision per ADR — don't bundle, don't false-flag.** When a feature carries **multiple distinct decisions**, each is its own `Needs ADR: yes` item — don't lump unrelated decisions into one "strategy" ADR. If several genuinely share **one** broad decision that then splits, model it as an **umbrella** and let dependents reference it — but never mark a dependent `no` when it actually carries its own decision.
 
@@ -233,13 +240,14 @@ Keep it coarse and surgical: reconcile cells and append rows; don't rewrite the 
 
 ## Add (enroll one ad-hoc feature — lightweight)
 
-`/roadmap add <feature>` enrolls **one** coarse row without re-planning the product — for a feature the engineer invents mid-stream.
+Inferred when a roadmap already exists and the argument names a single feature — `/roadmap <a feature>` enrolls **one** coarse row without re-planning the product, for a feature the engineer invents mid-stream. There is no `add` subcommand to type.
 
 1. **Re-read the roadmap** and **dedup** — if it already exists in any status, extend that row instead of adding a duplicate.
 2. **Ask only what's needed** (a short decision panel if the intent/weight is ambiguous — otherwise infer): the feature's **intent**, its **weight**, and where it sits (its **Order** / **Phasing**).
-3. **Set `Needs ADR?`** with the invent-test (Step 5). If yes, its next step is `/architect <feature>`.
-4. **Append one row** (next free `#`, status `planned`) with its intent line and a couple of acceptance-criteria seeds — **no build-task breakdown** (derived from the ADR later). In an epic-split roadmap, add it to the right epic file and bump that epic's rollup in `index.md`.
-5. **Report** briefly (mode: add): the row added, its weight, whether it needs an ADR, and the next command.
+3. **Offer the per-feature Approach** (Step 5) — top option **`(recommended) inherit the project default`**, plus the named approaches to override. Record an Approach on the row **only if it differs** from the header default; otherwise leave it inheriting.
+4. **Set `Needs ADR?`** with the invent-test (Step 5). If yes, its next step is `/architect <feature>`.
+5. **Append one row** (next free `#`, status `planned`) with its intent line and a couple of acceptance-criteria seeds — **no build-task breakdown** (derived from the ADR later). In an epic-split roadmap, add it to the right epic file and bump that epic's rollup in `index.md`.
+6. **Report** briefly (mode: add): the row added, its weight, its approach (inherited or overridden), whether it needs an ADR, and the next command.
 
 ---
 

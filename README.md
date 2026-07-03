@@ -51,7 +51,7 @@ Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below,
 
 | Skill | Phase | What it does |
 |---|---|---|
-| [`roadmap`](skills/roadmap/) | **Scope** | Turns an idea into a **coarse, living** feature roadmap in `docs/roadmap/` — each feature with an intent, acceptance-criteria seeds, phasing, and process weight. Build tasks are derived from each feature's ADR, not guessed here. Includes `replan` and `add`. |
+| [`roadmap`](skills/roadmap/) | **Scope** | Turns an idea into a **coarse, living** feature roadmap in `docs/roadmap/` — each feature with an intent, acceptance-criteria seeds, phasing, and process weight. Build tasks are derived from each feature's ADR, not guessed here. Just run `/roadmap` — it infers plan / reconcile / enroll-one-feature from context. |
 | [`audit`](skills/audit/) | **Map** | Writes the `AGENTS.md` context files every other skill reads — asks your standards on greenfield, scans the code on brownfield, per-area (and per-workspace) nesting. |
 | [`architect`](skills/architect/) | **Decide** | Staff-engineer system design as a **staged, gated** conversation (requirements → data model → stack → API → security → edge cases), writing a complete build-spec **ADR** — `## Requirements` (acceptance criteria), Design, `## Build plan` — to `docs/adr/`. |
 | [`develop`](skills/develop/) | **Build** | Builds a feature — UI *and* logic — from its ADR as a **vertical slice**, runs migrations, and emits verify steps. **Gates on the decision first**: if building would mean inventing something undecided, it routes you to `/architect`. |
@@ -71,8 +71,8 @@ Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below,
 You rarely run all twelve. The [Tiers table](#tiers--right-sizing-the-process) (or the roadmap) tells you which subset a given piece of work needs.
 
 ### Greenfield — a new product
-1. **`/roadmap`** decomposes the idea into a **coarse, living** roadmap, **foundations first**: coding standards → stack → **data model** → design system → a **walking-skeleton** slice, *then* the feature slices.
-2. Walk the roadmap in order. For each foundation/feature it names the exact command (e.g. `/audit` to capture standards, `/architect` to choose the stack and design the data model).
+1. **`/roadmap`** decomposes the idea into a **coarse, living** roadmap and picks the build approach, **foundations first**: **stack** → **scaffold** → **coding standards** → **data model** → design system → a **walking-skeleton** slice, *then* the feature slices.
+2. Walk the roadmap in order. The ground gets laid before conventions or code: **`/architect`** decides the stack (an ARCHITECTURE ADR), then you **scaffold the project** with that chosen stack, then **`/audit`** seeds root `AGENTS.md` conventions + tooling from the *real* project — running it before the stack is chosen and the project scaffolded would be premature. `/architect` then designs the data model, and so on down the foundations.
 3. Then the per-feature loop (below), building each feature as a **vertical slice** (data → logic → API → UI, end-to-end) so every slice ships something real. Run `/roadmap replan` after each slice lands to reconcile and queue what's next.
 
 ### Brownfield — an existing codebase
@@ -148,7 +148,7 @@ Acceptance-criteria seeds:
   - **Journey** — a complete user path end-to-end per phase.
 
   The choice is **recorded once and honored everywhere**: `/roadmap` writes it into the roadmap header → `/audit`/`/sync` persist it into root `AGENTS.md` → `/architect`, `/develop`, `/verify` read it and shape the ADR's build plan, the build, and what "working" means to fit it. Change the approach and the whole pipeline follows.
-- **Foundations-first sequencing** — whatever the phasing, the ground comes first and isn't up for a vote: **coding standards → stack → data model → design system → a walking-skeleton slice**, *then* the features.
+- **Foundations-first sequencing** — whatever the phasing, the ground comes first and isn't up for a vote: **stack → scaffold → coding standards → data model → design system → a walking-skeleton slice**, *then* the features. (The stack is decided and the project scaffolded *before* `/audit` seeds conventions + tooling, so it reads the real project rather than an empty one.)
 - **Per-feature process weight** — the `Weight` column right-sizes each feature (it turns design-review and `/harden` on or off downstream). This **replaces the old triage step** — right-sizing is one column, not a separate skill.
 - **The replan beat** — the roadmap is *living*. `/roadmap replan` after each feature or phase ships reconciles what landed, enrolls follow-ups surfaced during the build (from the ADR's `## Consequences` / `## Follow-up`), reorders, and queues the next slice. `/roadmap add <feature>` enrolls one ad-hoc feature without re-planning the whole product.
 - **Epic-split** — a small product is a single `roadmap.md`; a big one splits by epic into an `index.md` + one file per epic (mirroring the ADR umbrella and the per-workspace layout).
@@ -203,9 +203,9 @@ The amount of process scales with risk. **Right-size each change against the tab
 
 **Starting a whole product or a fresh batch of features** isn't one change — run `/roadmap` first to produce the feature roadmap (in `docs/roadmap/`), then right-size each feature off that list one at a time.
 
-**Greenfield vs brownfield order.** The first two steps invert depending on whether code exists yet:
+**Greenfield vs brownfield order.** Where `/audit` sits depends on whether code exists yet:
 - **Brownfield** (existing codebase): `/audit → /architect → …` — understand what's there *before* deciding the change.
-- **Greenfield** (new project): `/roadmap → /architect → /audit → /develop → …` — decide the foundational stack **first** (`/architect`'s ARCHITECTURE ADR), *then* `/audit` seeds root `AGENTS.md` from that decision (auditing before the stack is chosen would seed an empty one).
+- **Greenfield** (new project): `/roadmap → /architect → scaffold → /audit → /develop → …` — decide the foundational stack **first** (`/architect`'s ARCHITECTURE ADR), **scaffold the project** with that stack, *then* `/audit` seeds root `AGENTS.md` conventions + tooling from the real scaffolded project (auditing before the stack is chosen and scaffolded would seed an empty one).
 
 ---
 

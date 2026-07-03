@@ -9,7 +9,7 @@ description: "Use this skill to bootstrap a project's AI context — the AGENTS.
 
 The context-bootstrapper. It gives every later skill (and every AI tool) an accurate picture of the project by writing the `AGENTS.md` files — and it handles all three starting points:
 
-- **Greenfield** (no code yet): asks the engineer for the coding standards and conventions, and **seeds the root `AGENTS.md`** from the answers — including the project's **build approach** (name + one-line principle) read from the roadmap header if `/roadmap` set one — so the very first `/develop` already has ambient conventions to build to. (This is the cold-start fix: without it, the foundational stack/standards/build-approach decision has nowhere to land.)
+- **Greenfield** (no code yet): asks the engineer for the coding standards and conventions, and **seeds the root `AGENTS.md`** from the answers — including the project's **build approach** (name + one-line principle) read from the roadmap header if `/roadmap` set one — so the very first `/develop` already has ambient conventions to build to. (This is the cold-start fix: without it, the foundational stack/standards/build-approach decision has nowhere to land.) On greenfield this runs **after the project is scaffolded with its chosen stack** — the greenfield spine is `/roadmap` → `/architect` (decide the stack) → **scaffold the project** → `/audit`, so it seeds conventions + tooling from the *real* project; running it before the stack is chosen and scaffolded is premature.
 - **Brownfield, undocumented** (code, no `AGENTS.md`): scans the whole project, then **writes the root `AGENTS.md` AND creates nested `<area>/AGENTS.md` files** — using judgment about what is global (→ root) versus area-specific (→ nested).
 - **Brownfield, partially documented** (code + some `AGENTS.md` already): checks the existing root and nested docs **against the whole codebase** and **adds only what's missing** — new global facts, and nested docs for undocumented areas — never clobbering curated content.
 
@@ -134,6 +134,8 @@ Then route to the chosen phase.
 ### Phase 1 — Greenfield setup
 
 **Trigger**: pre-flight classified **clearly greenfield**, or Phase 0 → `New project`.
+
+On greenfield, `/audit` is meant to run **after the project has been scaffolded with its chosen stack** (`/roadmap` → `/architect` decides the stack → scaffold → `/audit`) — so it seeds `AGENTS.md` conventions + tooling from the real project. Running before the stack is chosen and scaffolded is premature; the standards questions and root-seed behavior below are unchanged either way.
 
 **Step 1 — Ask coding patterns** (main model asks, as above):
 
