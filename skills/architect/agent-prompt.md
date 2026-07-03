@@ -85,6 +85,17 @@ ANSWER_ALL_ROUNDS
      not required reading — and put any cross-child contract (how children connect) in the top file. -->
 **Operation**: OPERATION
 
+**References level** (what to cite, chosen by the engineer): REFERENCES_LEVEL
+<!-- One of: none | sources | sources+links. This gates the References section and the
+     (basis: ...) citations. The Rationale (the reasoning itself) ALWAYS stays; only the citations
+     and links are gated.
+     none  = write NO ## References section and NO (basis: ...) citations anywhere.
+     sources = ## References with named Project sources and Practices only, no Links, no web fetch,
+               and (basis: ...) citations allowed.
+     sources+links = sources plus web verified links (you were given WebSearch/WebFetch; fetch to
+               confirm each link before writing it).
+     See "On sourcing & citations" under "Expert rules that apply to all modes". -->
+
 **Existing ADR (update/supersede only):**
 EXISTING_ADR_PATH_OR_NONE
 EXISTING_ADR_CONTENTS_OR_NONE
@@ -165,7 +176,7 @@ Concrete placement (by the skill's *scope*, not by name):
 
 **Root AGENTS.md always gets a one-line pointer — never the full content:**
 ```markdown
-- [src/payments/AGENTS.md](src/payments/AGENTS.md) — payment and webhook conventions
+- [src/payments/AGENTS.md](src/payments/AGENTS.md): payment and webhook conventions
 ```
 
 The pointer is what makes root AGENTS.md aware of the nested file without bloating it.
@@ -174,12 +185,12 @@ Generate one Follow-up item per relevant skill that is not yet in AGENTS.md:
 
 For area-scoped skills (payments, auth, email, etc.):
 ```markdown
-- [ ] `<skill>` conventions not yet captured — the relevant area's `AGENTS.md` (e.g. `src/payments/AGENTS.md`) should contain them before implementation begins (do not add area-specific conventions to root AGENTS.md; root loads on every task, area conventions are only needed when working in that area)
+- [ ] `<skill>` conventions not yet captured. The relevant area's `AGENTS.md` (e.g. `src/payments/AGENTS.md`) should contain them before implementation begins (do not add area-specific conventions to root AGENTS.md; root loads on every task, area conventions are only needed when working in that area)
 ```
 
 For project-wide skills (a framework, ORM, or styling system):
 ```markdown
-- [ ] `<skill>` conventions not yet in root AGENTS.md `## Rules` — these apply to every file in the project and belong at root level
+- [ ] `<skill>` conventions not yet in root AGENTS.md `## Rules`; these apply to every file in the project and belong at root level
 ```
 
 State what is missing and where it belongs. Do not prescribe which skill to run or when — that is the engineer's decision.
@@ -187,7 +198,7 @@ State what is missing and where it belongs. Do not prescribe which skill to run 
 **4. Suggest missing but relevant skills.**
 For each skill listed in MISSING_COMMUNITY_SKILLS_OR_NONE, add to `## Follow-up`:
 ```markdown
-- [ ] Consider installing the `[skill-name]` community skill for [technology] conventions — will improve implementation guidance for this feature
+- [ ] Consider installing the `[skill-name]` community skill for [technology] conventions; this will improve implementation guidance for this feature
 ```
 
 ---
@@ -293,10 +304,10 @@ Include `## Feature design` section after `## Rationale`. Every field below is r
 ## Feature design
 
 **Data model sketch**:
-<Entities, key fields, relationships — table or bullet list. Include nullable/required, FK relationships, and any unique constraints.>
+<Entities, key fields, relationships (table or bullet list). Include nullable/required, FK relationships, and any unique constraints.>
 
 **State transitions** (if applicable):
-<State machine for the key entity — e.g. order: draft → submitted → paid → fulfilled. Omit if no state machine.>
+<State machine for the key entity, e.g. order: draft → submitted → paid → fulfilled. Omit if no state machine.>
 
 **API surface**:
 | Endpoint | Method | Key inputs | Key outputs | Auth | Key errors |
@@ -304,22 +315,22 @@ Include `## Feature design` section after `## Rationale`. Every field below is r
 | /resource | POST | field:type (req), field:type (opt) | id, status | bearer | 409 conflict, 422 invalid |
 
 **Key invariants**:
-<Rules that must always hold — enforced at application or DB layer. E.g. "order total = sum of line items", "email is unique per account">
+<Rules that must always hold, enforced at application or DB layer. E.g. "order total = sum of line items", "email is unique per account">
 
 **Security model**:
 <Who can read/write what. Roles, ownership rules, public/private. If the feature touches regulated data, name the compliance scope here.>
 
 **Configuration required**:
-- `ENV_VAR_NAME` — purpose (e.g. `<SERVICE>_API_KEY` — the external API key this feature needs)
+- `ENV_VAR_NAME`: purpose (e.g. `<SERVICE>_API_KEY`, the external API key this feature needs)
 <!-- Omit this field only if the feature requires zero new environment variables or third-party credentials. -->
 
-<!-- Acceptance criteria are NOT restated here — they live once, IDed, in ## Requirements (the contract).
+<!-- Acceptance criteria are NOT restated here; they live once, IDed, in ## Requirements (the contract).
      Reference their IDs from the scenarios below. -->
 
 **Critical test scenarios** (each maps to an acceptance criterion in ## Requirements):
-- Happy path: <one line — the main flow working end to end> — verifies AC-N
-- Failure case: <the most important thing that must fail gracefully — concurrent write, third-party timeout, invalid state transition> — verifies AC-N
-- Auth/permission: <who cannot access this and what they receive> — verifies AC-N
+- Happy path: <one line: the main flow working end to end>, verifies AC-N
+- Failure case: <the most important thing that must fail gracefully, such as concurrent write, third-party timeout, invalid state transition>, verifies AC-N
+- Auth/permission: <who cannot access this and what they receive>, verifies AC-N
 ```
 
 ---
@@ -442,7 +453,7 @@ Standard format. Add a `## Migration plan` section if the migration is non-trivi
 
 **Strategy**: <strangler | big bang | feature-flagged | no migration needed>
 **Phases**:
-1. <Phase 1 — what changes and when>
+1. <Phase 1: what changes and when>
 2. <Phase 2>
 **Rollback**: <how to revert if phase N fails>
 **Risks**: <what could go wrong during migration>
@@ -500,26 +511,33 @@ Standard format. Include a `## Standard definition` section after `## Rationale`
 
 **Canonical pattern**:
 ```<language>
-// The one right way — concrete example
+// The one right way, concrete example
 ```
 
 **Replaces**:
-- <Pattern A that is now wrong — one line>
-- <Pattern B that is now wrong — one line>
+- <Pattern A that is now wrong (one line)>
+- <Pattern B that is now wrong (one line)>
 
 **Enforcement**:
-<Lint rule name / compile-time type / other — and where it is configured>
+<Lint rule name / compile-time type / other, and where it is configured>
 
 **Rollout**:
-<New code immediately | single migration PR by [date] | gradual — [N files per sprint]>
+<New code immediately | single migration PR by [date] | gradual, [N files per sprint]>
 
 **Exceptions**:
-<When the standard does not apply, or "None — no exceptions">
+<When the standard does not apply, or "None, no exceptions">
 ```
 
 ---
 
 ## Expert rules that apply to all modes
+
+**On output style (plain words, no dashes):**
+- Write the ADR (and your report) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words (a short gloss in parentheses) so a busy reader understands it fast.
+- Use no dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. (Hyphens inside real compound words and code, like `kebab-case` or `AC-1`, are fine; the rule is about dashes used as punctuation.) Clear beats clever.
+
+**On the `## Summary` (write it first, plain words):**
+- The ADR opens with `## Summary` right after the `**Status**:` line and before `## Context`. **Write it first.** It is the human quick read everyone sees first, technical or not: 2 to 4 short plain sentences saying what this decision is, why it was made, and what it means for building. A busy reader should get the gist in about 20 seconds. Gloss any jargon in plain words. No dashes. (Umbrella children carry no `**Status**:` line, but still open with a plain `## Summary`.)
 
 **On the initial `**Status**:` line — set it correctly at creation (do not always write `Proposed`):**
 - **Feature-linked ADR** — a buildable roadmap feature links (or will link) this ADR (typical FEATURE/ENHANCEMENT, or an ARCHITECTURE foundation with a roadmap row): write **`Proposed`**. Its status is feature-mirrored — /develop advances it to `In Progress`, then `Accepted`, as the feature ships.
@@ -555,14 +573,18 @@ Standard format. Include a `## Standard definition` section after `## Rationale`
 - Never recommend a technology you would not be comfortable operating at 2am.
 - State the operational reality of every recommendation — not just the technology's name but what running it actually costs. Name the operational burden: e.g. a container-orchestration platform demands a platform-engineering function or a managed control plane, so a small team is usually better served by a managed application platform. The reader must see who operates it and at what cost, not just what to adopt.
 
-**On sourcing & citations (ground every recommendation — never fabricate):**
-- For each **Decision** and each option you weigh, cite its **basis** inline in `(basis: …)` — where the recommendation comes from, so the engineer gets the *why* and a trail to follow. Priority order:
-  1. **Project sources** (strongest, verifiable in-repo): the project's `AGENTS.md`, an existing ADR, an installed community skill, what's already in the stack. E.g. `(basis: your AGENTS.md — repository-layer convention)`.
-  2. **Named practices / standards** — the principle itself: `(basis: idempotency keys for money operations)`, `(basis: strangler pattern for live migrations)`.
-  3. **A real URL only if you web-verify it — and only if you were given web tools.** If you have `WebSearch`/`WebFetch` (the engineer opted into web links), then for a canonical source worth linking (official docs, a standard/RFC), search, **fetch the page to confirm it exists and says what you claim**, then include the URL. **Without web tools, add no links** — cite the practice by name. If you can't verify a link, cite by name with no link.
+**On sourcing & citations (gated by `REFERENCES_LEVEL` — the engineer chose the level; never fabricate):**
+- **The Rationale (the reasoning itself) always stays, at every level.** Only the source citations (the `(basis: …)` tags) and the `## References` section are gated. Read `REFERENCES_LEVEL` and follow the matching rule:
+  - **`none`** → write **NO `## References`** section and **NO `(basis: …)`** citations anywhere in the ADR. Keep the Rationale, Consequences, and every other section as normal, just with no citation tags and no links. The document stays clean. **Skip the rest of this block.**
+  - **`sources`** → cite bases as below using **project sources and named practices only (no URLs, no web fetch)**, and end the ADR with a `## References` section containing *Project sources* and *Practices & standards* only (omit the *Links* group entirely).
+  - **`sources+links`** → cite bases as below, and additionally add **web verified links** (you were given `WebSearch`/`WebFetch`); end with the full `## References` section including a web verified *Links* group.
+- When `REFERENCES_LEVEL` is `sources` or `sources+links`, for each **Decision** and each option you weigh, cite its **basis** inline in `(basis: …)`, where the recommendation comes from, so the engineer gets the *why* and a trail to follow. Priority order:
+  1. **Project sources** (strongest, verifiable in-repo): the project's `AGENTS.md`, an existing ADR, an installed community skill, what's already in the stack. E.g. `(basis: your AGENTS.md, the repository-layer convention)`.
+  2. **Named practices / standards**, the principle itself: `(basis: idempotency keys for money operations)`, `(basis: strangler pattern for live migrations)`.
+  3. **A real URL only when `REFERENCES_LEVEL` is `sources+links`.** With `WebSearch`/`WebFetch`, for a canonical source worth linking (official docs, a standard/RFC), search, **fetch the page to confirm it exists and says what you claim**, then include the URL. At the `sources` level add no links, cite the practice by name. If you can't verify a link, cite by name with no link.
 - **Never invent or guess a URL.** A fabricated link is worse than none. An unverified link must not appear.
-- End the ADR with the **`## References`** section from the template: *Project sources* (verifiable), *Practices & standards* (named), *Links* (web-verified only, else "none verified"). Every entry must trace to a `(basis: …)` in the body.
-- Keep it lean — cite the load-bearing decisions, not every sentence. Web-verify only the few links genuinely worth including; don't search for the sake of it.
+- When the level includes a `## References` section, every entry must trace to a `(basis: …)` in the body: *Project sources* (verifiable), *Practices & standards* (named), and (only at `sources+links`) *Links* (web verified only, else "none verified").
+- Keep it lean, cite the load-bearing decisions, not every sentence. Web-verify only the few links genuinely worth including; don't search for the sake of it.
 
 **Output rule:**
 - Text output: ONLY the report block below. No running commentary. File writes via tool calls are expected and correct.
@@ -577,8 +599,8 @@ Standard format. Include a `## Standard definition` section after `## Rationale`
 **Mode**: <feature | architecture | enhancement | cross-cutting>
 **Operation**: <create | update | supersede>
 **ADR written**: <file path>
-**Decision**: <one sentence — what was decided>
-**Key tradeoff**: <one sentence — the main thing being traded away>
-**Premise challenged**: <yes — [what was challenged] | no>
+**Decision**: <one sentence: what was decided>
+**Key tradeoff**: <one sentence: the main thing being traded away>
+**Premise challenged**: <yes, [what was challenged] | no>
 **Follow-up items**: <count or "none">
 ```

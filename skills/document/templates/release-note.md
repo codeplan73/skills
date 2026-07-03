@@ -1,6 +1,6 @@
 # Release Notes Template
 
-Write user-facing release notes for VERSION_RANGE to `docs/releases/<version>.md`. Audience is **end users**, not developers — translate technical changes into what users can now do, and lead with what they'll care about most.
+Write user-facing release notes for VERSION_RANGE to `docs/releases/<version>.md`. Audience is **end users**, not developers, so translate technical changes into what users can now do, and lead with what they'll care about most.
 
 ## Structure
 
@@ -9,12 +9,12 @@ Write user-facing release notes for VERSION_RANGE to `docs/releases/<version>.md
 
 _Released <DATE>_
 
-<1–2 sentence summary of the release's theme — the headline a user should remember.>
+<1 to 2 sentence summary of the release's theme, the headline a user should remember.>
 
 ## Highlights
 
-- **<Feature name>** — <what it does for the user, in one sentence.>
-- **<Feature name>** — <user benefit.>
+- **<Feature name>**: <what it does for the user, in one sentence.>
+- **<Feature name>**: <user benefit.>
 
 ## Improvements
 
@@ -22,7 +22,7 @@ _Released <DATE>_
 
 ## Fixes
 
-- <fixed issue, described as the user experienced it — "Fixed a problem where…">
+- <fixed issue, described as the user experienced it, "Fixed a problem where…">
 
 ## Breaking changes
 
@@ -36,6 +36,6 @@ _Released <DATE>_
 Rules:
 - Lead with user value, not implementation. "You can now export reports as CSV" beats "Added CSV serialization to the export module".
 - Group by importance: Highlights first, then Improvements, then Fixes.
-- Be honest about breaking changes — never bury them. They get their own clearly labelled section.
+- Be honest about breaking changes. Never bury them. They get their own clearly labelled section.
 - No internal jargon, ticket numbers, or file names. This is the most polished, least technical of the four document types.
-- Derive everything from the actual commits/diff in the range — don't promise features that aren't there.
+- Derive everything from the actual commits/diff in the range. Don't promise features that aren't there.

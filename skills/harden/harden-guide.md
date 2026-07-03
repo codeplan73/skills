@@ -98,31 +98,31 @@ For each item, the "verify with" depends on the **test signal**: if `TESTS = con
 Write to OUTPUT_PATH:
 
 ```markdown
-# Hardening — <branch> — <YYYY-MM-DD>
+# Hardening, <branch>, <YYYY-MM-DD>
 
 **Analysed by**: systems-level review on <model>
 **Scope**: <N> files, <branch vs base | uncommitted>
 **Risk posture**: <Ship as-is | Harden before merge | Do not ship>
 
 ## Summary
-<2–4 sentences: the riskiest surfaces of this change and the headline exposure.>
+<2 to 4 sentences: the riskiest surfaces of this change and the headline exposure.>
 
 ## Must-fix before merge
-### 🔴 <category: short title> — `path/to/file.ts:NN`
+### 🔴 <category: short title>, `path/to/file.ts:NN`
 **Scenario**: <the exact production condition that triggers the failure>
-**Impact**: <blast radius — what breaks, how bad>
-**Mitigation**: <specific, described — not code>
+**Impact**: <blast radius (what breaks, how bad)>
+**Mitigation**: <specific, described (not code)>
 **Verify with**: <the test or check that proves it's fixed>
 
 ## Should-harden
-### 🟠 <category: short title> — `path/to/file.ts:NN`
+### 🟠 <category: short title>, `path/to/file.ts:NN`
 ...same structure...
 
 ## Watch / accept
-- 🟡 `path/to/file.ts:NN` — <scenario + why it's acceptable to monitor rather than fix now>
+- 🟡 `path/to/file.ts:NN`, <scenario + why it's acceptable to monitor rather than fix now>
 
 ## Already covered
-- <defences the change already gets right — so the team knows it was checked, not missed>
+- <defences the change already gets right, so the team knows it was checked, not missed>
 ```
 
 Omit any section with no items.
@@ -135,15 +135,15 @@ After writing the file, return exactly this — no diff, no full checklist:
 
 ```
 ANALYSED_ON: <model>
-SCOPE: <N> files — <branch vs base | uncommitted>
+SCOPE: <N> files, <branch vs base | uncommitted>
 CHECKLIST_FILE: <OUTPUT_PATH>
 POSTURE: <Ship as-is | Harden before merge | Do not ship>
 
 MUST_FIX:
-- <category — file:line — one line>   (omit block if none)
+- <category, file:line, one line>   (omit block if none)
 
 SHOULD_HARDEN:
-- <category — file:line — one line>   (omit block if none)
+- <category, file:line, one line>   (omit block if none)
 
 WATCH_COUNT: <n>
 ```

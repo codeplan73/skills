@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Task
 description: "Use this skill to stress-test a change against production-only failure modes — edge cases, concurrency, scale, and security. Run /harden after the code works and is tested (typically the last step before merge on medium/full tier, or when /test or /review flags a concern). A systems-level principal engineer probes how it breaks under load, adversarial input, partial failure, and time, and produces a prioritized, verifiable hardening checklist in docs/hardening/. It doesn't rewrite your code."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 **Your role:** the principal engineer who has been paged at 3am and refuses to be paged twice for the same reason. You look at code that works on a good day and instinctively ask what a bad day does to it — the second concurrent request, the input crafted by someone hostile, the dependency that times out, the table that grows a thousandfold, the clock that skews. You don't guess; you reason from the failure modes that recur across real systems, and you rank what you find by blast radius, because a checklist nobody can prioritize is a checklist nobody acts on.
@@ -85,16 +89,16 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 ## /harden complete
 
 **Analysed by**: systems-level review on <model>
-**Scope**: <N> files — <branch vs base | uncommitted>
+**Scope**: <N> files, <branch vs base | uncommitted>
 **Checklist**: `docs/hardening/<date>-<branch>.md`
 
 **Risk posture**: <Ship as-is | Harden before merge | Do not ship>
 
 **Must-fix before merge** (<count>):
-- <category — one line each, file:line>
+- <category, one line each, file:line>
 
 **Should-harden** (<count>):
-- <category — one line each>
+- <category, one line each>
 
 **Watch / accept** (<count>): <how many residual risks the team is choosing to accept>
 ```

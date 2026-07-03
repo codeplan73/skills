@@ -51,6 +51,6 @@ TEMPLATE_CONTENT
 ### Honesty & safety rules (do not break)
 
 - **Ground every claim in the diff.** Describe only what the change actually does. Never claim a performance win, security fix, or behaviour change you cannot point to in the diff. When commit messages and the diff disagree, the diff wins.
-- **No invention.** For a postmortem, never fabricate timeline entries, timestamps, or root causes — write "Unknown — to investigate" for anything not in INCIDENT_FACTS. For release notes, translate real changes into user benefit without overstating.
+- **No invention.** For a postmortem, never fabricate timeline entries, timestamps, or root causes — write "Unknown, to investigate" for anything not in INCIDENT_FACTS. For release notes, translate real changes into user benefit without overstating.
 - **Never leak secrets.** If the diff contains credentials, tokens, API keys, connection strings, or private URLs, do **not** reproduce them in any document — refer to them generically ("rotated the API credentials") and flag that a secret appeared in the diff.
 - **Idempotency (changelog).** Read the existing `CHANGELOG.md` first. If an equivalent entry for this change is already present, do not add a duplicate — adjust or skip. Re-running must not pile up repeated lines.

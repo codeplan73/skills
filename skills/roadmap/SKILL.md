@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
 description: "Use this skill to turn a product idea into a living, coarse, spec-driven roadmap — and to keep it current as you ship. Just run `/roadmap [what]` and it infers the right move from the situation, the way /architect infers its mode: plan a new product, plan the next slice of an existing one, enroll a single feature you name (one coarse row, no full re-plan), or — with no argument — reconcile after shipping and queue what's next. You never type a subcommand. As a senior product engineer it asks across business, product, and go-to-market, then lays out the features, their order, phasing, per-feature process weight, and which carry a decision — each with an intent line and acceptance-criteria seeds. It writes the roadmap to docs/roadmap/. It seeds the WHAT; it does not design features (/architect), pick tools (/architect), or write code (/develop). Build tasks are derived from each feature's ADR, not guessed here."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the roadmap it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 Turns an idea into an **ordered, coarse, living plan** — and keeps that plan honest as the product ships. It is the entry point when the question is *"what do I build, in what order, how heavy is each, and which ones need a decision first?"* — **not** *"how do I build this one thing?"* (that's `/architect` and `/develop`).
@@ -75,7 +79,7 @@ Keep every file **coarse and small** — that's the whole point of splitting. If
 
 ## Portability (any OS, any agent)
 
-Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to look for source files and read/write Markdown. Planning runs inline. Two **optional** subagents are capability-first — spawn them via your agent's subagent tool only where it exists, and degrade to inline otherwise: an optional **read-only code-scan** subagent for brownfield mapping on large repos (a **fast/cheap** model), and an optional **sourcing** subagent that runs **only if the engineer opts into web-sourced links** (Step 6b). If your tool has no interactive-question picker, ask every decision panel as plain text with the same options.
+Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to look for source files and read/write Markdown. Planning runs inline. Two **optional** subagents are capability-first — spawn them via your agent's subagent tool only where it exists, and degrade to inline otherwise: an optional **read-only code-scan** subagent for brownfield mapping on large repos (a **fast/cheap** model), and an optional **sourcing** subagent that runs **only if the engineer opts into web verified links at the Step 6b References consent**. If your tool has no interactive-question picker, ask every decision panel as plain text with the same options.
 
 ## Execution
 
@@ -90,7 +94,7 @@ When intent is ambiguous (e.g. an argument that could be a whole new slice *or* 
 
 If plan behavior and no idea was provided (`/roadmap` with no argument and no existing roadmap to extend): **stop and ask** before anything else:
 
-"What are you building? Describe the product or the slice of it you want to plan — one or two sentences about what it does and who it's for."
+"What are you building? Describe the product or the slice of it you want to plan (one or two sentences about what it does and who it's for)."
 
 Wait for the answer. Use it as the product idea.
 
@@ -150,10 +154,10 @@ Each "yes" becomes its own feature or folds into a relevant feature's acceptance
 
 The **build approach** is the most far-reaching call the roadmap makes: it decides how every feature is sliced and sequenced, and — once recorded — the whole pipeline honors it downstream. Don't run a fixed procedure here. As a senior **product engineer**, reason about *this* product — its goal and the Round 1 constraints, and whether it's a proper production build or a throwaway — then present a decision panel of the named approaches, each stated by its **guiding principle** (not its steps), and recommend exactly one:
 
-- **Tracer Bullet** — vertical slices; each feature built end-to-end through every layer, working.
-- **Skateboard** — MVP-first; ship the thinnest *usable whole* first, then grow it.
-- **Facade** — UI-first; a clickable shell on placeholder data, then wire the back. **Prototype-grade** — fast to demo, not production-complete.
-- **Journey** — a complete user path end-to-end per phase.
+- **Tracer Bullet**: vertical slices; each feature built end-to-end through every layer, working.
+- **Skateboard**: MVP-first; ship the thinnest *usable whole* first, then grow it.
+- **Facade**: UI-first; a clickable shell on placeholder data, then wire the back. **Prototype-grade** (fast to demo, not production-complete).
+- **Journey**: a complete user path end-to-end per phase.
 - **Other** (free text).
 
 **Recommend exactly one — reason it out, don't hardcode the pick or its mechanics.** For a proper production build the default is **Tracer Bullet** (every slice ships something real and complete); shift only when this product's goal calls for it — fast validation of one core loop → **Skateboard**; the experience/funnel *is* the product → **Journey**; the explicit goal is a quick clickable prototype → **Facade** (and say plainly it is prototype-grade, not production-complete). State the one-line why in terms of this product. **Capability-first:** use your agent's interactive picker if it has one; otherwise ask the same options as plain text. Never name a tool — the approach shapes *how* features are built, not *with what*.
@@ -200,22 +204,28 @@ Re-list the roadmap location immediately before writing (a teammate may have cha
 - **Large product → epic-split**: `docs/roadmap/index.md` (epics + order + status rollup) + one file per epic (`docs/roadmap/<epic>.md`) holding that epic's feature rows and intent/seed blocks. **Promote to this only when the single file has outgrown a comfortable scan** — otherwise stay single-file.
 - **Re-run (living update)** — **edit in place**, don't spawn a dated file: append new rows with the next free `#`, sharpen existing rows' intent/seeds, and leave existing statuses untouched. Set a now-out-of-scope row to `dropped` (never delete). On brownfield, append enrolled `existing`/`in-progress` rows above the `planned` ones.
 
-**Basis on recommendations.** Where the roadmap *recommends* something the engineer didn't dictate — the phasing choice, the order rationale, a suggested capability, flagging a feature `Needs ADR`, a weight call — append a short `(basis: …)`: a **project source** (`your AGENTS.md`, an ADR, the existing stack) or a **named practice** (`vertical slices ship real value early`, `foundations before features`, `data model is the costliest thing to redo`). You have no web tools here, so **name the source/practice — never a URL**.
+**Basis on recommendations (only when the engineer opts in).** This is gated by the References consent panel in Step 6b, so ask that panel first (or confirm the chosen level) before you add any citations. If the engineer chose **No references**, add **no `(basis: …)` citations** and **no `## References`** section (the roadmap keeps its intent and reasoning, just with no citation tags, so it reads clean). If they chose **Sources only** or **Sources plus web verified links**, then where the roadmap *recommends* something the engineer didn't dictate (the phasing choice, the order rationale, a suggested capability, flagging a feature `Needs ADR`, a weight call), append a short `(basis: …)`: a **project source** (`your AGENTS.md`, an ADR, the existing stack) or a **named practice** (`vertical slices ship real value early`, `foundations before features`, `data model is the costliest thing to redo`). Inline here you have no web tools, so **name the source or practice, never a URL** (web verified links, if that level was chosen, are added by the Step 6b subagent).
 
-### Step 6b — Ground the recommendations (sourcing subagent — ask first)
+### Step 6b — References consent (one panel, covers sources AND links)
 
-Adding **web-verified reference links** runs a subagent that web-searches and fetches pages to confirm them — useful, but it **costs extra tokens**. So **ask the engineer first** (decision panel; capability-first picker or plain text):
-- **question**: "Add web-sourced reference links to the roadmap? I'll run a subagent that web-searches and fetches to verify official docs/standards — it costs some extra tokens. Either way the roadmap already names its sources."
-- **header**: "Web sources"
-- **options**: `No — skip it (no web, no extra tokens) (recommended)` · `Yes — fetch & verify links` · Other
+Ask ONE consent question that governs both the `(basis: …)` citations and any reference links, so there is a single clear ask, not two competing ones. Present it as a decision panel (capability-first picker or plain text) and record the outcome as the References level:
+- **question**: "Add a References section to the roadmap (where the recommendations come from, and optionally links)? The intent and reasoning stay either way. The links option runs a subagent that web searches and fetches pages to confirm official docs and standards, which costs some extra tokens."
+- **header**: "References"
+- **options**:
+  - `No references, keep it clean (recommended)` (no `## References` section, and no `(basis: …)` citations on the recommendations)
+  - `Sources only (named project sources and practices, no web fetch)` (a `## References` section with named project sources and practices, plus `(basis: …)` citations, no links, no subagent)
+  - `Sources plus web verified links (fetches pages to confirm the links, costs some extra tokens)` (sources and citations as above, plus web verified links added by a sourcing subagent)
+  - Other (free text)
 
-**If they decline** (or there's no answer, or the agent has no web tools): **skip the subagent** — the roadmap's `(basis: …)` named sources stand on their own; add a one-line `## References` note ("Links: none — web sourcing skipped"). You're done.
+**If they choose No references** (or there is no answer): add **no `## References`** section and **no `(basis: …)`** citations anywhere (this is what the Basis on recommendations note in Step 6 is gated on). The roadmap keeps its intent and reasoning and stays clean. You're done.
 
-**If they say yes**, spawn a **sourcing subagent** (capability-first) so links are *fetched-and-confirmed*, not fabricated:
+**If they choose Sources only** (or the agent has no web tools): add the `(basis: …)` citations (Step 6) and a **`## References`** section naming *Project sources* (verifiable) and *Practices & standards* (named), with **no Links group** and no subagent. You're done.
+
+**If they choose Sources plus web verified links**, add the citations and `## References` as for Sources only, then spawn a **sourcing subagent** (capability-first) so links are *fetched and confirmed*, not fabricated:
 - `model`: a **fast/cheap** model (e.g. `haiku` on Claude Code; a light model on other agents) · `description: "Roadmap: source & reference the recommendations"`
 - Tools: `Read`, `Edit`, `WebSearch`, `WebFetch`
-- `prompt`: give it the roadmap file path(s) and its recommendations. Its job: for the load-bearing recommendations, confirm each `(basis: …)` is sound, and where a **canonical source is worth linking** (an official doc, a named standard/practice), **web-search + fetch to confirm it exists and says what's claimed**, then add a **`## References`** section — *Project sources* (verifiable), *Practices & standards* (named), *Links* (web-verified only, else "none verified"). **Never invent a URL.** Keep it lean.
-- If the client has no web tools/subagents, do this inline with named practices + project sources only (no links) — an acceptable degrade.
+- `prompt`: give it the roadmap file path(s) and its recommendations. Its job: for the load-bearing recommendations, confirm each `(basis: …)` is sound, and where a **canonical source is worth linking** (an official doc, a named standard/practice), **web search and fetch to confirm it exists and says what's claimed**, then complete the **`## References`** section with a *Links* group (web verified only, else "none verified"). **Never invent a URL.** Keep it lean.
+- If the client has no web tools or subagents, degrade to the Sources only behavior (named practices and project sources, no links).
 
 ### Step 7 — Report and hand off
 

@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
 description: "Use this skill to build a feature — UI or logical/backend — from an approved design. Run /develop to implement a page, component, API, service, data layer, or any slice. It first gates on the decision: if building would require inventing something undecided (a design system, page composition, a provider, data model, or a feature's behavior) and no ADR records it, /develop stops and routes you to /architect. Otherwise it reads the ADR + AGENTS.md (+ design.md for UI) and builds, advancing the roadmap. It doesn't make architecture decisions or write ADRs (/architect)."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 The builder. It implements a feature that has already been *decided* — turning an ADR + project conventions into working code, for **both UI and logical work**. Two tracks behind one front door:
@@ -42,7 +46,7 @@ Written for any Agent Skills client on macOS, Linux, or Windows. Detection snipp
 
 `/develop` builds *into* a scaffolded project; it does not scaffold one. If there's no project skeleton at all (no `package.json`/`pyproject.toml`/`go.mod`/manifest, no source tree), **stop** and tell the engineer:
 
-> No project found to build into. Scaffold it first — `create-next-app`, `npm init`, `vite`, `cargo new`, etc. (per your architecture ADR) — then re-run `/develop`.
+> No project found to build into. Scaffold it first (`create-next-app`, `npm init`, `vite`, `cargo new`, and so on, per your architecture ADR), then run `/develop` again.
 
 If a project exists (even a bare scaffold), proceed.
 
@@ -55,9 +59,9 @@ Before mutating anything, a quick safety pass (skip silently if it's a solo, off
 - With `git`, count the commits you're BEHIND the remote base (`git rev-list --count HEAD..origin/<base>`).
 - With `git`, check for uncommitted work (`git status --short`).
 
-- **Behind the remote** (count > 0) → **stop and warn**: "You're N commits behind `origin/$BASE` — a teammate may have already changed or shipped this. Pull first, then re-run." Don't build on stale code.
-- **Uncommitted work in the area you're about to touch** → warn: "You have uncommitted changes here — commit or stash first so this build doesn't tangle with them." Let them proceed if they insist.
-- **Feature already `in-progress` by someone else** → if the roadmap marks this feature `in-progress` AND its `Code area` has **recent commits by another author** (use `git log --format='%an' -- <area>` and check whether the recent author names include anyone other than you), warn: "*<feature>* looks like it's mid-build by someone else — coordinate before continuing it." Confirm before proceeding.
+- **Behind the remote** (count > 0) → **stop and warn**: "You're N commits behind `origin/$BASE`. A teammate may have already changed or shipped this. Pull first, then run again." Don't build on stale code.
+- **Uncommitted work in the area you're about to touch** → warn: "You have uncommitted changes here. Commit or stash first so this build doesn't tangle with them." Let them proceed if they insist.
+- **Feature already `in-progress` by someone else** → if the roadmap marks this feature `in-progress` AND its `Code area` has **recent commits by another author** (use `git log --format='%an' -- <area>` and check whether the recent author names include anyone other than you), warn: "*<feature>* looks like it's mid-build by someone else. Coordinate before continuing it." Confirm before proceeding.
 
 These are warnings, not hard blocks (the engineer may have a reason) — but surface them; silent stale/duplicate builds are the worst team foot-gun.
 
@@ -88,11 +92,11 @@ Do **not** hardcode this to a list of page names or features — apply the *inve
 
 **If a decision is owed and nothing records it — do not guess, and do not silently stop. Ask the engineer** — present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none (single-select):
 
-- **question**: "This looks like it needs an architecture decision first — `<name the specific load-bearing choice, e.g. 'which auth provider + session model'>`. How do you want to handle it?"
+- **question**: "This looks like it needs an architecture decision first: `<name the specific load-bearing choice, e.g. 'which auth provider + session model'>`. How do you want to handle it?"
 - **header**: "ADR first?"
 - **options**:
-  1. `Architect it first` — "Recommended — capture the decision in an ADR before building, so the build has a spec." → **end here** and output the paste-ready handoff (below). Do not build.
-  2. `No — not needed` — "I've judged there's no real decision here; build directly." → proceed to Step 1.
+  1. `Architect it first` — "Recommended. Capture the decision in an ADR before building, so the build has a spec." → **end here** and output the paste-ready handoff (below). Do not build.
+  2. `No, not needed` — "I've judged there's no real decision here; build directly." → proceed to Step 1.
   3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to Step 1, and leave the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in the roadmap (`docs/roadmap/`) so it isn't forgotten.
 
 The tool appends "Other" as a free-text option automatically.
@@ -101,7 +105,7 @@ The tool appends "Other" as a free-text option automatically.
 
 > Run this next, then come back to `/develop`:
 > ```
-> /architect <feature> — <the specific decision to settle>
+> /architect <feature>: <the specific decision to settle>
 > ```
 > Once the ADR exists, re-run `/develop <task>` and I'll build to it.
 
@@ -120,7 +124,7 @@ If genuinely ambiguous, ask once: "Is this the UI, the logic behind it, or both?
 ### Step 2 — Load the decision and conventions (both tracks)
 
 Before building, read:
-1. **The governing ADR — read only its build-spec sections for *this* sub-task** (from the roadmap row's `ADR` pointer, or the one found in Step 0). **Read only the build spec, not the whole ADR (token-efficiency rule):** the sections `/develop` needs are **`## Requirements`** (the user stories + IDed acceptance criteria `AC-1…` — the contract the build must meet, and the source of the verify steps you emit at the end), **`## Decision`**, the **design/spec section** (`## Feature design` / `## Proposed stack` / the equivalent spec table), **`## Build plan`** (the ordered tasks, each tagged "— satisfies AC-N", migration as task 1), and **`## Consequences`** (constraints). **Skip `## Context`, `## Options considered`, and `## Rationale`** — that's the human decision-record (the WHY), not build input; go back to it only if a specific constraint genuinely needs the reasoning. **Single ADR file** → read those sections. **Umbrella `index.md`** (a directory decision) → read the `index.md` for the overall decision + its child list, then open **the child ADR(s) whose scope this sub-task touches** and build from their detailed spec — again its build-spec sections, not its reasoning (usually one child; read a second only if the sub-task genuinely spans two — never all). The index's `## Structure` maps every file, and the `index.md` holds any **cross-child contract** (how the pieces connect). The child ADR is self-sufficient to build from — open a child's `## References` research **only if you need the underlying evidence** (optional depth, not required reading). Not the whole `docs/adr/` tree, and not the reasoning prose — just the spec for *this* work: data model, API surface, invariants, security model, the provider/library already chosen. **Check the `Status`** — on the single file, or on the umbrella `index.md` for a directory decision (child ADRs carry no lifecycle status): if it's still **`Proposed`** (not `Accepted`), the decision isn't ratified — warn before building: "The governing ADR is still `Proposed`, not accepted — build on an un-agreed decision, or accept it first (re-run `/architect` and confirm)?" Build only on the engineer's go-ahead. A `Superseded` ADR → use the one that superseded it.
+1. **The governing ADR — read only its build-spec sections for *this* sub-task** (from the roadmap row's `ADR` pointer, or the one found in Step 0). **Read only the build spec, not the whole ADR (token-efficiency rule):** the sections `/develop` needs are **`## Requirements`** (the user stories + IDed acceptance criteria `AC-1…` — the contract the build must meet, and the source of the verify steps you emit at the end), **`## Decision`**, the **design/spec section** (`## Feature design` / `## Proposed stack` / the equivalent spec table), **`## Build plan`** (the ordered tasks, each tagged "— satisfies AC-N", migration as task 1), and **`## Consequences`** (constraints). **Skip `## Context`, `## Options considered`, and `## Rationale`** — that's the human decision-record (the WHY), not build input; go back to it only if a specific constraint genuinely needs the reasoning. **Single ADR file** → read those sections. **Umbrella `index.md`** (a directory decision) → read the `index.md` for the overall decision + its child list, then open **the child ADR(s) whose scope this sub-task touches** and build from their detailed spec — again its build-spec sections, not its reasoning (usually one child; read a second only if the sub-task genuinely spans two — never all). The index's `## Structure` maps every file, and the `index.md` holds any **cross-child contract** (how the pieces connect). The child ADR is self-sufficient to build from — open a child's `## References` research **only if you need the underlying evidence** (optional depth, not required reading). Not the whole `docs/adr/` tree, and not the reasoning prose — just the spec for *this* work: data model, API surface, invariants, security model, the provider/library already chosen. **Check the `Status`** — on the single file, or on the umbrella `index.md` for a directory decision (child ADRs carry no lifecycle status): if it's still **`Proposed`** (not `Accepted`), the decision isn't ratified — warn before building: "The governing ADR is still `Proposed`, not accepted. Build on an un-agreed decision, or accept it first (re-run `/architect` and confirm)?" Build only on the engineer's go-ahead. A `Superseded` ADR → use the one that superseded it.
 2. **The nearest `AGENTS.md`** to the target code area (proximity — Claude Code auto-loads it; read it explicitly to be sure). This carries decisions synced from earlier features, so you **don't re-ask** what's already settled.
 3. **`design.md`** (UI track only) — the visual source of truth.
 4. **This feature's build approach** — how the feature is sequenced into working software, read with precedence: **this feature's roadmap-row `Approach` override if the feature's row declares one, else the project default** — recorded in the **root `AGENTS.md`**, or failing that the **roadmap file's header**. This mirrors the ADR-overrides-`AGENTS.md` precedence: a feature that declares its own approach (e.g. a Facade prototype in an otherwise Skateboard project) is built by ITS approach, while every other feature uses the project default. It names the strategy to build by — a vertical end-to-end slice, the thinnest usable whole, a UI-shell-first prototype wired later, or a full user journey per phase — and it governs *how you assemble* this slice in Step 3, **not** *what* it contains (the ADR fixes that). **If neither the feature nor the project records an approach, default to a coherent end-to-end slice** — the feature working through every layer it spans. Read the recorded strategy and, in your role as a senior build engineer, reason from its principle; don't run it through a fixed per-approach recipe.
@@ -132,9 +136,9 @@ Before building, read:
 This step is why `/develop auth functionality` doesn't re-ask the stack chosen during `/develop auth pages`: `/architect` decided it, `/sync` wrote it into `AGENTS.md`, and you read it here.
 
 **Spec-completeness check (before building, not mid-build).** Confirm the ADR actually contains what you need to build *this* task — for logical work: data model, API surface, security model, key invariants; for UI work: the screens and their states/requirements. If a load-bearing section you need is **missing or left as a placeholder**, do not guess your way through it. Ask (as above):
-- **question**: "The ADR for this is missing `<section>` — I need it to build correctly. How do you want to proceed?"
+- **question**: "The ADR for this is missing `<section>`. I need it to build correctly. How do you want to proceed?"
 - **header**: "ADR gap"
-- **options**: `Update the ADR first` (recommended — end with a paste-ready `/architect <feature> — fill in <section>` handoff) · `Tell me the answer now` (engineer supplies it inline; proceed, and note it should be backfilled into the ADR) · `Use your best judgment` (proceed on a stated assumption, surfaced in the report for review).
+- **options**: `Update the ADR first` (recommended: end with a paste-ready `/architect <feature>: fill in <section>` handoff) · `Tell me the answer now` (engineer supplies it inline; proceed, and note it should be backfilled into the ADR) · `Use your best judgment` (proceed on a stated assumption, surfaced in the report for review).
 
 A thin ADR caught here is a 30-second question; caught mid-build it's a wrong guess baked into code.
 
@@ -160,7 +164,7 @@ Build from that map. The rule: **offload the token-heavy *reading*; keep the *de
 
 **Build the coherent slice the approach calls for — don't silently skip surface.** Assemble the feature, in your role as a senior build engineer, to fit the feature's build approach (read in Step 2 — the feature's row override, else the project default): the ADR specs a **coherent slice**, not a loose bag of tasks — e.g. a tracer-bullet slice wired end-to-end through every layer it spans, or a Facade's UI shell on placeholder data now with the logical layer wired after. Reason from the approach's principle rather than a fixed recipe. **Default, when no approach is recorded, to the feature working end-to-end** (data → logic → interface → UI, whatever the slice spans). Before building, cross-check the task list against the ADR's **`## Requirements` (acceptance criteria `AC-1…`)** and its API/UI surface: if the ADR requires something the task list **doesn't cover** — the classic "missed the verify-email page" miss — **flag it and add the task** rather than shipping a partial slice that leaves an `AC-N` unmet. The acceptance criteria are the contract; every one must be satisfied by a task you build (or explicitly deferred with the engineer's agreement).
 
-**Resume first — never rebuild what's already done.** Use the **same file you located in Step 0** (the one roadmap file with this feature — the workspace's, in a monorepo); don't re-open others. If its status is **`existing`** (already shipped) or **`dropped`** (de-scoped), it isn't active — don't auto-build; tell the engineer it's marked `<status>` and confirm they want to revive/modify it (that's a new task, possibly needing an ADR). Otherwise scan the task list (the roadmap row or the ADR `## Build plan`) and find the first **unchecked** `[ ]` task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`, and **mirror it onto the governing ADR**: if this feature has a governing ADR (the row's `ADR` pointer), advance its `**Status**:` line `Proposed` → `In Progress` — a one-line surgical edit (re-read the line first; if it's not `Proposed` — already `In Progress`, `Accepted`, or `Superseded` — flag it, don't clobber; never touch ADR content). (No roadmap → just build the requested task.)
+**Resume first — never rebuild what's already done.** Use the **same file you located in Step 0** (the one roadmap file with this feature — the workspace's, in a monorepo); don't re-open others. If its status is **`existing`** (already shipped) or **`dropped`** (de-scoped), it isn't active — don't auto-build; tell the engineer it's marked `<status>` and confirm they want to revive/modify it (that's a new task, possibly needing an ADR). Otherwise scan the task list (the roadmap row or the ADR `## Build plan`) and find the first **unchecked** `[ ]` task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done, resuming at *data integration*." Then set the feature's **Status** to `in-progress`, and **mirror it onto the governing ADR**: if this feature has a governing ADR (the row's `ADR` pointer), advance its `**Status**:` line `Proposed` → `In Progress` — a one-line surgical edit (re-read the line first; if it's not `Proposed` — already `In Progress`, `Accepted`, or `Superseded` — flag it, don't clobber; never touch ADR content). (No roadmap → just build the requested task.)
 
 **Gather any remaining inline answers** (the Step 2 spec-gap answer, the UI asset/template questions, an ambiguous business rule) — these need the engineer, so collect them *before* handing off to a build run.
 
@@ -185,7 +189,7 @@ Then build the track(s):
 
 - **Both** → the order the two tracks run in follows the build approach, not a fixed rule. By default (and for an end-to-end / tracer-bullet slice) build the logical interface first so the UI binds to something real, then the UI; for a **Facade** (UI-shell-first prototype) stand the UI up on placeholder data first and wire the logical layer after. Let the project's recorded approach decide.
 
-**If the build reveals the spec is wrong, update the ADR before patching — never silently diverge.** The Step 0 / Step 2 checks catch a *thin* or *missing* ADR before you start; this is the mid-build case where the ADR turns out **wrong or incomplete** — the decided data model can't hold, an acceptance criterion contradicts the API surface, the chosen approach doesn't work in practice. When building correctly would mean **deviating from the spec**, STOP before coding the deviation and route to `/architect` to **update or supersede** the ADR (paste-ready `/architect <feature> — <what the spec got wrong>`); resume `/develop` once the ADR reflects reality. Quietly building something the ADR doesn't say is how spec and code drift apart — the whole point of the spec-driven flow is that they don't.
+**If the build reveals the spec is wrong, update the ADR before patching — never silently diverge.** The Step 0 / Step 2 checks catch a *thin* or *missing* ADR before you start; this is the mid-build case where the ADR turns out **wrong or incomplete** — the decided data model can't hold, an acceptance criterion contradicts the API surface, the chosen approach doesn't work in practice. When building correctly would mean **deviating from the spec**, STOP before coding the deviation and route to `/architect` to **update or supersede** the ADR (paste-ready `/architect <feature>: <what the spec got wrong>`); resume `/develop` once the ADR reflects reality. Quietly building something the ADR doesn't say is how spec and code drift apart — the whole point of the spec-driven flow is that they don't.
 
 **A data-layer build isn't done until its migration is applied and verified.** Generating a migration is not the same as running it: a data-layer sub-task requires **generating the migration, running it against the target DB, and confirming the schema is live** (the tables/columns/relationships actually exist — query the DB or its introspection, not just the migration file) before it's ticked. A generated-but-unapplied migration is an un-done task. (Detailed in `logical-guide.md`, Phase 2.)
 
@@ -204,13 +208,13 @@ Then build the track(s):
   - **question**: "Save these verify steps to the feature's `verify.md`, or just show them in this summary?"
   - **header**: "Save verify steps?"
   - **options**:
-    1. `Save to verify.md` — "Recommended for data/auth/full-weight features — a durable checklist `/verify` can run and `/test` can later lock." → write/append the steps to `verify.md` (below).
+    1. `Save to verify.md` — "Recommended for data, auth, or full-weight features: a durable checklist `/verify` can run and `/test` can later lock." → write/append the steps to `verify.md` (below).
     2. `Just show in summary` — "Keep them inline in this report only; don't write a file." → include them in the report and stop.
 
   The tool appends "Other" as a free-text option automatically. On **Save**, write/append to a `verify.md` **beside the ADR**: if the ADR is a **single file**, **promote it to a directory** to hold the new file — `docs/adr/NNNN-feature.md` → `docs/adr/NNNN-feature/{NNNN-feature.md, verify.md}` (the same promotion rule `research/` uses); if the ADR is already an umbrella directory, drop `verify.md` in it. Append (don't clobber) if a `verify.md` already exists. Use this format so `/verify` can consume it and `/test` can lock the durable steps:
 
   ```markdown
-  # Verify — <feature> · ADR NNNN · updated <date>
+  # Verify: <feature> · ADR NNNN · updated <date>
   _Steps derived from ADR NNNN acceptance criteria. `/verify` runs these; `/test` locks the durable ones._
   ## UI / manual
   - [ ] <action> → <expected>        → AC-N

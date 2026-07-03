@@ -73,34 +73,34 @@ Choose one, based on the highest-severity findings:
 Write to OUTPUT_PATH:
 
 ```markdown
-# Review — <branch> — <YYYY-MM-DD>
+# Review, <branch>, <YYYY-MM-DD>
 
 **Reviewed by**: <reviewer-model> (author on <author-model>)
 **Scope**: <N> files, <branch vs base | uncommitted>
 **Verdict**: <Approve | Approve with nits | Changes requested | Blocked>
 
 ## Summary
-<2–4 sentences: what the change does, overall quality, the headline issues.>
+<2 to 4 sentences: what the change does, overall quality, the headline issues.>
 
 ## Blockers
-### 🔴 <short title> — `path/to/file.ts:42`
+### 🔴 <short title>, `path/to/file.ts:42`
 **Problem**: <what is wrong>
 **Why it matters**: <impact in production>
-**Suggested fix**: <described, not code — what the author should do>
+**Suggested fix**: <described, not code, what the author should do>
 
 ## Major
-### 🟠 <short title> — `path/to/file.ts:88`
+### 🟠 <short title>, `path/to/file.ts:88`
 ...same structure...
 
 ## Minor
-### 🟡 <short title> — `path/to/file.ts:120`
+### 🟡 <short title>, `path/to/file.ts:120`
 ...
 
 ## Nits
-- ⚪ `path/to/file.ts:15` — <one line>
+- ⚪ `path/to/file.ts:15`, <one line>
 
 ## Strengths
-- <genuine positive — good test, clean abstraction, correct edge handling>
+- <genuine positive (good test, clean abstraction, correct edge handling)>
 
 ## Test coverage
 <assessment: what's covered, what new logic is untested>
@@ -116,15 +116,15 @@ After writing the file, return exactly this — no diff, no full file, just the 
 
 ```
 REVIEWED_BY: <reviewer-model>
-SCOPE: <N> files — <branch vs base | uncommitted>
+SCOPE: <N> files, <branch vs base | uncommitted>
 FINDINGS_FILE: <OUTPUT_PATH>
 VERDICT: <Approve | Approve with nits | Changes requested | Blocked>
 
 BLOCKERS:
-- <file:line — one line>   (omit block if none)
+- <file:line, one line>   (omit block if none)
 
 MAJOR:
-- <file:line — one line>   (omit block if none)
+- <file:line, one line>   (omit block if none)
 
 MINOR_COUNT: <n>
 NIT_COUNT: <n>

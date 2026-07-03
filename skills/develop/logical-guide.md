@@ -23,7 +23,7 @@ You are a **senior backend engineer** on this project. You implement the decisio
 - **Ground in the project's build approach** (`SKILL.md` Step 2) — it sets how this logical slice fits the whole: built end-to-end alongside its UI in a tracer-bullet slice, or wired behind a UI shell already standing in a Facade. It changes *when* the logic joins the slice, not *how* you build it correctly. If no approach is recorded, build it as part of the coherent end-to-end slice.
 - List the integration points and the order you'll build in — within this track, typically data → logic → interface → integration → cleanup. Surface any ADR gap now, before writing code.
 - If this task **replaces** existing code (a refactor/migration, not a greenfield addition), note upfront *what* it supersedes — the old functions/files/patterns — so you know exactly what Phase 6 must delete once the replacement is in.
-- **If grounding reveals the ADR is wrong or incomplete** — the decided data model can't hold, an acceptance criterion contradicts the API surface, the chosen approach won't work in practice — **stop and route to `/architect`** to update or supersede the ADR *before* coding the deviation (paste-ready `/architect <feature> — <what the spec got wrong>`). Never silently diverge from the spec; the ADR and the code must stay in lockstep (`SKILL.md` Step 3).
+- **If grounding reveals the ADR is wrong or incomplete** — the decided data model can't hold, an acceptance criterion contradicts the API surface, the chosen approach won't work in practice — **stop and route to `/architect`** to update or supersede the ADR *before* coding the deviation (paste-ready `/architect <feature>: <what the spec got wrong>`). Never silently diverge from the spec; the ADR and the code must stay in lockstep (`SKILL.md` Step 3).
 
 ### Phase 2 — Data layer
 
@@ -79,17 +79,17 @@ Not a final checklist — built into every phase, enforced here:
 ## /develop complete (logical)
 
 **Feature**: <name>
-**ADR**: <path — the decision implemented>
-**Built**: <files — data layer, services, endpoints>
-**Removed (superseded)**: <old files/functions deleted after refactor/replacement — verified unreferenced> | none
+**ADR**: <path (the decision implemented)>
+**Built**: <files: data layer, services, endpoints>
+**Removed (superseded)**: <old files/functions deleted after refactor/replacement, verified unreferenced> | none
 **Data model**: <tables/entities created or changed>
 **API surface**: <endpoints/actions added>
 **Integrations**: <provider(s) wired> | none
-**New config**: `ENV_VAR` — purpose | none
-**Invariants enforced**: <where — DB constraint / app check>
+**New config**: `ENV_VAR` (purpose) | none
+**Invariants enforced**: <where: DB constraint or app check>
 **Migration applied**: <ran + schema confirmed live: tables/relationships present> | n/a (no data-layer change)
 **Open questions left for you**: <ambiguous business rules the ADR didn't settle> | none
-**Verify steps (from acceptance criteria)** — emit these, then offer to save to `verify.md` (`SKILL.md` Step 4):
+**Verify steps (from acceptance criteria)**: emit these, then offer to save to `verify.md` (`SKILL.md` Step 4):
 - `<command / action>` → `<expected>` → AC-N
 **What /test should verify**:
 - Happy path: <main flow end to end>

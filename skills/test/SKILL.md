@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
 description: "Use this skill to write a test suite for code you just built or changed. Run /test after implementing a feature, component, API route, or fix — it targets the files changed and not yet committed (working tree + staged + untracked), no need to name them. Reads test-preferences.json for your framework; if absent it asks, installs with confirmation, and saves it. A senior test engineer choosing the right strategy per file: happy path, edge cases, error states, and accessibility where relevant."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 **Your role:** a senior test engineer who writes the suite the code deserves — no more, no less. Your instinct is to pin the *behavior that matters* for this slice and ignore the noise: you test what a caller relies on and what would actually break someone, not lines for a coverage number. You choose a strategy per file the way an experienced engineer does — reading what the thing *is* before deciding how to prove it works — and you refuse to write tests that lock in scaffolding the slice was never meant to make real.
@@ -93,7 +97,7 @@ Ask — "<N> changed files is a lot for one pass. How should I focus?"
     - label: "Logic & API first (recommended)"
       description: "Test the <count> logic/api files now; I'll note the rest as not-yet-covered"
     - label: "Test everything in batches"
-      description: "Cover all <N> files across multiple subagent passes — slower but complete"
+      description: "Cover all <N> files across multiple subagent passes, slower but complete"
     - label: "Let me narrow it"
       description: "I'll tell you which files or directory matter most"
 ```
@@ -125,7 +129,7 @@ Ask — "No uncommitted source changes found. What should I test?"
     - label: "Specific files"
       description: "I'll test the files or directory you name"
     - label: "Nothing right now"
-      description: "Stop — I'll run /test after I make changes"
+      description: "Stop. I'll run /test after I make changes"
 ```
 
 - **Last commit**: scope = `git diff --name-only --diff-filter=ACMR HEAD~1 HEAD` (cross-platform git), then re-run Step 1b classification.
@@ -142,8 +146,8 @@ Using your file tools (not shell utilities), determine:
 - **Already-installed test tools** — in `package.json` look for `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*` (common ones; if the project already uses a different runner — `bun test`, `node:test`, `ava`, `deno test`, etc. — detect and use that instead of installing a new one).
 
 **Q0 — No test setup at all? Don't assume they want one.** If **no** test tool is installed (detection above found none) — likely for the whole repo, or for *this* package in a monorepo — first check whether the project **deliberately has no test runner**:
-- Look in the nearest `AGENTS.md` and the governing ADR for a stated convention (e.g. "CI is lint + format + typecheck only", "no test runner — typecheck + `/verify` is the gate"). If found, **respect it** — do **not** push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, and point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite — ran the typecheck gate; use `/verify` to confirm behavior."
-- If there's no stated convention, **ask** (don't default to installing, ask as above): "This has no test setup. How do you want to gate changes here?" → options: `Set up a test framework` (→ proceed to Q1, install with confirmation) · `No test runner — typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
+- Look in the nearest `AGENTS.md` and the governing ADR for a stated convention (e.g. "CI is lint + format + typecheck only", "no test runner — typecheck + `/verify` is the gate"). If found, **respect it** — do **not** push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, and point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite. Ran the typecheck gate; use `/verify` to confirm behavior."
+- If there's no stated convention, **ask** (don't default to installing, ask as above): "This has no test setup. How do you want to gate changes here?" → options: `Set up a test framework` (→ proceed to Q1, install with confirmation) · `No test runner, typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
 - In a **monorepo**, this is **per package** — a package with no tests by design gates on typecheck/`/verify` even if a sibling package has a full suite. Apply per resolved package root.
 
 Skip Q1 unless the engineer chose "set up a framework".
@@ -178,7 +182,7 @@ Ask (as above) — "Pages/flows changed. Add end-to-end tests too?"
       description: "Real-browser flow tests for the changed pages"
     - label: "Cypress"
       description: "Real-browser flow tests with the Cypress runner"
-    - label: "No E2E — unit/component only"
+    - label: "No E2E (unit/component only)"
       description: "Skip browser tests; cover pages at the component level"
 ```
 
@@ -188,9 +192,9 @@ Ask (as above) — "Pages/flows changed. Add end-to-end tests too?"
 Ask (as above) — "Add component testing support?"
   header: "Components"
   options:
-    - label: "Yes — Testing Library (recommended)"
+    - label: "Yes, Testing Library (recommended)"
       description: "Installs @testing-library/<framework> + user-event for render+interact tests"
-    - label: "No — logic tests only"
+    - label: "No, logic tests only"
       description: "Plain module/function tests, no DOM rendering"
 ```
 
@@ -213,9 +217,9 @@ For the chosen unit tool, E2E tool (if any), and addon (if any), check whether i
 Ask (as above) — "<missing tools> not installed. Install now?"
   header: "Install"
   options:
-    - label: "Yes — install and continue"
+    - label: "Yes, install and continue"
       description: "Run the install with the detected package manager, then write tests"
-    - label: "No — write runnable stubs"
+    - label: "No, write runnable stubs"
       description: "Skip install; write tests I can run once I install the tools myself"
 ```
 
@@ -262,7 +266,7 @@ Conventional directories and patterns:
 | Rust | `#[cfg(test)]` in-file / `tests/` | n/a |
 
 Then tell the engineer:
-> "Preferences saved to `test-preferences.json` — future `/test` runs load these and skip straight to writing."
+> "Preferences saved to `test-preferences.json`. Future `/test` runs load these and skip straight to writing."
 
 ---
 
@@ -294,9 +298,9 @@ What the main model passes to the subagent:
 Ask (as above) — "Tests will be written for <N> changed files. Run the suite after writing?"
   header: "Run tests?"
   options:
-    - label: "Yes — run and fix to green"
+    - label: "Yes, run and fix to green"
       description: "Execute the suite; I'll fix any test mistakes and flag real bugs the tests catch"
-    - label: "Skip — just write them"
+    - label: "Skip, just write them"
       description: "Write the tests and give me manual run-and-verify instructions instead"
 ```
 
@@ -331,29 +335,29 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 **If `RUN_AFTER = yes`** — parse `TESTS_WRITTEN`, `RUN_RESULT`, `BUGS_FOUND`, `NOT_COVERED`, `HARDEN_FLAG`:
 
 ```
-## /test complete — suite run
+## /test complete (suite run)
 
 **Scope**: <N> changed files (uncommitted)
 **Tool**: <unit tool> [+ E2E tool] [+ addons]
 **Preferences**: loaded | saved to test-preferences.json
 
 **Tests written**:
-- `<file path>` — <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
+- `<file path>`, <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
 
 **Run result**: <X passed, Y failed> via `<RUN_COMMAND>`
 
-**Traceability** (only when TRACE_TO_CONTRACT=yes — ADR NNNN):
-- AC-1 ✅ locked in — `<test file · test name>`
-- AC-3 ✅ locked in — `<test file · test name>`
+**Traceability** (only when TRACE_TO_CONTRACT=yes, ADR NNNN):
+- AC-1 ✅ locked in, `<test file · test name>`
+- AC-3 ✅ locked in, `<test file · test name>`
 
 **Bugs caught** (tests failing because the code is wrong, not the test):
-- <file:line — what's broken and the failing expectation>   ← only if BUGS_FOUND is non-empty
+- <file:line, what's broken and the failing expectation>   ← only if BUGS_FOUND is non-empty
 
 **Not covered** (consider adding):
 - <gap and why>
-- AC-N — <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
+- AC-N, <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
 
-**What /harden should check**: <only if HARDEN_FLAG=yes — one sentence>
+**What /harden should check**: <only if HARDEN_FLAG=yes, one sentence>
 ```
 
 If `BUGS_FOUND` is non-empty, lead with it — a green suite is the goal, but a test that correctly fails on real broken code is a genuine finding, not something to silence. /test does not modify application code to make a test pass.
@@ -361,18 +365,18 @@ If `BUGS_FOUND` is non-empty, lead with it — a green suite is the goal, but a 
 **If `RUN_AFTER = no`** — parse `TESTS_WRITTEN`, `MANUAL_INSTRUCTIONS`, `NOT_COVERED`, `HARDEN_FLAG`:
 
 ```
-## /test complete — not run
+## /test complete (not run)
 
 **Scope**: <N> changed files (uncommitted)
 **Tool**: <unit tool> [+ E2E tool] [+ addons]
 **Preferences**: loaded | saved to test-preferences.json
 
 **Tests written**:
-- `<file path>` — <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
+- `<file path>`, <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
 
-**Traceability** (only when TRACE_TO_CONTRACT=yes — ADR NNNN):
-- AC-1 ✅ locked in — `<test file · test name>`
-- AC-3 ✅ locked in — `<test file · test name>`
+**Traceability** (only when TRACE_TO_CONTRACT=yes, ADR NNNN):
+- AC-1 ✅ locked in, `<test file · test name>`
+- AC-3 ✅ locked in, `<test file · test name>`
 
 **How to run them**:
 1. <setup step, e.g. install if INSTALL=deferred>
@@ -380,13 +384,13 @@ If `BUGS_FOUND` is non-empty, lead with it — a green suite is the goal, but a 
 3. Watch a single file: `<focused command>`
 
 **What you should see**: <expected pass output, and which tests prove which behaviour>
-**If something fails**: <how to read the failure — is it a test gap or a real bug>
+**If something fails**: <how to read the failure, is it a test gap or a real bug>
 
 **Not covered** (consider adding):
 - <gap and why>
-- AC-N — <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
+- AC-N, <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
 
-**What /harden should check**: <only if HARDEN_FLAG=yes — one sentence>
+**What /harden should check**: <only if HARDEN_FLAG=yes, one sentence>
 ```
 
 Omit the harden line entirely when `HARDEN_FLAG=no`. This skill is complete after relaying the report — it does not invoke other skills.

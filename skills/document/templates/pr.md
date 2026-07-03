@@ -11,7 +11,7 @@ One line, imperative mood, ≤ 72 chars. Match the project's commit convention i
 ```markdown
 ## What
 
-<1–3 sentences: what this PR does, in plain terms.>
+<1 to 3 sentences: what this PR does, in plain terms.>
 
 ## Why
 
@@ -19,7 +19,7 @@ One line, imperative mood, ≤ 72 chars. Match the project's commit convention i
 
 ## Changes
 
-- <key change — grouped logically, not a raw commit dump>
+- <key change, grouped logically, not a raw commit dump>
 - <key change>
 
 ## How to test / verify
@@ -29,7 +29,7 @@ One line, imperative mood, ≤ 72 chars. Match the project's commit convention i
 
 ## Risk & rollout
 
-<Blast radius, migrations, feature flags, or rollback notes. Write "Low risk — no migrations, no flags." when that's true.>
+<Blast radius, migrations, feature flags, or rollback notes. Write "Low risk, no migrations, no flags." when that's true.>
 
 ## Notes for reviewers
 
@@ -38,6 +38,6 @@ One line, imperative mood, ≤ 72 chars. Match the project's commit convention i
 
 Rules:
 - Group changes by intent, not by file or commit. A reviewer wants the story, not `git log`.
-- Keep "What" skimmable — a busy reviewer reads it first.
+- Keep "What" skimmable. A busy reviewer reads it first.
 - If a hardening checklist or review findings exist for this change, reference accepted residual risks under "Risk & rollout".
-- Do not invent test steps — derive them from the actual tests or the change's behaviour.
+- Do not invent test steps. Derive them from the actual tests or the change's behaviour.

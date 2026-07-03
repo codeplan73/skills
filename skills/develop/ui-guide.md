@@ -616,14 +616,14 @@ Use CSS logical properties instead of physical ones so layouts work correctly fo
 **Stack**: Next.js | Vite | Nuxt | SvelteKit | Plain HTML
 **Styling**: <tailwind | shadcn | css-modules | styled-components | plain css>
 **Dark mode strategy**: .dark class | @media | both
-**Icon library**: <library name> | none — install needed
+**Icon library**: <library name> | none (install needed)
 **Path**: Design.md (existing) | A (image) | A (multi: <what each image represented>) | B (template: <name> | url: <url> | custom: "<style>")
 **design.md**: pre-existing | created | fetched from <url>
-**Token conflicts**: none | <list — verify manually before next run>
-**Token file**: created | updated | unchanged — <path>
-**Fonts**: <family> via <method> | <proprietary> → <substitute> | system
-**Assets**: project files | placeholders (<service> — swap at <where>) | none needed
-**Built**: <name> — <file paths>
+**Token conflicts**: none | <list, verify manually before next run>
+**Token file**: created | updated | unchanged (<path>)
+**Fonts**: <family> via <method> | <proprietary> to <substitute> | system
+**Assets**: project files | placeholders (<service>, swap at <where>) | none needed
+**Built**: <name> (<file paths>)
 **Token adherence**: all sourced from design.md | <deviations>
 **Accessibility**: WCAG AA passed | <items deferred>
 **Semantic HTML**: correct elements used | <issues noted>

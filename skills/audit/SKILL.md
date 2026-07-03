@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
 description: "Use this skill to bootstrap a project's AI context — the AGENTS.md files every later skill reads. Run /audit at the start of a greenfield project (it asks your coding standards and seeds root AGENTS.md), on an existing codebase with no or partial docs (it scans and writes root + nested AGENTS.md, adding only what's missing), or on one named area (e.g. /audit src/auth). Writes tool-agnostic AGENTS.md plus a thin CLAUDE.md pointer; never overwrites curated content. Not for ADRs (/architect), post-change upkeep (/sync), or the roadmap (/roadmap)."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 The context-bootstrapper. It gives every later skill (and every AI tool) an accurate picture of the project by writing the `AGENTS.md` files — and it handles all three starting points:
@@ -65,7 +69,7 @@ The choice is made from **several signals** (source count, git history, manifest
 
 When creating a nested `AGENTS.md`, add exactly one pointer line to root `AGENTS.md` under `## Context files`:
 ```
-- [<area>/AGENTS.md](<area>/AGENTS.md) — <one-line description>
+- [<area>/AGENTS.md](<area>/AGENTS.md) (<one-line description>)
 ```
 
 Never create a nested AGENTS.md for every subfolder — only where distinct conventions exist.
@@ -123,11 +127,11 @@ Note `MONOREPO=yes` + the workspace list in the subagent prompt.
 ### Phase 0 — Classify (only when pre-flight is ambiguous)
 
 Don't guess. Ask once — present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none:
-- **question**: "I can't tell if this is a new project or an existing codebase — <state why: e.g. 'a manifest exists but I see no source in a language I recognise', or 'files look like untouched scaffolding'>. Which is it?"
+- **question**: "I can't tell if this is a new project or an existing codebase (<state why: e.g. 'a manifest exists but I see no source in a language I recognise', or 'files look like untouched scaffolding'>). Which is it?"
 - **header**: "Project state"
 - **options**:
-  1. `New project` — "I'll ask for your coding standards and seed the context." → **Phase 1** (read the manifest/scaffold for the stack; still ask standards).
-  2. `Existing codebase` — "I'll scan what's here and document it." → **Phase 2**.
+  1. `New project`, "I'll ask for your coding standards and seed the context." → **Phase 1** (read the manifest/scaffold for the stack; still ask standards).
+  2. `Existing codebase`, "I'll scan what's here and document it." → **Phase 2**.
 
 Then route to the chosen phase.
 
@@ -203,9 +207,9 @@ Note: the subagent adds the nested `AGENTS.md` pointer line to root `AGENTS.md` 
 - If `ROOT_GAPS: none` → relay the full report, done.
 - If gaps exist → ask (as above):
   - Question: "I found things in `<area>` not reflected in root AGENTS.md. What should I do?"
-  - Option 1: `Add them now` — description: "I'll apply the additions immediately"
-  - Option 2: `Show me the diff` — description: "Print exactly what would change; I'll apply it manually"
-  - Option 3: `Skip for now` — description: "Leave root AGENTS.md as-is"
+  - Option 1: `Add them now`, description: "I'll apply the additions immediately"
+  - Option 2: `Show me the diff`, description: "Print exactly what would change; I'll apply it manually"
+  - Option 3: `Skip for now`, description: "Leave root AGENTS.md as-is"
 
   - If `Add them now`: parse the subagent report — locate the `ROOT_GAPS:` block and extract each line starting with `- `. Each line contains the exact markdown to insert and the target section (`— target section: ## <section>`). Apply one **Edit** tool call per gap into root `AGENTS.md`. Do not paraphrase.
   - If `Show me the diff`: print each addition as a fenced markdown block with the target section labelled. Do not write.

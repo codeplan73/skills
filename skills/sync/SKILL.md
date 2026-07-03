@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task
 description: "Use this skill after a change is complete to keep durable knowledge current. Run /sync as the last step on medium/full work, around merge. It updates the AGENTS.md context files (root + nested) to reflect what changed, reconciles the feature roadmap's status from repo evidence, and flags any ADR the change made stale. Conservative: surgical, additive edits that never overwrite curated content; it doesn't restructure root (/audit) or edit ADRs (/architect)."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 Closes the loop on a change by syncing the durable knowledge to reality:
@@ -115,28 +119,28 @@ Read `agent-prompt.md`, fill it, then spawn a subagent with:
 **Scope**: <N> changed files
 
 **AGENTS.md updated**:
-- `<path>` — <what was added/corrected, one line>   (or "no updates needed")
+- `<path>`, <what was added/corrected, one line>   (or "no updates needed")
 
 **AGENTS.md created** (new area):
-- `<area>/AGENTS.md` — <what conventions it captures> (+ root pointer added)
+- `<area>/AGENTS.md`, <what conventions it captures> (+ root pointer added)
 
 **Orphans cleaned** (after deletions):
-- `<path>` — <removed orphaned nested doc / fixed broken pointer>
+- `<path>`, <removed orphaned nested doc / fixed broken pointer>
 
 **Roadmap reconciled** (relevant workspace):
-- `<feature>` — <ticked sub-tasks / status planned→in-progress→done to match the diff>   (or "no roadmap, or already accurate")
+- `<feature>`, <ticked sub-tasks / status planned→in-progress→done to match the diff>   (or "no roadmap, or already accurate")
 
 **ADR statuses reconciled** (Status line only):
-- `docs/adr/<file>` — <Status Proposed→In Progress→Accepted to match the feature's roadmap status>
+- `docs/adr/<file>`, <Status Proposed→In Progress→Accepted to match the feature's roadmap status>
 
 **ADRs flagged stale** (run /architect to update or supersede):
-- `docs/adr/<file>` — <why the change makes it stale, or status mismatch sync couldn't safely resolve>
+- `docs/adr/<file>`, <why the change makes it stale, or status mismatch sync couldn't safely resolve>
 
-**Context gaps** (run /audit — area too established for /sync to document from the diff alone):
-- `<area>` — <pre-existing undocumented area only sliced by this change>
+**Context gaps** (run /audit, area too established for /sync to document from the diff alone):
+- `<area>`, <pre-existing undocumented area only sliced by this change>
 
 **Conflicts left for you** (not auto-edited):
-- `<path>` — <curated content that would need rewriting; decide manually>
+- `<path>`, <curated content that would need rewriting; decide manually>
 ```
 
 Omit any section with no items. If everything was already current and nothing is stale, say so in one line. /sync does not run /architect or /audit for you — it points; you decide.

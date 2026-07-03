@@ -166,16 +166,16 @@ After finishing, output the block matching `RUN_AFTER` verbatim — no extra pro
 
 ```
 TESTS_WRITTEN:
-- <file path> (<class>): <N tests> — <one-line coverage summary> [extended existing | new]
-- <file path> (<class>): <N tests> — <summary>
+- <file path> (<class>): <N tests>, <one-line coverage summary> [extended existing | new]
+- <file path> (<class>): <N tests>, <summary>
 
 RUN_RESULT: <X passed, Y failed> via <RUN_COMMAND>
 
 BUGS_FOUND:
-- <file:line — the assertion that failed and what it reveals is broken in the code>   (omit the whole block if none)
+- <file:line, the assertion that failed and what it reveals is broken in the code>   (omit the whole block if none)
 
 NOT_COVERED:
-- <scenario left out — one line each, with reason>
+- <scenario left out, one line each, with reason>
 
 HARDEN_FLAG: yes|no
 HARDEN_NOTE: <if yes: one sentence on the security or scale risk; omit if no>
@@ -185,7 +185,7 @@ HARDEN_NOTE: <if yes: one sentence on the security or scale risk; omit if no>
 
 ```
 TESTS_WRITTEN:
-- <file path> (<class>): <N tests> — <one-line coverage summary> [extended existing | new]
+- <file path> (<class>): <N tests>, <one-line coverage summary> [extended existing | new]
 
 MANUAL_INSTRUCTIONS:
 - setup: <e.g. install command if INSTALL_STATE=deferred, else "none">
@@ -195,7 +195,7 @@ MANUAL_INSTRUCTIONS:
 - on_failure: <how to tell a test gap from a real bug>
 
 NOT_COVERED:
-- <scenario left out — one line each, with reason>
+- <scenario left out, one line each, with reason>
 
 HARDEN_FLAG: yes|no
 HARDEN_NOTE: <if yes: one sentence on the security or scale risk; omit if no>

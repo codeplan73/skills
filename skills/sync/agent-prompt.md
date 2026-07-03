@@ -78,7 +78,7 @@ Rules you must not break:
 
 You may create **one** nested `<area>/AGENTS.md` for an area the change introduced wholesale. The test is **context, not policy**:
 
-- **Create it** when every source file in that area carries status `A` (added) in CHANGED_FILES — the diff shows you the entire area, so you can document it accurately. If any file in the area is `M` (modified), the area pre-existed: do NOT create, defer to /audit. Write a focused doc: local file pointers, local commands, the conventions/constraints visible in the new code, and links to any governing ADR. End it with a one-line note: `_Drafted by /sync from the introducing change — worth a quick human pass._` (a cheap model wrote it; mark it as a starting point). Then add exactly one pointer line to root AGENTS.md under `## Context files`:
+- **Create it** when every source file in that area carries status `A` (added) in CHANGED_FILES — the diff shows you the entire area, so you can document it accurately. If any file in the area is `M` (modified), the area pre-existed: do NOT create, defer to /audit. Write a focused doc: local file pointers, local commands, the conventions/constraints visible in the new code, and links to any governing ADR. End it with a one-line note: `_Drafted by /sync from the introducing change, worth a quick human pass._` (a cheap model wrote it; mark it as a starting point). Then add exactly one pointer line to root AGENTS.md under `## Context files`:
   ```
   - [<area>/AGENTS.md](<area>/AGENTS.md) — <one-line description>
   ```
@@ -154,28 +154,28 @@ Output exactly this block — verbatim, no extra prose. Omit any section that's 
 SCOPE: <N> changed files
 
 AGENTS_UPDATED:
-- <path> — <what you added or corrected, one line>
+- <path>, <what you added or corrected, one line>
 
 AGENTS_CREATED:
-- <area>/AGENTS.md — <conventions captured; root pointer added>
+- <area>/AGENTS.md, <conventions captured; root pointer added>
 
 ORPHANS_CLEANED:
-- <path> — <removed orphaned doc / fixed broken pointer after deletion>
+- <path>, <removed orphaned doc / fixed broken pointer after deletion>
 
 ROADMAP_RECONCILED:
-- <feature> — <sub-tasks ticked / status advanced to match the diff; or "unmapped: <area>">
+- <feature>, <sub-tasks ticked / status advanced to match the diff; or "unmapped: <area>">
 
 ADR_STATUS_RECONCILED:
-- <docs/adr/file> — <Status line: Proposed→In Progress→Accepted to match the feature's roadmap status>
+- <docs/adr/file>, <Status line: Proposed→In Progress→Accepted to match the feature's roadmap status>
 
 STALE_ADRS:
-- <docs/adr/file> — <why the change makes it stale, or a status mismatch you couldn't safely reconcile>
+- <docs/adr/file>, <why the change makes it stale, or a status mismatch you couldn't safely reconcile>
 
 CONTEXT_GAPS:
-- <area> — <pre-existing undocumented area only sliced by this change; suggest /audit>
+- <area>, <pre-existing undocumented area only sliced by this change; suggest /audit>
 
 CONFLICTS:
-- <path> — <curated content that would need rewriting; left for a human>
+- <path>, <curated content that would need rewriting; left for a human>
 ```
 
 If you made no edits and found nothing stale, output `SCOPE: <N> changed files` followed by `NOTHING_TO_SYNC: everything is already current`.

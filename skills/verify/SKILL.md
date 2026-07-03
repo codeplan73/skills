@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
 description: "Use this skill to confirm a change actually works by running the real app and watching its behavior — not just that tests pass. Run /verify after /develop and before /review, or any time you need to see a feature work end to end: it launches the app, exercises the changed flow, and checks the observable result (UI, an API response, CLI output, a job). For a **behavior-preserving refactor** (or a project with no test runner), it runs a before/after diff — capturing the affected outputs pre- and post-change and proving they're identical — which is the regression gate a refactor needs. Complements /test with runtime confirmation; reports what worked, what didn't, and what /test should lock in. It doesn't write code."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 **Your role:** the acceptance engineer — the senior hand who trusts observed behavior over green checkmarks. You reason from a single question: *"If I were the person who has to sign off that this is real, what would I need to watch happen with my own eyes?"* You know that a passing suite proves the code the author thought to test, not that the feature exists; so you drive the actual thing and judge what you see against what the slice was supposed to deliver.
@@ -60,7 +64,7 @@ When an ADR **is** found, it carries the **contract**: `## Requirements` with ID
 
 1. **Prefer the per-feature `verify.md`** beside the ADR (`docs/adr/NNNN-<feature>/verify.md`) if present — `/develop` emits it as concrete, already-resolved verify steps, each tagged with the `AC-N` it exercises:
    ```markdown
-   # Verify — <feature> · ADR NNNN
+   # Verify: <feature> · ADR NNNN
    ## UI / manual
    - [ ] <action> → <expected>   → AC-N
    ## Commands
@@ -119,8 +123,8 @@ For each behavior, decide **pass / fail / blocked** against what should happen. 
 Roll the observations up into a **per-criterion** and **per-surface** verdict against the contract. For every `AC-N` and every specced surface, assign one of:
 
 - **met ✅** — the criterion's check passed / the surface exists and behaves as specced.
-- **specced-but-missing 🚫** — the ADR specs a surface or criterion that has **no implementation at all**. There is nothing to exercise because it was never built. Name the exact spec item and what to do. e.g. *"ADR specs `/auth/verify-email` — page not found (no route, no file); build it before this is done."* or *"AC-4 requires an audit-log table — no migration and no table in the schema."*
-- **specced-but-not-applied ⚠️** — the code exists but its **runtime check fails**: the surface is built but doesn't satisfy the criterion at runtime. The classic case is a written-but-un-applied migration. e.g. *"Migration `0007_add_verified_at.sql` is committed but the column isn't in the live schema — run the migration."* or *"AC-2 says the CTA opens checkout; the button renders but clicking it 404s."*
+- **specced-but-missing 🚫** — the ADR specs a surface or criterion that has **no implementation at all**. There is nothing to exercise because it was never built. Name the exact spec item and what to do. e.g. *"ADR specs `/auth/verify-email`, page not found (no route, no file); build it before this is done."* or *"AC-4 requires an audit-log table, but there's no migration and no table in the schema."*
+- **specced-but-not-applied ⚠️** — the code exists but its **runtime check fails**: the surface is built but doesn't satisfy the criterion at runtime. The classic case is a written-but-un-applied migration. e.g. *"Migration `0007_add_verified_at.sql` is committed but the column isn't in the live schema; run the migration."* or *"AC-2 says the CTA opens checkout; the button renders but clicking it 404s."*
 - **blocked ⚠️** — couldn't be exercised (missing data/creds/env); say what's needed. Distinct from not-applied: not-applied is a confirmed runtime failure, blocked is unknown.
 
 The distinction is the point of this gate: **missing** = never built (a scope miss), **not-applied** = built but not live/correct at runtime (a wiring miss). Both block "done"; report them separately so the fix is obvious. Conformance is only **PASS** when every `AC-N` is met and every specced surface exists — a single missing or not-applied item makes the overall verdict **FAIL**.
@@ -130,36 +134,36 @@ The distinction is the point of this gate: **missing** = never built (a scope mi
 ```
 ## /verify complete
 
-**Ran**: <how the app was started — command / url>
+**Ran**: <how the app was started: command or url>
 **Scope**: <N> behaviors checked
 **Spec**: ADR NNNN <feature> · checklist from verify.md | ADR ## Requirements   (omit this line when no governing ADR)
 
 **Verified** ✅:
-- <behavior> — <what you observed (e.g. "all 3 tiers render; CTA opens /checkout")>
+- <behavior>: <what you observed (e.g. "all 3 tiers render; CTA opens /checkout")>
 
 **Failed** ❌:
-- <behavior> — <what went wrong + exact error/screenshot path> → run /debug
+- <behavior>: <what went wrong + exact error/screenshot path> → run /debug
 
 **Blocked** ⚠️:
-- <behavior> — <what's needed to verify it (seed data, credentials, env)>
+- <behavior>: <what's needed to verify it (seed data, credentials, env)>
 
 **Spec conformance**: PASS | FAIL   (this whole block only when a spec contract was loaded)
-- AC-1 ✅ met — <what confirmed it>
-- AC-2 ✅ met — <what confirmed it>
-- AC-3 🚫 specced-but-missing — <ADR specs it, no implementation> → build it before done
-- AC-4 ⚠️ specced-but-not-applied — <built but runtime check fails, e.g. migration not run> → <fix>
+- AC-1 ✅ met: <what confirmed it>
+- AC-2 ✅ met: <what confirmed it>
+- AC-3 🚫 specced-but-missing: <ADR specs it, no implementation> → build it before done
+- AC-4 ⚠️ specced-but-not-applied: <built but runtime check fails, e.g. migration not run> → <fix>
 
 **Missed surfaces** 🚫 (specced in ADR, not built):
-- <page / route / table> — <where it was expected> → build before done
+- <page / route / table>: <where it was expected> → build before done
 
 **Not applied** ⚠️ (built but not live/correct at runtime):
-- <surface / criterion> — <the runtime failure, e.g. "migration committed, column absent from live schema"> → <apply/fix>
+- <surface / criterion>: <the runtime failure, e.g. "migration committed, column absent from live schema"> → <apply/fix>
 
 **What /test should lock in**:
 - <the behaviors above, as permanent assertions>
 
 **For /review or /harden**:
-- <anything that worked but looked fragile — slow response, console warning, missing empty state>
+- <anything that worked but looked fragile: slow response, console warning, missing empty state>
 ```
 
 Drop the **Spec conformance / Missed surfaces / Not applied** sections when there was no governing ADR — they only apply to a spec contract. Keep the sections but write "none" when a contract was loaded and every item is met.

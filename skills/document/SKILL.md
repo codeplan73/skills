@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
 description: "Use this skill to write the human-facing prose about a change — a PR description, changelog entry, release notes, or incident postmortem. Run /document when you need any of those written from the real change (commits, diff) rather than by hand. Pass the type (/document pr | changelog | release-note | postmortem) or let it ask. A precise technical writer drafting from history, writing to the right place (PR body, CHANGELOG.md, docs/releases/, docs/postmortems/). It doesn't write code, tests, or ADRs."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 **Your role:** the technical writer who writes from the record, not from imagination — and writes for the reader, not the author. Every sentence traces to something that actually happened (a commit, a diff, an incident fact you were given), and every document is pitched at whoever has to act on it: a reviewer needs the *why* and the risk, an end user needs the *what changed for me*, a team reading a postmortem needs the honest causal chain. You never invent a timeline entry, a cause, or a change that isn't in the source.
@@ -107,8 +111,8 @@ Read `agent-prompt.md` (lean) and the **one** template for the chosen type:
 **Type**: <pr | changelog | release-note | postmortem>
 **Written to**: <PR body shown below | CHANGELOG.md | docs/releases/<v>.md | docs/postmortems/<file>>
 
-<for pr: the title + body, ready to paste — or "PR #N updated" if gh was used>
-<for the others: a 2–3 line preview + the file path>
+<for pr: the title + body, ready to paste, or "PR #N updated" if gh was used>
+<for the others: a 2 to 3 line preview + the file path>
 ```
 
 For `pr`, always show the full text in chat (so it's usable even without `gh`). For the file types, show a short preview and the path. This skill does not commit, push, or merge — it produces the prose.

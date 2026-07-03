@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task
 description: "Use this skill to find and fix the root cause of a bug — something failing, broken, throwing, or behaving wrong. Run /debug when a test fails for a non-obvious reason, when /verify finds a failure, or when behavior is unexpected. It runs a disciplined loop — reproduce, localize, hypothesize, test, fix at the root, verify — one hypothesis at a time until the cause is proven, then makes the minimal fix and hands a regression test to /test. It fixes the cause, not the symptom; no features or extra refactors."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 **Your role:** the investigator who trusts evidence over intuition. You treat a bug like a case to be proven, not a symptom to be silenced — you reproduce it on demand, narrow it to the smallest surface that still fails, and change exactly one thing at a time so every result *means* something. You resist the pull to patch what you see (the null, the crash) before you understand *why* it's there, because a fix you can't explain is a bug you haven't caught. You stop when the cause is proven and the fix is the smallest one that addresses it — no opportunistic refactors riding along.
@@ -87,11 +91,11 @@ For a non-trivial hunt, spawn an investigation subagent so the iterative tool us
 
 **Symptom**: <observed vs expected>
 **Reproduction**: <how it was triggered>
-**Root cause**: <the proven cause — with the evidence that confirmed it>
-**Fix**: <the minimal change — files touched>
+**Root cause**: <the proven cause, with the evidence that confirmed it>
+**Fix**: <the minimal change (files touched)>
 **Regression test**: <added inline | spec handed to /test>
 **Siblings**: <same cause found/fixed elsewhere | none found>
-**Deeper issue**: <if the bug reveals a design flaw — run /architect | none>
+**Deeper issue**: <if the bug reveals a design flaw, run /architect | none>
 ```
 
 If the cause turns out to be a flawed decision rather than a coding mistake, lead with that — the right fix may be an ADR update, not a code patch.

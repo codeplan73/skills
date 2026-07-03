@@ -36,7 +36,7 @@ This makes the `/architect → /audit` handoff order-independent: whenever audit
 ## Build approach (every phase that writes or audits root)
 
 Root `AGENTS.md`'s `## Build approach` is a **project-wide convention** — the default build strategy every skill reads, exactly like `## Stack`. Reason as the engineer setting the team's default: **capture** the approach as a convention, don't invent or prescribe one. Its source of truth is the **roadmap header** (the build-approach line `/roadmap` records):
-- **Creating root** (greenfield, whole-repo): seed `## Build approach` from the roadmap header if one exists — a short line: the approach's name + its one-line principle. If there's no roadmap, or none is set yet, write `<TBD — set by /roadmap>` rather than guessing one.
+- **Creating root** (greenfield, whole-repo): seed `## Build approach` from the roadmap header if one exists — a short line: the approach's name + its one-line principle. If there's no roadmap, or none is set yet, write `<TBD, set by /roadmap>` rather than guessing one.
 - **Auditing existing root** (gap-fill): if root's `## Build approach` is missing while the roadmap header names one, that's a gap (ROOT_GAPS); if the two name **different** approaches, that's a contradiction (CONTRADICTIONS). Never silently overwrite a curated line.
 
 ## Phase
@@ -95,11 +95,11 @@ Using your file tools, list the top couple of levels of the project (excluding `
 
 Read the project's manifest if present (whatever the ecosystem uses) — note language and package manager. **If an architecture ADR exists in `docs/adr/`** (one with a `## Proposed stack` section), read it: the engineer already decided the stack via `/architect`. Use it to populate `## Stack` — do not leave placeholders or contradict it. This is the cold-start handoff: the architecture decision becomes the project's first ambient convention.
 
-Also check `docs/roadmap/` (or `.workflow/roadmap/`) for a roadmap: its **header** may record the project's **build approach** (name + one-line principle). If it does, that's the seed for `## Build approach` — capture it verbatim as a convention. If there's no roadmap or no approach set, leave it `<TBD — set by /roadmap>`.
+Also check `docs/roadmap/` (or `.workflow/roadmap/`) for a roadmap: its **header** may record the project's **build approach** (name + one-line principle). If it does, that's the seed for `## Build approach` — capture it verbatim as a convention. If there's no roadmap or no approach set, leave it `<TBD, set by /roadmap>`.
 
 **Step 2 — Create root AGENTS.md**
 
-Use the template below. Populate `## Stack` from the architecture ADR if one exists, otherwise from what you found (or `<to be filled>` if truly nothing is decided yet). Populate `## Build approach` from the roadmap header if one is set (name + one-line principle), otherwise `<TBD — set by /roadmap>`.
+Use the template below. Populate `## Stack` from the architecture ADR if one exists, otherwise from what you found (or `<to be filled>` if truly nothing is decided yet). Populate `## Build approach` from the roadmap header if one is set (name + one-line principle), otherwise `<TBD, set by /roadmap>`.
 
 For `## Rules`: use the SELECTED_PATTERNS content injected above as the basis. If the engineer selected "Other" (free-text) instead of a named pattern, treat their exact text as the conventions and include it verbatim under `## Rules` — do not interpret or reformat it. Append ADDITIONAL_STANDARDS as extra bullet points at the end of `## Rules`. If nothing was found for stack, write placeholders like `<to be filled>`.
 
@@ -188,7 +188,7 @@ Collect gaps in this format and include them in the final report under `Root gap
 
 ```
 ROOT_GAPS:
-- <exact markdown line to add> — target section: `## <section>` — reason: <one line>
+- <exact markdown line to add>, target section: `## <section>`, reason: <one line>
 ```
 
 If no gaps: `ROOT_GAPS: none`
@@ -249,18 +249,18 @@ Be conservative: only flag findings you're confident about and that are durable.
 
 - **Language / Runtime**: <e.g. TypeScript, Node 20>
 - **Framework**: <e.g. Next.js 14, Express>
-- **Key dependencies**: <3–5 most important>
+- **Key dependencies**: <3 to 5 most important>
 - **Package manager**: <npm / pnpm / yarn / pip / cargo>
 
 ## Build approach
 
-<The project's default build strategy — a short line: name + one-line principle. A project-wide
- convention every skill reads (like the stack). Seeded from the roadmap header; `<TBD — set by
+<The project's default build strategy, a short line: name + one-line principle. A project-wide
+ convention every skill reads (like the stack). Seeded from the roadmap header; `<TBD, set by
  /roadmap>` if none is set yet. The approach is one of:
- - **Tracer Bullet** — vertical end-to-end slices, thin but complete through every layer
- - **Skateboard** — ship the thinnest usable whole, then grow it
- - **Facade** — UI-first shell, then wire the real behavior behind it (prototype-led)
- - **Journey** — build the full user path, one phase at a time>
+ - **Tracer Bullet**, vertical end-to-end slices, thin but complete through every layer
+ - **Skateboard**, ship the thinnest usable whole, then grow it
+ - **Facade**, UI-first shell, then wire the real behavior behind it (prototype-led)
+ - **Journey**, build the full user path, one phase at a time>
 
 ## Commands
 
@@ -284,10 +284,10 @@ Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
 
 ## Rules
 
-<Conventions that apply everywhere — from pattern presets and/or discovered from code.
+<Conventions that apply everywhere, from pattern presets and/or discovered from code.
   For greenfield: paste the selected pattern conventions here.
   For whole-repo: extract what you observe in the code.
-  Keep this to 5–10 bullet points max.>
+  Keep this to 5 to 10 bullet points max.>
 
 ## Context files
 
@@ -304,17 +304,17 @@ Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
 
 ## Overview
 
-<2–3 sentences: what this area does and why it exists>
+<2 to 3 sentences: what this area does and why it exists>
 
 ## Key files
 
 | File | Owns |
 |---|---|
-| <path> | <what it does — one line> |
+| <path> | <what it does, one line> |
 
 ## Commands
 
-<Local commands if different from root — omit section if identical>
+<Local commands if different from root, omit section if identical>
 
 ## Conventions
 
@@ -322,11 +322,11 @@ Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
 
 ## Gotchas
 
-<Non-obvious invariants that would trip a developer — omit section if none>
+<Non-obvious invariants that would trip a developer, omit section if none>
 
 ## Related ADRs
 
-<Links once ADRs exist — omit section if none yet>
+<Links once ADRs exist, omit section if none yet>
 ```
 
 ---
@@ -362,7 +362,7 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 - <finding>
 
 **Written**:
-- <file path> — <created | pointer added | updated>
+- <file path> (<created | pointer added | updated>)
 
 **Root gaps flagged** (area / gap-fill phases):
 <ROOT_GAPS output or "none">
@@ -370,7 +370,7 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 **Proposed** (existing files):
 <PROPOSED_ADDITIONS block or "none">
 
-**Contradictions** (gap-fill phase — docs the code disproves; for a human to resolve):
+**Contradictions** (gap-fill phase, docs the code disproves; for a human to resolve):
 <CONTRADICTIONS entries or "none">
 ```
 

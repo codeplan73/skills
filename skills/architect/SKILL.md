@@ -5,6 +5,10 @@ allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
 description: "Use this skill to make and document an architectural or technical decision before writing code. Run /architect when facing a meaningful choice between approaches, designing a feature or page from scratch, choosing a tech stack, or when /develop says a decision is owed. A Staff/Principal Engineer that challenges bad directions, names anti-patterns, asks deep feature-specific questions, and recommends the right answer rather than a neutral menu — then writes a complete-build-spec ADR to docs/adr/ for your confirmation. Owns all ADR files."
 ---
 
+## Output style (plain words, no dashes)
+
+Write everything this skill produces (the ADR it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+
 ## What this skill does
 
 Runs a structured discovery process, weighs options, and writes or updates an Architecture Decision Record (ADR) in `docs/adr/`. Works across four modes:
@@ -102,7 +106,7 @@ From the ADR list (all paths below are relative to `$ADR_DIR`, the resolved loca
   - **Umbrella** (splits into ≥2 related sub-decisions + research) → a directory `$ADR_DIR/NNNN-kebab-title/` with `index.md` (the umbrella decision, listing its children), child ADRs `NNNN-child.md` inside it, and any inventories/audits under `$ADR_DIR/NNNN-kebab-title/research/`. Decide this from the topic's breadth *before* the subagent writes; tell the subagent to use the directory shape.
 - **Related ADRs**: read the first 20 lines of each existing ADR — enough to capture the title, status, and opening paragraph of Context — to check for overlap with the current design topic. Flag any that match.
 - **Child-of-umbrella detection**: if the topic is a **sub-decision of an existing umbrella** (`$ADR_DIR/NNNN-<umbrella>/`) — e.g. a new decision that surfaced while building under it — place the new ADR **inside that directory** as the next child (`NNNN-child.md`) and add it to the umbrella's `index.md` list, rather than creating a new top-level ADR. This is also the path when `/develop` hits a decision mid-build: it routes here, and the child lands under its parent. Tell the engineer where it's going.
-- **Update/supersede detection**: if any existing ADR clearly overlaps the current design topic (same domain, same system, same decision), **before the staged conversation**, present it to the engineer via a **decision panel** (options + free-text Other; plain-text options where the agent has no picker): "I found an existing ADR that may overlap: `[path]` — [title]. How should I treat this?" — options: **New decision — create a new ADR** · **Update the existing ADR in place** · **Supersede it — a new ADR replaces it**. Pre-select the "(recommended)" option by how strongly it overlaps (near-identical → Update or Supersede; adjacent → New). On update/supersede: set OPERATION accordingly, read the existing ADR in full, and skip the staged conversation for in-place updates.
+- **Update/supersede detection**: if any existing ADR clearly overlaps the current design topic (same domain, same system, same decision), **before the staged conversation**, present it to the engineer via a **decision panel** (options + free-text Other; plain-text options where the agent has no picker): "I found an existing ADR that may overlap: `[path]`, [title]. How should I treat this?", options: **New decision (create a new ADR)** · **Update the existing ADR in place** · **Supersede it (a new ADR replaces it)**. Pre-select the "(recommended)" option by how strongly it overlaps (near-identical → Update or Supersede; adjacent → New). On update/supersede: set OPERATION accordingly, read the existing ADR in full, and skip the staged conversation for in-place updates.
 
 **Community skills — read them from the project's `AGENTS.md`, not from a hardcoded name table** (skill names and stacks change). `AGENTS.md` is the source of truth for what the project uses: project-wide skills/conventions in **root `AGENTS.md`**, area-specific ones in the relevant **nested `<area>/AGENTS.md`** (maintained by `/audit` and `/sync`). So:
 
@@ -126,11 +130,11 @@ Before any questioning, run these two checks **in order**. Check B must run befo
 Scan the design topic for phrases signalling an existing decision: "I built", "we built", "we're using", "we use", "I use", "we chose", "I chose", "already using", "already built", "just document", "document the decision we made", "decided to use", "we went with", "we're on".
 
 If found: before anything else, tell the engineer:
-present a **decision panel** (plain-text options where the agent has no picker): "This sounds like an existing decision you want to *document* rather than explore from scratch." — options: **Document it — write the ADR from what you tell me (recommended)** · **Go through the full design process** (+ Other).
+present a **decision panel** (plain-text options where the agent has no picker): "This sounds like an existing decision you want to *document* rather than explore from scratch.", options: **Document it (write the ADR from what you tell me) (recommended)** · **Go through the full design process** (+ Other).
 
 If they reply `yes`:
 1. Ask these three plain-text questions (not MCQ — the engineer types free text):
-   - "What alternatives did you consider before choosing this approach? (Even if briefly — 'we looked at X and Y but went with Z' is enough.)"
+   - "What alternatives did you consider before choosing this approach? (Even if briefly, 'we looked at X and Y but went with Z' is enough.)"
    - "What was the main reason you chose this over the alternatives?"
    - "What tradeoffs is the team accepting with this decision? What does it make harder?"
 2. Wait for their answers.
@@ -153,7 +157,7 @@ A design topic is **decision-scoped** if it names a specific component, feature,
 
 **If product-scoped**: do not start the staged conversation yet. Instead:
 
-1. Tell the engineer: "This describes a full product — /architect works one decision at a time. Let me help you pick the first foundational decision."
+1. Tell the engineer: "This describes a full product. /architect works one decision at a time. Let me help you pick the first foundational decision."
 2. Generate 4 **foundational first-decision** options tailored to the product type and present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none (question: "Which foundational decision should we design first?", header: "First decision"). For most products these are the tech stack/architecture, the auth/identity approach, the core domain data model, and the single most important product-specific concern — worded for what the engineer described.
 3. After the engineer selects: update the design topic to that specific decision and proceed to Framing.
 
@@ -169,7 +173,7 @@ A design topic is **decision-scoped** if it names a specific component, feature,
 - **Stack & conventions** — language, framework, DB, and the community skills the project uses, from `AGENTS.md` (the target workspace's, in a monorepo) — inferred, never asked.
 - **Constraints** — team size, scale, and compliance: infer from `AGENTS.md` / the product. Raise a **per-feature** compliance question only when *this* feature touches regulated data (payments, PII, health) — not as a generic deadline/team menu.
 
-State it: *"Reading this as a new **FEATURE** on your existing stack (from `AGENTS.md`), web — correct me if not."* Then begin the **staged design conversation** (below).
+State it: *"Reading this as a new **FEATURE** on your existing stack (from `AGENTS.md`), web (correct me if not)."* Then begin the **staged design conversation** (below).
 
 ---
 
@@ -177,7 +181,7 @@ State it: *"Reading this as a new **FEATURE** on your existing stack (from `AGEN
 
 The design is **not one long question dump** — it's an **ordered sequence of stages**, each ending in a **GATE**: you PROPOSE a strong opinion, SHOW it, and the engineer signs off via a **decision panel** before you move on. **No vital stage is silently decided or skipped** — the **data model** and the **tool choice** especially are shown and signed off, never buried in prose. What you build together, stage by stage, becomes the ADR's `## Requirements` (the acceptance-criteria spine) and `## Build plan`. **Generate everything from *this* feature** — never a fixed list; an auth feature and a reviews feature share no questions.
 
-**Decision-panel convention — every user-facing choice is a panel.** Present every gate and every choice as an options panel: **2–4 options, exactly ONE marked "(recommended)"** with a one-line why (**never a neutral menu**), plus a free-text **"Other"** so the engineer can redirect. **Capability-first:** use your agent's interactive picker (`AskUserQuestion` on Claude Code); where the agent has no picker, degrade to the **same options as plain text**. This governs every stage gate, the stack drill-down, the web-assistance gate, and the final ADR confirmation.
+**Decision-panel convention — every user-facing choice is a panel.** Present every gate and every choice as an options panel: **2–4 options, exactly ONE marked "(recommended)"** with a one-line why (**never a neutral menu**), plus a free-text **"Other"** so the engineer can redirect. **Capability-first:** use your agent's interactive picker (`AskUserQuestion` on Claude Code); where the agent has no picker, degrade to the **same options as plain text**. This governs every stage gate, the stack drill-down, the References consent panel, and the final ADR confirmation.
 
 **Still infer, don't interrogate.** Framing (mode, platform, stack, constraints) is inferred as above — the stages spend the budget on what only the engineer knows (requirements, rules, scope) and what expertise must settle (provider/pattern). Within each stage, sort every dimension **INFER / ASK / RECOMMEND** (see *Asks vs acts*): **INFER** silently from the prompt/codebase/`AGENTS.md`; **ASK** the engineer only what they alone know; **RECOMMEND** by proposing your pick (state it + one-line why + runner-up, never a blank menu). The gate confirms the whole stage at once.
 
@@ -208,17 +212,21 @@ The design is **not one long question dump** — it's an **ordered sequence of s
 
 Then run the stages **in order**. Each is a **GATE** — you PROPOSE, SHOW, and don't advance until the panel returns **Accept**. Batch questions **up to 4 per call**, run as many rounds within a stage as it needs, and fold prior answers forward so it reads as one interview, not a form.
 
-**Stage (a) — Requirements & acceptance criteria.** **Seed** the user stories and a first cut of acceptance criteria from the **roadmap feature row's intent + acceptance-criteria seeds** (read in pre-flight) when a row exists; otherwise draft them from the topic + framing. PROPOSE them, **ID each criterion (`AC-1`, `AC-2`, …)**, SHOW the list, and refine with the engineer. **Gate:** panel — *"These acceptance criteria are right (recommended)"* · *"Change/add a criterion — I'll say which"* · *"Missing a failure case"* · Other; loop until Accept. These ACs are **the contract `/develop` builds to and `/verify` checks** — the spine every later stage and every build task hangs off.
+**Stage (a) — Requirements & acceptance criteria.** **Seed** the user stories and a first cut of acceptance criteria from the **roadmap feature row's intent + acceptance-criteria seeds** (read in pre-flight) when a row exists; otherwise draft them from the topic + framing. PROPOSE them, **ID each criterion (`AC-1`, `AC-2`, …)**, SHOW the list, and refine with the engineer. **Gate:** panel — *"These acceptance criteria are right (recommended)"* · *"Change/add a criterion, I'll say which"* · *"Missing a failure case"* · Other; loop until Accept. These ACs are **the contract `/develop` builds to and `/verify` checks** — the spine every later stage and every build task hangs off.
 
-**Stage (b) — Data model (MANDATORY — propose → SHOW → confirm → iterate).** Never skipped for a data-backed feature, and never a silently-buried field. **PROPOSE** the entities, their fields (type, required/nullable), and relationships as a **strong opinion** — recommend a concrete model, don't ask a blank *"what's your schema?"*. **SHOW** it as an **ERD-style table or diagram**: entities, primary keys, foreign keys, and cardinality (1:1 / 1:N / N:M). **Gate:** panel — *"Data model looks right (recommended)"* · *"Change/add/remove a field or entity — I'll say what"* · *"A relationship is wrong"* · Other. **ITERATE** — revise and re-SHOW — until Accept. On sign-off, **derive the migration as build task 1** (feeds `## Build plan`).
+**Stage (b) — Data model (MANDATORY — propose → SHOW → confirm → iterate).** Never skipped for a data-backed feature, and never a silently-buried field. **PROPOSE** the entities, their fields (type, required/nullable), and relationships as a **strong opinion** — recommend a concrete model, don't ask a blank *"what's your schema?"*. **SHOW** it as an **ERD-style table or diagram**: entities, primary keys, foreign keys, and cardinality (1:1 / 1:N / N:M). **Gate:** panel — *"Data model looks right (recommended)"* · *"Change/add/remove a field or entity, I'll say what"* · *"A relationship is wrong"* · Other. **ITERATE** — revise and re-SHOW — until Accept. On sign-off, **derive the migration as build task 1** (feeds `## Build plan`).
 
-**Stage (c) — Stack & tool selection (progressive drill-down).** Drill **category → specific option → config**, one panel per level — e.g. *backend shape?* → (a platform/BaaS → which one → which of its features) **or** (custom → database → data-access layer → auth approach → hosting). **Generate the options FRESH and CURRENT at runtime — never a hardcoded/canned list** (this category rots fastest); be honest about staleness (*"as of my knowledge; this space moves fast — verify current"*). Each level carries **exactly one recommended pick**, **aligned to the stack already in use** (from `AGENTS.md` — reuse beats sprawl; a platform already in the project usually wins over a new external tool). **Skip any level the existing stack already settles** (INFER — don't re-ask a decided layer); drill only where a real choice is open (for an ENHANCEMENT most of this is inferred; for ARCHITECTURE/greenfield it's the core of the conversation). For a **greenfield/foundational (ARCHITECTURE) stack decision**, recommend enabling **web-landscape verification** first (the gate below) so the options are current — the *recommended* pick for greenfield, and distinct from optional citation links.
+**Stage (c) — Stack & tool selection (progressive drill-down).** Drill **category → specific option → config**, one panel per level — e.g. *backend shape?* → (a platform/BaaS → which one → which of its features) **or** (custom → database → data-access layer → auth approach → hosting). **Generate the options FRESH and CURRENT at runtime — never a hardcoded/canned list** (this category rots fastest); be honest about staleness (*"as of my knowledge; this space moves fast — verify current"*). Each level carries **exactly one recommended pick**, **aligned to the stack already in use** (from `AGENTS.md` — reuse beats sprawl; a platform already in the project usually wins over a new external tool). **Skip any level the existing stack already settles** (INFER — don't re-ask a decided layer); drill only where a real choice is open (for an ENHANCEMENT most of this is inferred; for ARCHITECTURE/greenfield it's the core of the conversation). For a **greenfield/foundational (ARCHITECTURE) stack decision**, checking the current tool landscape keeps the options fresh, so the References consent panel below folds that in (the web option runs a current landscape check before the stack panel). It stays the recommended pick for a greenfield stack.
 
-  **Web-assistance gate (panel, capability-first).** Before a greenfield stack drill-down — and reused before the subagent writes citations — offer web help as a panel:
-  - **question**: "Use web tools here? Landscape verification checks the *current* options/versions so recommendations aren't stale; citation links fetch-and-confirm official docs for the ADR. Both cost some extra tokens."
-  - **header**: "Web assistance"
-  - **options**: `Landscape verification + citation links (recommended for greenfield stack)` · `Citation links only` · `No web — named sources only (no extra tokens)` · Other
-  For a non-greenfield feature on an established stack, landscape verification is unnecessary — set the recommended pick to citation-links-only or none. When landscape verification is enabled **and** your agent has web tools, run a quick current-landscape check (a web-capable subagent, or your own web tools) **before** presenting the stack panel; without web tools, proceed from your knowledge and flag the staleness. **Record the choice — the subagent-spawn step reuses it (don't re-ask).**
+  **References consent (one panel, capability-first).** There is ONE ask here, not two competing ones (the old web assistance gate and the references ask are now a single question). Before the stack drill down for a greenfield decision (so current options can be checked), and reused later before the subagent writes the References, ask this single question and record the outcome as `REFERENCES_LEVEL`:
+  - **question**: "Add a References section to the ADR (where the recommendations come from, and optionally links)? The full reasoning (the Rationale) stays either way. For a greenfield stack decision the web option also checks the current tool landscape so the options are not stale. Web fetches cost some extra tokens."
+  - **header**: "References"
+  - **options**:
+    - `No references, keep it clean (recommended)` (the ADR keeps its full Rationale but writes no References section and adds no `(basis: ...)` citations) sets `REFERENCES_LEVEL = none`
+    - `Sources only (named project sources and practices, no web fetch)` (a References section with named project sources and practices, no links) sets `REFERENCES_LEVEL = sources`
+    - `Sources plus web verified links (fetches pages to confirm the links, costs some extra tokens)` (sources plus web verified links; for a greenfield stack decision this also runs the current landscape check) sets `REFERENCES_LEVEL = sources+links`
+    - Other (free text)
+  **For a greenfield/foundational ARCHITECTURE stack decision, set the recommended pick to `Sources plus web verified links` instead**, so the current landscape is verified before you present the options; for a non-greenfield feature on an established stack, keep `No references, keep it clean` as the recommended pick (landscape verification is unnecessary there). When `sources+links` is chosen **and** your agent has web tools and this is a greenfield stack decision, run a quick current-landscape check (a web capable subagent, or your own web tools) **before** presenting the stack panel; without web tools, proceed from your knowledge and flag the staleness. **Record `REFERENCES_LEVEL` (`none` | `sources` | `sources+links`), the subagent spawn step reuses it, do not re-ask.**
 
 **Stage (d) — API / interface surface.** PROPOSE the endpoints or actions as a table (method, path/signature, key inputs, key outputs, auth requirement, key errors). **Gate:** panel — *"Surface is right (recommended)"* · *"Change/add an endpoint"* · *"Wrong auth on one"* · Other; loop until Accept.
 
@@ -228,7 +236,7 @@ Then run the stages **in order**. Each is a **GATE** — you PROPOSE, SHOW, and 
 
 **(UI-page features** — topic IS a page/screen: insert a **page-design stage** between (a) and (d) that PROPOSEs page composition/sections, design-system direction, component inventory, and asset strategy (the UI-design checklist bullet), SHOWs it, and gates it — the "what goes on the page" only the engineer knows.**)**
 
-**Quality bar per stage:** every option maps to a real, feature-specific decision (never a placeholder like "how complex is the data model?"), with concrete options each carrying a one-line tradeoff; multi-select where answers aren't exclusive. **Cite the basis on any option that carries a recommendation** — append `(basis: …)`: a **project source** (`your AGENTS.md`, an ADR, an installed skill, the existing stack) or a **named practice** (`idempotency for money ops`). At stage time you have no web tools **unless landscape verification is on**, so **name the source/practice — not a URL** (the subagent adds verified links later if opted in).
+**Quality bar per stage:** every option maps to a real, feature-specific decision (never a placeholder like "how complex is the data model?"), with concrete options that each carry a one-line tradeoff; multi-select where answers are not exclusive. **Keep the option list itself clean:** one recommended pick with a one-line why, plus a free-text Other for the engineer's own answer. Do not put a `(basis: …)` tag or a source citation in the option labels. The source and reasoning behind a recommendation belong in the written ADR (its Rationale, which always stays, and its References section when the engineer opts in), not in the live panel the engineer picks from.
 
 **Collect the RECOMMEND items** you defer to the subagent (a call better made with full design context) as a list to inject into its prompt — it must decide each, state the pick + one-line why + the runner-up, and never echo it back as an open question.
 
@@ -247,9 +255,9 @@ Notice: each feature shares *no* questions with the others — that's the point.
 
 **Enhancement-mode guard**: if the inferred mode is `ENHANCEMENT` AND `SOURCE_FILE_COUNT = 0`: stop before the staged conversation and tell the engineer:
 
-"Enhancement mode reads existing code to understand what's being changed — but no source files were found. What's the situation?
-- A) The code exists in a different directory — tell me the path and I'll re-check.
-- B) There is no existing implementation — then this is really a new **FEATURE** (or **ARCHITECTURE**)."
+"Enhancement mode reads existing code to understand what's being changed, but no source files were found. What's the situation?
+- A) The code exists in a different directory. Tell me the path and I'll re-check.
+- B) There is no existing implementation. Then this is really a new **FEATURE** (or **ARCHITECTURE**)."
 
 Wait for their answer. If (A): re-run the source-file count for that path. If (B): switch the inferred mode and continue.
 
@@ -261,15 +269,20 @@ After the staged conversation, read `agent-prompt.md` and `adr-template.md` (rel
 
 **Inject only the resolved MODE's block.** `agent-prompt.md`'s `## Instructions by mode` section has four blocks (`### FEATURE mode`, `### ARCHITECTURE mode`, `### ENHANCEMENT mode`, `### CROSS-CUTTING mode`), but **only one mode runs per call.** In the filled prompt, include **only the block matching the resolved MODE** and drop the other three — they're ~200 lines the subagent never uses. Keep everything else verbatim: the persona ("Who you are / How you think / What you do NOT do"), Step 0 and Step 0b, `## Expert rules that apply to all modes`, `## Report format`, and all the context placeholders.
 
-**Inline the ADR skeleton, not the template's reference/meta sections.** From `adr-template.md`, inline the **ADR section structure + field guidance the subagent fills** — everything between `=== ADR TEMPLATE START ===` and `=== ADR TEMPLATE END ===` (Context, Options considered, Decision, Rationale, the mode-specific design section, Consequences, Follow-up, References, etc.). You **MAY omit the trailing reference/meta sections** — `## Filename conventions`, the `## Status values` table, the umbrella-structure / child-status notes, and the `## Writing rules` commentary — those are **main-agent guidance** for status, shape, and naming (the main agent resolves the filename, shape, and initial `**Status**:` and injects them via the placeholders), not material the subagent needs to *write* the ADR body. The `**Status**:` line the subagent should write is already conveyed by the "On the initial `**Status**:` line" rule in `## Expert rules that apply to all modes`. Do **not** edit `adr-template.md` — this only changes what gets inlined.
+**Inline the ADR skeleton, not the template's reference/meta sections.** From `adr-template.md`, inline the **ADR section structure + field guidance the subagent fills** — everything between `=== ADR TEMPLATE START ===` and `=== ADR TEMPLATE END ===` (Summary, Context, Options considered, Decision, Rationale, the mode-specific design section, Consequences, Follow-up, References, etc.). You **MAY omit the trailing reference/meta sections** — `## Filename conventions`, the `## Status values` table, the umbrella-structure / child-status notes, and the `## Writing rules` commentary — those are **main-agent guidance** for status, shape, and naming (the main agent resolves the filename, shape, and initial `**Status**:` and injects them via the placeholders), not material the subagent needs to *write* the ADR body. The `**Status**:` line the subagent should write is already conveyed by the "On the initial `**Status**:` line" rule in `## Expert rules that apply to all modes`. Do **not** edit `adr-template.md` — this only changes what gets inlined.
 
-**Web-verified links — reuse the Stage (c) web-assistance choice.** The subagent can add **web-verified reference links** (fetch-to-confirm official docs/standards), which costs extra tokens. **The web-assistance gate in Stage (c) already settled this** — if the engineer chose "citation links" (either option that includes them), give the subagent web tools; if they chose "No web," don't. **Only if Stage (c) never ran** (e.g. documentation path, or no stack stage), present the web-assistance panel now (2–4 options, one recommended, plus Other) covering citation links; landscape verification is moot at write time.
+**References and links — reuse the Stage (c) References consent (`REFERENCES_LEVEL`).** The subagent writes the References section and `(basis: ...)` citations only at the level the engineer chose. **The References consent panel in Stage (c) already settled this:**
+- `none`: the subagent writes NO `## References` section and adds NO `(basis: ...)` citations anywhere; the Rationale still stays.
+- `sources`: a `## References` section with named Project sources and Practices only, no Links, and no web tools.
+- `sources+links`: sources plus web verified links; give the subagent web tools so it fetches to confirm each link before writing it.
+
+**Only if Stage (c) never ran** (for example the documentation path, or no stack stage), present the References consent panel now (the same one panel, recommended pick `No references, keep it clean`, plus Other) and set `REFERENCES_LEVEL` from it; the landscape check is moot at write time.
 
 Then spawn a subagent:
 
 - `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
 - `description: "Architect: <mode> — research and draft ADR"`
-- Tools: `Read`, `Bash`, `Write`, `Edit` — **add `WebSearch`, `WebFetch` only if the engineer opted into web links** (above). The web tools verify citation links (fetch-to-confirm before linking; sourcing rules in `agent-prompt.md`). Without them — declined, no answer, or the client has no web tools — the subagent cites project sources + named practices only (no links); that's fine.
+- Tools: `Read`, `Bash`, `Write`, `Edit`. **Add `WebSearch`, `WebFetch` only when `REFERENCES_LEVEL` is `sources+links`** (above). The web tools verify links (fetch to confirm before linking; sourcing rules in `agent-prompt.md`). When `REFERENCES_LEVEL` is `sources`, the subagent cites named project sources and practices only (no links, no web tools). When it is `none`, the subagent writes no References section and no `(basis: ...)` citations at all.
 - `prompt`: filled template with all engineer answers, the inferred framing, and the injected ADR template
 
 The **inferred MODE** (from Framing) is already one of `FEATURE` / `ARCHITECTURE` / `ENHANCEMENT` / `CROSS-CUTTING` — inject it directly.
@@ -280,6 +293,7 @@ Inject into the template:
 2a. The **feature's build approach** (read in pre-flight with precedence — this feature's roadmap-row `Approach` override if its row declares one, else the project default from `AGENTS.md`/roadmap header, else the noted default) → inject into `BUILD_APPROACH`, so the subagent orders and slices `## Build plan` in role by what the approach implies for this feature
 3. All **staged-conversation answers, stage by stage** — including the **confirmed acceptance criteria** (already IDed AC-1…, to seed `## Requirements`), the **confirmed data model** (entities/fields/relationships, to seed `## Build plan` task 1), the confirmed stack/tool picks, API surface, authz model, and edge cases. If the staged conversation was skipped (documentation path), inject: `"Staged design skipped — documenting an already-made decision"` so the subagent knows this was intentional, not an error
 3a. The **RECOMMEND items** → inject into `RECOMMEND_ITEMS_OR_NONE` — the specific decisions the subagent must make and justify (tool/provider aligned to the stack, session model, etc.). If none, inject `"none"`.
+3b. The **References level** from the Stage (c) References consent → inject into `REFERENCES_LEVEL` (one of `none` | `sources` | `sources+links`). This governs whether the subagent writes a `## References` section and `(basis: ...)` citations, and at what depth (see the sourcing rules in `agent-prompt.md`). If Stage (c) never ran and you have not asked yet, default to `none`.
 4. Context-file contents — `AGENTS.md` (root + the feature area's nested), or `CLAUDE.md` as fallback, or "MISSING"
 5. Existing ADR list (filenames + first line of each)
 6. Related ADR paths (flagged in pre-flight)
@@ -298,14 +312,14 @@ Inject into the template:
 **First — did it run at all?** If the ADR file is missing or empty (the subagent errored or produced nothing), report the failure and offer to re-run — never fabricate an ADR summary. Only if the file exists, continue:
 
 **Self-check before presenting**: Read the written ADR file. Verify it contains all required sections:
-- All modes: `## Context`, `## Requirements` (IDed acceptance criteria — the confirmed spine), `## Options considered` (unless "Documenting a made decision"), `## Decision`, `## Rationale`, `## Consequences`
+- All modes: `## Summary` (the plain-words human quick read, no dashes), `## Context`, `## Requirements` (IDed acceptance criteria — the confirmed spine), `## Options considered` (unless "Documenting a made decision"), `## Decision`, `## Rationale`, `## Consequences`
 - Data-backed modes: `## Build plan` — ordered tasks, each tagged with the AC(s) it satisfies, migration first; **every AC traces to at least one task**
 - Feature mode: `## Feature design` with the confirmed data model and Critical test scenarios (mapped to ACs) populated
 - Architecture mode: `## Proposed stack` with every relevant layer filled
 - Enhancement mode (non-trivial migration): `## Migration plan` with Strategy, Phases, Rollback, and Risks
 - Cross-cutting mode: `## Standard definition` with Canonical pattern, Replaces, Enforcement, Rollout, and Exceptions
 
-If a required section is missing or a field is blank/placeholder, add this line directly after the ADR path in the presentation: `⚠️ Incomplete: [section name] was not completed by the subagent — e.g. "⚠️ Incomplete: ## Feature design > Security model — left as placeholder. Request it in your feedback."`
+If a required section is missing or a field is blank/placeholder, add this line directly after the ADR path in the presentation: `⚠️ Incomplete: [section name] was not completed by the subagent, e.g. "⚠️ Incomplete: ## Feature design > Security model was left as a placeholder. Request it in your feedback."`
 
 **Design-review gate (full-weight features — optional for lean/medium, capability-first).** Before presenting a **full-tier / high-risk / compliance-touching / foundational ARCHITECTURE** ADR for confirmation, run a **fresh-model critique**: spawn a subagent on a **strong and, where possible, different model** with the drafted ADR and ask it to stress-test the design — *does it hold up? is there a materially simpler option? what failure mode is missed?* Surface its findings to the engineer alongside the ADR (as a short "Design review" note), and fix any clear issues by targeted Edit before or during confirmation. **Skip it for trivial/lean-tier** decisions, and skip where the agent has no subagent capability (note that it was skipped).
 
@@ -321,7 +335,7 @@ If a required section is missing or a field is blank/placeholder, add this line 
    Then present the **confirmation decision panel** (capability-first: `AskUserQuestion` on Claude Code, else the same options as plain text):
    - **question**: "Accept this ADR, or change it?"
    - **header**: "ADR"
-   - **options**: `Accept — looks solid (recommended)` · `Change something — I'll tell you what` · `Rethink the approach` · Other
+   - **options**: `Accept, looks solid (recommended)` · `Change something, I'll tell you what` · `Rethink the approach` · Other
    On **Change something**, ask what to change (this also covers overriding a ⚠️ Premise note — if the engineer disagrees with it, remove it and proceed with their direction) and apply targeted **Edit**s. On **Rethink the approach**, revisit the relevant stage(s)/options and revise. Either way, **re-present the SAME panel** and loop until the engineer picks **Accept**.
 
 2. Do not rewrite the ADR from scratch on feedback. Use the **Edit** tool to apply targeted changes to the specific sections the engineer called out.
@@ -332,7 +346,18 @@ If a required section is missing or a field is blank/placeholder, add this line 
    - **Already-shipped documentation path**: the ADR was already born `Accepted` — leave it, and /sync reconciles the status against the roadmap.
 5. **Derive tasks + link the roadmap (after confirmation).** Use the roadmap row located in pre-flight (or re-locate it cheaply by scanning roadmap filenames/headings across per-workspace subdirs; open only the **single numbered roadmap file** that contains it).
    - **If a matching roadmap row exists** → write the ADR's **`## Build plan` tasks into that feature's sub-tasks** (the derived, AC-tagged build order becomes the feature's checklist), and update the row's `ADR` cell to point at the new file, **computed as a relative path from the roadmap file to the ADR** (usually siblings): from `docs/roadmap/api/…` to `docs/adr/api/0001-x.md` the link is `[0001](../../adr/api/0001-x.md)`; to an umbrella, `[0001](../../adr/api/0001-x/index.md)`; single-repo `docs/roadmap/` → `docs/adr/` is `../adr/…`. If the feature's first sub-task is "Decision (ADR)", tick it `[x]`. Edit only the `ADR` cell, the sub-tasks, and that checkbox — **never the feature's status or other rows** (status stays `/roadmap`/`/develop`/`/sync`).
-   - **If there is NO matching row** → the derived tasks stay in the ADR's `## Build plan` as the source of truth, and **ask via a panel** (capability-first): question "Track this feature on the roadmap?", header "Roadmap", options `Yes — enroll a coarse row + these tasks (recommended)` · `No — keep the tasks in the ADR Build plan` · Other. On **Yes**, enroll a coarse roadmap row for the feature and copy the Build-plan tasks into it, then link the `ADR` cell as above. On **No**, leave the roadmap untouched and note in your final message: "This ADR isn't on the roadmap — its build tasks live in `## Build plan`; run `/roadmap` later to enroll it." (Silent orphan ADRs are exactly the drift `/status` later has to surface.)
+   - **If there is NO matching row** → the derived tasks stay in the ADR's `## Build plan` as the source of truth, and **ask via a panel** (capability-first): question "Track this feature on the roadmap?", header "Roadmap", options `Yes, enroll a coarse row + these tasks (recommended)` · `No, keep the tasks in the ADR Build plan` · Other. On **Yes**, enroll a coarse roadmap row for the feature and copy the Build-plan tasks into it, then link the `ADR` cell as above. On **No**, leave the roadmap untouched and note in your final message: "This ADR isn't on the roadmap. Its build tasks live in `## Build plan`; run `/roadmap` later to enroll it." (Silent orphan ADRs are exactly the drift `/status` later has to surface.)
+
+6. **Spoken summary in chat (plain words, no dashes).** After the engineer accepts and the roadmap is linked, show a short plain language summary in chat so they get it fast (follow *Output style* above: plain words, gloss any jargon, no dashes). In a few short sentences cover what the ADR decided, why in one line, and what happens next (the build tasks it produced, and which skill to run next). A template:
+
+   ```
+   Done. Here is the quick version.
+   What we decided: <one plain sentence>.
+   Why: <one plain sentence>.
+   What is next: I wrote <N> build tasks into <the roadmap row for this feature | the ADR's Build plan>. Run /develop next to build them.
+   ```
+
+   Keep it plain and skip the jargon, or gloss it in parentheses. This is the human read of the decision, separate from the ADR file's own `## Summary`.
 
 /architect is complete when the engineer confirms the ADR. For a **feature-linked** ADR the status stays `Proposed` — it becomes `Accepted` only when the feature ships, via /develop or /sync. For a **standalone decision** ADR (no linked buildable feature), confirmation sets it `Accepted` (ratification is the deliverable); an **already-shipped documentation** ADR was already `Accepted`. It does not invoke other skills.
 
