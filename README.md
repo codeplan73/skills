@@ -53,7 +53,7 @@ Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below,
 |---|---|---|
 | [`roadmap`](skills/roadmap/) | **Scope** | Turns an idea into a **coarse, living** feature roadmap in `docs/roadmap/` — each feature with an intent, acceptance-criteria seeds, phasing, and process weight. Build tasks are derived from each feature's ADR, not guessed here. Just run `/roadmap` — it infers plan / reconcile / enroll-one-feature from context. |
 | [`audit`](skills/audit/) | **Map** | Writes the `AGENTS.md` context files every other skill reads — asks your standards on greenfield, scans the code on brownfield, per-area (and per-workspace) nesting. |
-| [`architect`](skills/architect/) | **Decide** | Staff-engineer system design as a **staged, gated** conversation (requirements → data model → stack → API → security → edge cases), writing a complete build-spec **ADR** — `## Requirements` (acceptance criteria), Design, `## Build plan` — to `docs/adr/`. |
+| [`architect`](skills/architect/) | **Decide** | Staff-engineer system design as a **step-by-step walk** — one dimension at a time (requirements → data model → stack → API → security → edge cases), it suggests and you pick, nothing bundled upfront — writing a complete build-spec **ADR** to `docs/adr/`. A feature ADR carries `## Requirements` (acceptance criteria), Design, and `## Build plan`; a decision-only stack/standard ADR records just the decision. |
 | [`develop`](skills/develop/) | **Build** | Builds a feature — UI *and* logic — from its ADR as a **vertical slice**, runs migrations, and emits verify steps. **Gates on the decision first**: if building would mean inventing something undecided, it routes you to `/architect`. |
 | [`verify`](skills/verify/) | **Verify** | Runs the *real app* end-to-end — plus a **spec-conformance** pass: every acceptance criterion met and every specced surface built (catches missed pages / un-applied migrations), not just green tests. |
 | [`test`](skills/test/) | **Verify** | A senior test suite for your uncommitted change; detects/saves your framework. |
@@ -91,7 +91,7 @@ The loop is **spec-driven**: `/roadmap` fixes the *what*, `/architect` designs t
 ```
 
 - **`/roadmap`** seeds the *what* — a feature's intent plus acceptance-criteria **seeds** (the definition-of-done).
-- **`/architect`** designs the *how* as a **staged, gated** conversation — requirements → **data model (shown & confirmed)** → stack/tool drill-down → API surface → security → edge cases — writing an **ADR** whose spine is `## Requirements` (IDed acceptance criteria `AC-1…`, *the contract*), a Design section, and a `## Build plan` (tasks derived from those criteria).
+- **`/architect`** designs the *how* as a **step-by-step walk** — it asks one dimension at a time (requirements → data model → stack/tool → API → security → edge cases), suggesting an option at each and letting you pick, never dumping a finished model or stack in a box. It writes an **ADR** whose spine is `## Requirements` (IDed acceptance criteria `AC-1…`, *the contract*), a Design section, and a `## Build plan` (tasks derived from those criteria). A **decision-only ADR** (a stack/architecture or cross-cutting standard) records just the decision — its spec is `## Proposed stack` / `## Standard definition`, with no build plan; the feature that executes it derives its steps at `/develop` time.
 - **`/develop`** builds the **vertical slice** (data → logic → API → UI, end-to-end), runs migrations, and emits **verify steps** tied back to each `AC-N`.
 - **`/verify`** runs the **spec-conformance** pass — every acceptance criterion met and every specced surface (page, route, table, migration) actually built. This is what catches a missed page or an un-applied migration that green tests never reveal.
 - **`/test`** locks in the durable checks · **`/harden`** stress-tests `full`-weight work · **`/review`** re-reads on a fresh model · **`/document`** writes it up · **`/sync`** reconciles context + roadmap · then **replan** queues the next slice.
@@ -124,22 +124,24 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 
 ### The roadmap model (`docs/roadmap/`)
 
-`/roadmap` writes a **coarse, living** roadmap — the *what*, not an exhaustive task list. An **overview table** rows every feature with its build **Order**, **Phasing**, **Status**, process **Weight** (`lean` / `medium` / `full`), whether it **Needs ADR**, its **ADR** pointer, and its **Code area** — plus a per-feature block with a one- or two-line **intent** and a few **acceptance-criteria seeds**:
+`/roadmap` writes a **coarse, living** roadmap — the *what*, not an exhaustive task list — built for human reading. Two parts: a slim **At a glance** table, then the plan as **clean feature sections grouped by phase**. A section is a plain heading (name plus short tags only when they matter: `needs a decision`, an approach override, `full` weight), a one- or two-line **intent**, a single **Done when:** line (the acceptance-criteria seeds), and its **tasks as checkboxes** — the next step is always the first unticked box. A pointer line (`ADR <n> · code in <path>`) appears only once those exist, and nothing that isn't set is shown (no `n/a`, no empty columns, no metadata pipes in the title):
 
 ```markdown
-| # | Feature | Order | Phasing | Status | Weight | Needs ADR | ADR | Code area |
-|---|---|---|---|---|---|---|---|---|
-| 4 | Home page | 7 | Slice 2 | planned | medium | yes | — | apps/web |
+## At a glance
 
-### 4. Home page
-Intent: the public landing page that turns a visitor into a signup.
-Acceptance-criteria seeds:
-- hero, featured sections, and footer render with real data
-- SEO metadata + social card present
-- empty / error states handled
+| # | Feature | Phase | Status |
+|---|---------|-------|--------|
+| 4 | Home page | Slice 2 | planned |
+
+## Slice 2
+
+### 4. Home page · needs a decision
+The public landing page that turns a visitor into a signup.
+**Done when:** hero/featured/footer render on real data; SEO + social card present; empty and error states handled.
+- [ ] Design it (ADR): `/architect home page`
 ```
 
-**The detailed build tasks are not guessed here** — they're **derived from the feature's ADR** (`## Build plan`) when `/architect` designs it. `/roadmap` seeds the *what*; `/architect` designs the *how* and fills the tasks; `/develop` builds them.
+**The detailed build tasks are not guessed here** — they're **derived from the feature's ADR** (`## Build plan`) when `/architect` designs it, and become that feature's checkboxes. `/roadmap` seeds the *what*; `/architect` designs the *how* and fills the tasks; `/develop` builds them.
 
 - **Build approach** — `/roadmap` recommends *how the product gets built*, as a named delivery strategy (described by principle, so the AI reasons rather than following a hardcoded recipe):
   - **Tracer Bullet** — vertical slices; each feature built end-to-end through every layer, working. *(recommended default for a proper build)*
@@ -161,7 +163,7 @@ An ADR is the feature's **complete build spec**, and it carries the **acceptance
 
 - **`## Requirements`** — the user stories plus IDed acceptance criteria (`AC-1`, `AC-2`, …). **This is the contract** `/develop` builds to and `/verify` checks.
 - **Design** — the confirmed data model, API surface, stack/tool picks, security model, and edge cases (the mode-specific `## Feature design` / `## Proposed stack` / equivalent).
-- **`## Build plan`** — the ordered tasks derived from the criteria, each tagged *"satisfies AC-N"*, migration first.
+- **`## Build plan`** — the ordered tasks derived from the criteria, each tagged *"satisfies AC-N"*, migration first. (A **decision-only** ADR — a stack/architecture or cross-cutting standard — omits this: it records the decision, and the feature that executes it, e.g. the scaffold sub-task, derives the steps at `/develop` time.)
 
 This gives end-to-end **traceability**: **criterion → build task → verify step → conformance check**. Every `AC-N` maps to at least one task; every task yields a verify step in `verify.md`; `/verify` confirms each criterion is met.
 

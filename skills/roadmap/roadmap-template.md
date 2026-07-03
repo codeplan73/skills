@@ -1,126 +1,109 @@
-Roadmap structure `/roadmap` writes to — the templates/examples referenced from `SKILL.md` (sub-task format, the full roadmap Markdown, and the completion report block). These are reference material read while writing the roadmap; all rules and guidance live in `SKILL.md`.
+Roadmap structure `/roadmap` writes to — the reference shapes read while writing the roadmap and the completion report. All rules and guidance live in `SKILL.md`.
 
-## Standard sub-task table
+## What keeps it readable (the format rules)
 
-Standard sub-tasks (drop any that don't apply, add feature-specific ones), **ordered within the feature per the recorded Build approach** (a Tracer Bullet slice runs data→API→UI→integration end-to-end; a Facade prototype front-loads the UI on placeholder data — don't assume one fixed order):
+- **Two parts:** a slim **At a glance** table for a quick scan, then **the plan** as clean feature sections grouped by phase. Build order is just the section order — there is no separate "build order" list to keep in sync.
+- **Clean headings.** A heading is `### <N>. <Feature name>` plus a short status word and short tags **only when they carry real information** (`needs a decision`, a per-feature approach override, `full` weight). Never a pipe-delimited metadata row like `Title | P0 | inherit | …`.
+- **Each fact appears once.** Intent, the definition of done, tasks, and pointers live in the section; the At-a-glance table is the quick index. Status is shown in the table and beside the heading, and nowhere else.
+- **Only what is set.** No `n/a`, no `inherit`, no empty fields. A pointer line (`ADR <n> · code in <path>`) appears under a feature **only once those exist** (`/develop` fills it).
+- **Each feature is short:** a one- or two-line **intent**, a single **Done when:** line (the acceptance-criteria seeds `/architect` will grow into the ADR contract), then the **tasks as checkboxes**. The next step is always the first unticked box. A coarse (not-yet-designed) feature has one box: run `/architect` (when it `needs a decision`), or `/develop` directly, or `/audit` for the standards & tooling feature.
 
-| # | Sub-task | Command + prompt to paste |
-|---|---|---|
-| 1 | **Decision (ADR)** (only if `Needs ADR? = yes`) | `/architect <feature>: <the specific decisions: composition/sections · provider · data model · behavior>` |
-| 2 | **UI (placeholder data)** | `/develop <feature> UI: build to design.md with placeholder data + states` |
-| 3 | **Data model** | `/develop <feature> data model: <entities/tables/fields>` |
-| 4 | **Backend & API** | `/develop <feature> API: <endpoints/actions/queries>` |
-| 5 | **External integration** | `/develop <feature> integration: <provider/webhooks>` |
-| 6 | **Data integration** (replace the mock) | `/develop <feature> wire-up: swap placeholder for real data, loading/error/empty states` |
-| 7 | **Auth & permissions** | `/develop <feature> permissions: <who can do/see what>` |
-| 8 | **SEO & metadata** | `/develop <feature> SEO: title/meta/OG/structured data` |
-| 9 | **Validation & edge cases** | `/develop <feature> edge cases: <the failures>` |
-| 10 | **Tests** | `/test <feature>` |
-| 11 | **Harden** (payments/auth/admin only) | `/harden <feature>` |
-| 12 | **Sync conventions** | `/sync` |
-
-Each rendered sub-task is one checklist line: `- [ ] <sub-task name>: `\`<command + prompt>\``. The skill, the order, and the prompt all live in that line. That is the "which skill, in what order, with what prompt" the breakdown must answer.
-
-## Roadmap file structure
-
-Write the chosen file with two parts — an overview table and the detailed breakdown:
+## Single-file roadmap
 
 ```markdown
-# Feature Roadmap
+# Roadmap — <Product name>
 
-_Seeded by /roadmap · status advanced by /develop and /sync. Roadmap files live in `docs/roadmap/` (ADRs are in `docs/adr/`)._
+<One or two plain sentences: what the product is and who it serves.>
 
-**Build approach (project default):** Tracer Bullet, vertical slices; each feature built end-to-end through every layer, working.
-_(The chosen approach (Tracer Bullet · Skateboard · Facade (prototype-grade) · Journey) is recorded here by /roadmap as the project-wide **default** convention: /audit and /sync persist it into root `AGENTS.md`, and /architect, /develop, and /verify read and honor it so the whole build follows it consistently. Any single feature may **override** it via its own **Approach** (column below); precedence is the row's Approach if set, else this default.)_
+**Build approach:** <Tracer Bullet | Skateboard | Facade | Journey> — <one-line principle>.
+**Weight profile:** <e.g. mostly lean and medium; billing is full (payments)>.  <!-- omit line if all default -->
 
-## Overview
+## At a glance
 
-The **Approach** column is the per-feature override: blank/`inherit` = builds by the project default above; a named approach = that feature overrides the default. Record a value only when it differs from the default.
+| # | Feature | Phase | Status |
+|---|---------|-------|--------|
+| 1 | Stack & architecture | Foundation | in-progress |
+| 2 | Coding standards & tooling | Foundation | planned |
+| 3 | Data model | Foundation | planned |
+| 4 | Design system & UI foundation | Foundation | planned |
+| 5 | Core standup loop | Slice 1 | planned |
+| 6 | Daily reminders | Slice 2 | planned |
+| … | … | … | … |
 
-| # | Feature | Priority | Approach | Needs ADR? | Status | Code area |
-|---|---------|----------|----------|-----------|--------|-----------|
-| 1 | Stack & architecture (decide + scaffold) | P0 | inherit | yes | planned | n/a |
-| 2 | Coding standards & tooling (`/audit`) | P0 | inherit | no | planned | n/a |
-| 3 | Data model | P0 | inherit | yes | planned | n/a |
-| 4 | Design system & UI foundation | P0 | inherit | yes | planned | n/a |
-| 5 | Walking-skeleton slice | P0 | inherit | no | planned | n/a |
-| 6 | Home page | P0 | inherit | yes | planned | n/a |
-| 7 | Segment landing pages | P0 | inherit | yes | planned | n/a |
-| 8 | Shop listing (filter & sort) | P0 | inherit | yes | planned | n/a |
-| 9 | Product detail page | P0 | inherit | yes | planned | n/a |
-| 10 | Cart | P0 | Facade | yes | planned | n/a |
-| … | … | … | … | … | … | n/a |
+## Foundations
 
-_(Approach example: Cart is prototyped **Facade**-style first to demo the flow, overriding the Tracer-Bullet default; every other row inherits.)_
+### 1. Stack & architecture · in-progress
+Decide the stack and scaffold a runnable project so every later slice builds on real structure.
+**Done when:** the stack is recorded in an ADR and the empty scaffold boots locally and passes build.
+- [x] Decide the stack (ADR): `/architect stack & architecture`
+- [x] Scaffold from the decision: `/develop stack & architecture`
+- [ ] Smoke-check it runs: `/test`
+ADR 0001 · code in `./`
 
-<!-- Brownfield: already-built features are enrolled here above the planned ones, with status `existing`
-     (complete, no breakdown) or `in-progress` (partial, finish via /develop), e.g.
-| n/a | Auth | n/a | inherit | n/a | existing | `src/auth/` |
-| n/a | Product catalog | n/a | inherit | n/a | existing | `src/catalog/` |
-Note: `existing` is not `done`. It predates the workflow. Code area filled; complete ones get no breakdown. -->
+### 2. Coding standards & tooling
+Capture conventions, then install lint, format, and pre-commit enforcement from the real scaffolded project.
+**Done when:** root `AGENTS.md` reflects the real stack, and lint/format/pre-commit run clean.
+- [ ] Capture conventions + tooling choices: `/audit`
+- [ ] Install the tooling: `/develop tooling`
+- [ ] Check it runs clean: `/test`
 
-_(Granular: home and segment landing are separate features; listing, product, and cart are separate, not one "storefront".)_
+### 3. Data model · needs a decision
+Core entities every feature builds on: users, teams, memberships, standup entries, template.
+**Done when:** entities and relationships support later slices (reminders, templates, history) without a breaking migration.
+- [ ] Design it (ADR): `/architect data model`
 
-## Build order (sequenced per the recorded Build approach)
+### 4. Design system & UI foundation · needs a decision
+Visual language, layout primitives, and base components so the flows feel cohesive and accessible.
+**Done when:** `design.md` covers type/color/spacing/components, and base components handle focus and keyboard.
+- [ ] Design it (ADR): `/architect design system & UI foundation`
 
-Foundations always lead (Step 4); the feature phases after them are ordered by the header's **Build approach** (don't hardcode a single sequence). The example below is under **Tracer Bullet** (vertical slices); a Skateboard, Facade, or Journey build phases the same features differently.
+## Slice 1 — Core standup loop
 
-**Phase 1, Foundations** (scaffold before audit): standards *preferences* (light; may ride along with the stack feature) → **stack & architecture** (`/architect` decides the stack, then `/develop` scaffolds it from that decision — one feature, two sub-tasks) → coding standards + tooling (`/audit` reads the **real scaffolded project**, then enforcement tooling via `/develop`) → data model (`/architect`) → design system (`/architect` → `design.md` → base components) → walking-skeleton slice. `/audit` and tooling come **after** the stack-and-scaffold feature, never before.
-**Phase 2, Slice: home** (end-to-end): data → API → UI → integration → SEO → tests, shipping something real before the next slice
-**Phase 3, Slice: shop listing** (end-to-end): filter & sort working against real data, states, tests
-**Phase 4, Slice: product detail** (end-to-end) → **Slice: cart** (end-to-end) → … one working slice at a time
-**Phase 5, Harden & test**: per feature as it goes live (full-weight features)
-_Deferred: advanced search, analytics dashboard_
+### 5. Core standup loop · needs a decision
+Sign in, create a team, submit today's update on the default template, read the team feed. Nothing else yet. This slice is the walking skeleton.
+**Done when:** a user can sign in, create a team, submit one standup a day, and see the team's updates for today.
+- [ ] Design it (ADR): `/architect core standup loop`
 
-## Build breakdown
+## Slice 2 — Daily reminders
 
-### 1. Stack & architecture (decide + scaffold)  ·  Needs ADR: yes  ·  Approach: inherit  ·  Status: planned
-<!-- ONE foundation feature, two sub-tasks: decide the stack (ADR), then scaffold from it. The decision
-     ADR records the decision only; the scaffold steps are derived by /develop, not pre-written here or
-     in the ADR (that double-spec is the bug). -->
-- [ ] Decision (ADR): `/architect stack & architecture: framework, hosting, persistence, auth approach` _(ARCHITECTURE ADR, records the decision only)_
-- [ ] Scaffold from the decision: `/develop scaffold: framework init, dependency install, directory layout, runnable dev server/build, per the stack ADR`
-- [ ] Smoke-check it runs: `/test` _(dev server boots / build passes)_
-> ADR: [0001](../adr/0001-stack-architecture.md) · Code area: n/a · _The scaffold sub-task must land before `/audit`, since `/audit` reads the real project._
+### 6. Daily reminders · needs a decision
+Nudge members who have not submitted before a team cutoff, so daily standup becomes a habit.
+**Done when:** unsubmitted members get a timezone-aware reminder before cutoff, and submitters are not nagged.
+- [ ] Design it (ADR): `/architect daily reminders`
 
-### 2. Coding standards & tooling (`/audit`)  ·  Needs ADR: no  ·  Approach: inherit  ·  Status: planned
-- [ ] Capture standards + tooling into `AGENTS.md` from the **scaffolded project**: `/audit` _(greenfield, after scaffold: reads the real stack/structure, not a guess)_
-- [ ] Set up enforcement tooling: `/develop tooling: ESLint + Prettier + strict tsconfig + husky/lint-staged pre-commit, per the captured standards`
-- [ ] Tests: `/test` _(lint/format run clean)_
-> ADR: n/a (no decision; conventions captured by /audit, after stack-decision + scaffold) · Code area: n/a
-
-### 6. Home page  ·  Needs ADR: yes  ·  Approach: inherit  ·  Status: planned
-- [ ] Decision (ADR): `/architect home page: composition (hero, featured collections, segment entry points), layout, asset strategy`
-- [ ] UI (placeholder data): `/develop home page UI: build to design.md with mock collections + placeholder imagery`
-- [ ] Data integration: `/develop home page wire-up: swap mock for real featured collections, loading/empty states`
-- [ ] SEO & metadata: `/develop home page SEO: title/meta/OG/Organization JSON-LD`
-- [ ] Tests: `/test home page`
-> ADR: n/a · Approach: inherit (project default) · Code area: n/a
-
-### 10. Cart  ·  Needs ADR: yes  ·  Approach: **Facade** (override)  ·  Status: planned
-- [ ] Decision (ADR): `/architect cart: line items, quantity, totals, persistence`
-- [ ] UI (placeholder data): `/develop cart UI: clickable cart on mock line items + states`
-- [ ] Data integration: `/develop cart wire-up: swap mock for real cart, loading/empty states`
-- [ ] Tests: `/test cart`
-> ADR: n/a · Approach: **Facade** (overrides the Tracer-Bullet default; demo the flow on placeholder data first, then wire the back) · Code area: n/a
-
-### 7. Segment landing pages  ·  Needs ADR: yes  ·  Approach: inherit  ·  Status: planned
-- [ ] Decision (ADR): `/architect segment landing: per-segment layout (dev/gamer/anime), theming, shared vs unique blocks`
-- [ ] UI (placeholder data): `/develop segment landing UI: build to design.md, mock per-segment data`
-- [ ] Data integration: `/develop segment landing wire-up: real segment catalog, empty states`
-- [ ] SEO & metadata: `/develop segment landing SEO: per-segment title/meta/OG`
-- [ ] Tests: `/test segment landing`
-> ADR: n/a · Approach: inherit (project default) · Code area: n/a
-
-### … (every feature gets its own block with filled-in prompts)
+## Deferred
+Out of scope for the current build pass, kept so the plan stays honest.
+- **Email invites** — invite teammates by email · needs a decision
+- **Billing & plans** — free and paid tiers · needs a decision · full weight
+- **Chat integrations** — post standups to team chat · needs a decision
+- **Product analytics** — measure signups and habit · needs a decision
 
 ## Legend
-- **Status**: `planned` → `in-progress` → `done` (pipeline: /roadmap seeds → /develop builds → /sync reconciles). Plus **`existing`** (a pre-existing feature enrolled by /roadmap for context: built before this workflow; no breakdown; `done` is reserved for pipeline-verified work). Plus **`dropped`** (a de-scoped feature kept for history: set by /roadmap on re-planning; excluded from active work; never deleted).
-- **Sub-task checkbox**: `todo` `[ ]` → `done` `[x]`. `/develop` ticks its own sub-tasks as it builds; **`/sync` sweeps the rest** (`/test`, `/harden`, tooling, `/sync`) from repo evidence
-- **Needs ADR?**: `yes` → run `/architect` before building · `no` → `/develop` directly
-- **Approach**: per-feature override of the header **Build approach** default. `inherit`/blank = project default; a named approach = this feature overrides it. Precedence: row Approach if set, else the default.
-- **Priority**: P0 (MVP-critical) · P1 (MVP) · P2 (deferred)
+- **Next step** = the first unticked box in a feature.
+- **needs a decision** = run `/architect` first (it writes the ADR and fills that feature's build tasks); otherwise the feature goes straight to `/develop` (or `/audit` for standards & tooling).
+- **Status** (in the At-a-glance table and beside the heading): `planned` → `in-progress` → `done`. Plus `existing` (built before this workflow) and `dropped` (de-scoped, kept for history). `planned` may be left off a heading; the table always carries it.
+- **Approach tag** beside a heading (e.g. `· Facade`) = a per-feature override of the project default; no tag = inherits the default.
+- **Weight tag** `· full` = design review + `/harden` required; `lean`/`medium` are the norm and get no tag.
+- **Pointer line** (`ADR <n> · code in <path>`) sits directly under a feature, added by `/develop` once the ADR and code exist.
 ```
+
+## Brownfield enrollment
+
+Already-built features are enrolled **for context**, above the planned ones, with status `existing` (complete, no task list) or `in-progress` (partial, finish via `/develop`), each with a code pointer. They also appear in the At-a-glance table.
+
+```markdown
+### A. Auth · existing
+Pre-workflow auth: sign in, sessions, reset. code in `src/auth/`
+
+### B. Product catalog · in-progress
+Partial catalog; finish the remaining pieces via /develop. code in `src/catalog/`
+```
+
+`existing` is not `done` — it predates the workflow, so `/develop` and `/sync` leave it alone.
+
+## Large product — epic-split
+
+When one file outgrows a comfortable scan (roughly a dozen-plus features across clearly distinct areas), split by epic: a `docs/roadmap/index.md` (the At-a-glance table across all epics + a one-line status rollup per epic) plus one file per epic (`docs/roadmap/<epic>.md`) holding that epic's feature sections. Promote **on demand**; don't pre-split a small product. In a monorepo, each workspace gets its own `docs/roadmap/<workspace>/` the same way.
 
 ## Completion report block
 
@@ -129,13 +112,10 @@ _Deferred: advanced search, analytics dashboard_
 
 **Product**: <one line>
 **Behavior**: <plan | replan | add (inferred from the situation, not a typed subcommand)>
-**Build approach (project default)**: <name (one-line principle)> · **Per-feature overrides**: <feature → approach, … (or "none (all inherit)")>
-**Roadmap file**: <docs/roadmap/NN-name.md> (<created new | merged into latest | new slice (next number) because <reason>>)
-**Existing plans read** (re-run): <N files, M features already on the roadmap (or "none (first plan)")>
-**Existing features enrolled** (brownfield): <count as `existing` + count as `in-progress` (partial), or "n/a (greenfield)">
-**Drift enrolled** (off-plan work found in the code/ADRs): <count, or "none">
-**Scope (this plan)**: <N> NEW features to build (deduped against existing), <total sub-task count> build sub-tasks
-**Cross-cutting in scope**: <SEO / analytics / i18n / compliance, or "none">
+**Build approach**: <name (one-line principle)> · **Per-feature overrides**: <feature → approach, … (or "none, all inherit")>
+**Weight profile**: <e.g. billing full (payments), everything else lean/medium (or "all default")>
+**Roadmap file**: <docs/roadmap/roadmap.md> (<created new | updated in place | new epic file for <area>>)
+**Scope (this pass)**: <N> new features to build, <M> already on the roadmap, <K> deferred
 **Build order**: <feature 1> → <feature 2> → …
-**First step**: <recommended next command (usually `/architect <first feature>`, or `/audit` first if brownfield has no root AGENTS.md)>
+**First step**: <the first unticked box, usually `/architect <first feature>`, or `/audit` first if a brownfield repo has no root AGENTS.md>
 ```

@@ -141,20 +141,23 @@ Then route to the chosen phase.
 
 On greenfield, `/audit` is meant to run **after the project has been scaffolded with its chosen stack** (`/roadmap` → `/architect` decides the stack → scaffold → `/audit`) — so it seeds `AGENTS.md` conventions + tooling from the real project. Running before the stack is chosen and scaffolded is premature; the standards questions and root-seed behavior below are unchanged either way.
 
-**Step 1 — Ask coding patterns** (main model asks, as above):
+**Step 1 — Ask coding patterns AND tooling (main model asks, in batched rounds, tailored to the scaffolded stack).**
 
-Question 1 — Architecture style (single-select):
-- Read `patterns/clean-architecture.md` for label/description
-- Read `patterns/functional.md`
-- Read `patterns/domain-driven.md`
-- Read `patterns/solid-oop.md`
-- Present all four as options
+This is the one place the project's conventions and tooling get set, so **be thorough, not minimal** — a greenfield audit that asks two questions leaves most of the foundation unset. **First read the real scaffolded project** (its manifest, any config already present, and which tools the scaffold installed), then tailor every question to it: **skip a question the stack already settles**, list an **already-installed tool first as the suggested pick**, and phrase options for the actual language and framework. Ask as decision panels (one suggested pick each; the picker adds Other automatically), batched **up to 4 per round**, as many rounds as it takes. The answers are captured into `AGENTS.md`. **`/audit` records the choices, it does not install anything** — installing the chosen tooling (packages, config files, pre-commit hooks, CI) is the **`/develop tooling`** sub-task that follows. So ask the tooling questions here (this is where the choice is made and recorded), even though the actual install happens later in `/develop`.
 
-Question 2 — Additional standards (multi-select):
-- `Strict types` — No `any`/untyped code; exhaustive type coverage
-- `Test-driven` — Tests written before or alongside implementation
-- `Conventional commits` — `feat:`, `fix:`, `chore:` prefix on all commits
-- `Documented APIs` — JSDoc/docstrings required on all public interfaces
+**Architecture & code conventions:**
+- **Architecture style** (single-select) — read `patterns/clean-architecture.md`, `patterns/functional.md`, `patterns/domain-driven.md`, `patterns/solid-oop.md` for labels/descriptions and present all four.
+- **Type strictness** (typed languages only; skip if untyped) — `strict` (no `any`, exhaustive types) · `gradual` (strict for new code) · `loose`.
+- **Module & folder structure** — `folder-by-feature` (colocate by feature) · `by-layer` (controllers/services/repos) · match what the scaffold already set.
+- **Additional code standards** (multi-select) — documented public APIs · a consistent error-handling pattern · validate env vars at startup · named exports only (no default exports) · consistent naming conventions · accessibility baseline on UI (WCAG AA) · conventional commit messages.
+
+**Tooling (asked here, installed by `/develop tooling`):**
+- **Linting & formatting** (single-select, adaptive) — the standard linter + formatter for this stack (suggested; list an already-installed one first) · a specific alternative · minimal for now.
+- **Pre-commit enforcement** (single-select) — lint + format + typecheck on every commit (suggested) · format only · none.
+- **Testing gate** (single-select; captured as the convention, the runner is set up by `/test`) — unit + integration with a framework (suggested) · typecheck + manual `/verify` only · tests-first (TDD).
+- **Continuous integration** (single-select) — a basic CI check on push (lint, typecheck, test) (suggested) · not yet · already configured.
+
+Adapt the list to the project: drop what doesn't apply (no CI question for a throwaway prototype, no type-strictness for an untyped language), and add any stack-specific convention worth pinning. The goal is a foundation a small team can build on without re-litigating basics mid-build.
 
 **Step 2 — Inject selected pattern content**:
 - If a named pattern was selected: the main model already read all four files in Step 1 — do not re-read. Use the full content of the matching file as `SELECTED_PATTERNS`.
@@ -164,7 +167,7 @@ Question 2 — Additional standards (multi-select):
 - `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
 - `description: "Audit: greenfield setup — create root AGENTS.md + CLAUDE.md pointer"`
 - Tools: `Read`, `Bash`, `Write`
-- `prompt`: filled `agent-prompt.md` template with `PHASE=greenfield`, `SELECTED_PATTERNS=<file contents>`, `ADDITIONAL_STANDARDS=<selections>`, and **`MONOREPO_OR_NO`** (`yes — apps: web, api, …` if detected). The subagent writes root `AGENTS.md` + its `CLAUDE.md` pointer — seeding `## Build approach` from the roadmap header if one is set (else `<TBD — set by /roadmap>`) — **and, if `MONOREPO=yes`, a nested `AGENTS.md` (+ pointer) per workspace** seeded from each scaffold's manifest, with the root pointers baked in.
+- `prompt`: filled `agent-prompt.md` template with `PHASE=greenfield`, `SELECTED_PATTERNS=<file contents>`, `ADDITIONAL_STANDARDS=<all the other Step 1 selections: the code standards, type strictness, folder structure, AND the tooling choices (lint/format, pre-commit, testing gate, CI)>`, and **`MONOREPO_OR_NO`** (`yes — apps: web, api, …` if detected). The subagent records the code conventions in `AGENTS.md` `## Rules`; capture the **tooling choices** clearly (a short `## Tooling` note or explicit Rules lines) so the `/develop tooling` sub-task installs exactly what was chosen here. The subagent writes root `AGENTS.md` + its `CLAUDE.md` pointer — seeding `## Build approach` from the roadmap header if one is set (else `<TBD — set by /roadmap>`) — **and, if `MONOREPO=yes`, a nested `AGENTS.md` (+ pointer) per workspace** seeded from each scaffold's manifest, with the root pointers baked in.
 
 ---
 

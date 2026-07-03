@@ -2,7 +2,7 @@
 name: status
 compatibility: Built for Claude Code — reads git and workflow artifacts. Installs on any Agent Skills client.
 allowed-tools: Bash, Read, Grep, Glob
-description: "Use this skill to orient yourself — where things stand and what's safe to pick up — across a paused session or a team. Run /status when resuming ('where was I?', 'what's left?', 'catch me up'), joining a shared repo ('what's in progress?', 'am I behind?'), or before starting to avoid colliding with a teammate. Reads git state, the feature roadmap, and ADRs; reports what's done, what's in-progress with its resume point, and collaboration hazards (behind the remote, a feature someone else is mid-build on). Read-only."
+description: "Use this skill to orient yourself — where things stand and what's safe to pick up — across a paused session or a team. Run /status when resuming ('where was I?', 'what's left?', 'catch me up'), joining a shared repo ('what's in-progress?', 'am I behind?'), or before starting to avoid colliding with a teammate. Reads git state, the feature roadmap, and ADRs; reports what's done, what's in-progress with its resume point, and collaboration hazards (behind the remote, a feature someone else is mid-build on). Read-only."
 ---
 
 ## Output style (plain words, no dashes)
@@ -49,17 +49,17 @@ Using `git` (portable on every OS), gather:
 - **Behind / ahead of the remote** — `git rev-list --left-right --count origin/<base>...HEAD`
 - **Recent history** — `git log --oneline -8`
 
-Note: behind > 0 → **you're not up to date**; uncommitted entries → **work in progress**; ahead > 0 → **unpushed commits**.
+Note: behind > 0 → **you're not up to date**; uncommitted entries → **work in-progress**; ahead > 0 → **unpushed commits**.
 
 ### Step 2 — Roadmap
 
 Scan `docs/roadmap/` (or `.workflow/roadmap/`) for roadmap files — one or more numbered files (`01-roadmap.md`, `02-…`), **including per-workspace subdirs in a monorepo** (`docs/roadmap/<workspace>/`). Parse all of them. **In a monorepo, group the report by workspace** (each app's roadmap reported under its own heading) so apps don't blur together:
-- Count features by **Status** across every roadmap file: `planned` / `in-progress` / `done`, plus `existing` (pre-existing, not pipeline-built) and `dropped` (de-scoped — exclude from active work). For each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
-- Note any feature flagged `⚠ ADR pending` or `Needs ADR? = yes` with an empty `ADR` cell (a decision owed before building).
+- Count features by **Status** (from the At-a-glance table) across every roadmap file: `planned` / `in-progress` / `done`, plus `existing` (pre-existing, not pipeline-built) and `dropped` (de-scoped — exclude from active work). For each `in-progress` feature, list its checked/total checkbox tasks and the **first unchecked** one (the resume point).
+- Note any feature marked `needs a decision` with **no ADR pointer** on its pointer line (a decision owed before building).
 
-Also read the **build approach** from the roadmap header (the slice-shaping strategy the team chose — e.g. a thin end-to-end path, a thinnest-usable-whole core loop, a UI-first shell then wire, or a full user journey per phase). It's read-only context, but it lets you frame progress in the team's own terms: report where things stand *along that path* (which slice / journey / loop is live, which is next), not just a bare done/planned tally. Use the `Phasing` column values the header defines rather than inventing your own labels.
+Also read the **build approach** from the roadmap header (the slice-shaping strategy the team chose — e.g. a thin end-to-end path, a thinnest-usable-whole core loop, a UI-first shell then wire, or a full user journey per phase). It's read-only context, but it lets you frame progress in the team's own terms: report where things stand *along that path* (which slice / journey / loop is live, which is next), not just a bare done/planned tally. Use the **Phase** values from the At-a-glance table rather than inventing your own labels.
 
-If there's no roadmap, say so — suggest `/roadmap` (greenfield) or `/audit` (brownfield) to establish one. **If a roadmap file is malformed** (no overview table, non-standard status values, broken rows — likely a bad hand-edit), don't silently misreport — flag it: "`<file>` doesn't match the expected roadmap shape; counts may be off, worth a look or a `/roadmap` re-run to repair."
+If there's no roadmap, say so — suggest `/roadmap` (greenfield) or `/audit` (brownfield) to establish one. **If a roadmap file is malformed** (no At-a-glance table or feature sections, non-standard status values, broken headings — likely a bad hand-edit), don't silently misreport — flag it: "`<file>` doesn't match the expected roadmap shape; counts may be off, worth a look or a `/roadmap` re-run to repair."
 
 ### Step 3 — Decisions
 
@@ -78,8 +78,8 @@ Surface anything that makes it unsafe to just dive in:
 ### Step 4b — Drift (plan vs reality)
 
 People go off-plan — they redo UI, add a feature the roadmap doesn't mention, or write an ADR for something not tracked. `/status` is where that surfaces. Cross-check the roadmap against the code and ADRs:
-- **Unplanned code** → significant code areas/modules (use `AGENTS.md` nested areas + top-level dirs) that **no roadmap feature's `Code area` points to**. That's shipped work the plan doesn't know about.
-- **Orphan ADRs** → top-level ADR files in `docs/adr/` that **no roadmap feature's `ADR` cell links to**. (Child ADRs *inside* an umbrella directory are covered by the umbrella's link — not orphans.) Decisions made outside the plan.
+- **Unplanned code** → significant code areas/modules (use `AGENTS.md` nested areas + top-level dirs) that **no roadmap feature's code pointer points to**. That's shipped work the plan doesn't know about.
+- **Orphan ADRs** → top-level ADR files in `docs/adr/` that **no roadmap feature's `ADR` pointer links to**. (Child ADRs *inside* an umbrella directory are covered by the umbrella's link — not orphans.) Decisions made outside the plan.
 - **Stale `done`** (light touch) → a feature marked `done`/`existing` whose code area has substantial recent churn — its "done" may no longer match reality. Only flag if obvious; don't over-reach.
 
 Report these and the one-command fix: **`/roadmap`** to enroll unplanned work / re-run to reconcile drift, **`/architect`** (or a `/roadmap` row) to link an orphan ADR. Be conservative — only flag a real mismatch, not every file without a row.
@@ -113,4 +113,4 @@ Report these and the one-command fix: **`/roadmap`** to enroll unplanned work / 
 **Suggested next**: <the single most sensible command (e.g. "pull, then `/develop <feature>` to resume at data integration")>
 ```
 
-Omit any section with nothing to say. If the tree is clean, you're up to date, and nothing is in progress, say so in one line and point at the next `planned` feature. `/status` only reports — it never starts the work for you.
+Omit any section with nothing to say. If the tree is clean, you're up to date, and nothing is in-progress, say so in one line and point at the next `planned` feature. `/status` only reports — it never starts the work for you.
