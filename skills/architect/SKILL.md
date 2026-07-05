@@ -380,7 +380,7 @@ If a required section is missing or a field is blank/placeholder, add this line 
    Done. Here is the quick version.
    What we decided: <one plain sentence>.
    Why: <one plain sentence>.
-   What is next: I wrote <N> build tasks into <the roadmap row for this feature | the ADR's Build plan>. Run /develop next to build them.
+   What is next: run /clear to start a fresh session (it reads this ADR from disk, so nothing is lost and the long design chat you just had stops costing tokens), then /develop <feature> to build it.
    ```
 
    Keep it plain and skip the jargon, or gloss it in parentheses. This is the human read of the decision, separate from the ADR file's own `## Summary`.

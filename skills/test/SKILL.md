@@ -333,7 +333,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 
 **If the subagent errored or produced no report**, say so and offer to re-run — never report a passing or failing suite it didn't actually produce. Otherwise the report differs by branch; relay the matching format.
 
-**Update the roadmap.** If this feature is on the roadmap (`docs/roadmap/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now **all** ticked, set the feature's **status** to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`.
+**Update the roadmap.** If this feature is on the roadmap (`docs/roadmap/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now **all** ticked, set the feature's **status** to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. When the feature reaches `done`, advise **`/clear` before the next feature** — nothing needs to carry over in the chat, the roadmap and ADR hold it, and a fresh session keeps the next build cheap.
 
 **If `RUN_AFTER = yes`** — parse `TESTS_WRITTEN`, `RUN_RESULT`, `BUGS_FOUND`, `NOT_COVERED`, `HARDEN_FLAG`:
 

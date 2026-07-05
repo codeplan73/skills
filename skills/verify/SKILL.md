@@ -131,7 +131,7 @@ The distinction is the point of this gate: **missing** = never built (a scope mi
 
 ### Step 5 — Report
 
-**Update the roadmap.** If this feature is on the roadmap (`docs/roadmap/`) and the verdict is **PASS**, tick its `Verify it` box. Leave `Test it` and the `done` status to `/test` and `/sync`. On **FAIL**, tick nothing and report the gaps.
+**Update the roadmap.** If this feature is on the roadmap (`docs/roadmap/`) and the verdict is **PASS**, tick its `Verify it` box. Leave `Test it` and the `done` status to `/test` and `/sync`. On **FAIL**, tick nothing and report the gaps. On a PASS, point to `/test <feature>` next, and advise **`/clear` before moving to a new feature** (the ADR and `verify.md` hold the state, so a fresh session loses nothing and stays cheap).
 
 ```
 ## /verify complete

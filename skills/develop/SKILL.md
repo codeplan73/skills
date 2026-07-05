@@ -239,7 +239,7 @@ Then build the track(s):
   - AC-1 … covered by step … · AC-2 … · …
   ```
 - Relay the track's report (the `## /develop complete` block from `ui-guide.md` and/or `logical-guide.md`).
-- Recommend the next step per tier: usually `/verify` (run the steps you just emitted/saved), then `/test` to lock the durable ones, then `/sync` to promote any new area conventions into `AGENTS.md`. On a large or monorepo repo, also suggest `/clear` before starting the next feature so its context starts clean.
+- Recommend the next step per tier: usually `/verify` (run the steps you just emitted/saved), then `/test` to lock the durable ones, then `/sync` to promote any new area conventions into `AGENTS.md`. **Always end by advising `/clear` before the next feature** — the roadmap, the ADR, and `AGENTS.md` hold the state, so a fresh session loses nothing and keeps every build short and cheap (long sessions cost more even when cached). Suggest **`/compact` mid-build** if this single feature is running long. (On Claude Code use `/clear` / `/compact`; use your agent's fresh-session equivalent elsewhere.)
 
 `/develop` builds; it does not run `/verify`, `/test`, `/sync`, or `/architect` for you — it points; you decide.
 

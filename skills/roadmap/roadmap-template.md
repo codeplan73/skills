@@ -139,5 +139,7 @@ When one file outgrows a comfortable scan (roughly a dozen-plus features across 
 **Roadmap file**: <docs/roadmap/roadmap.md> (<created new | updated in place | new epic file for <area>>)
 **Scope (this pass)**: <N> new features to build, <M> already on the roadmap, <K> deferred
 **Build order**: <feature 1> → <feature 2> → …
-**First step**: <the first unticked box, usually `/architect <first feature>`, or `/audit` first if a brownfield repo has no root AGENTS.md>
+**First step**: <run `/clear` first, then the first unticked box, usually `/architect <first feature>` (or `/audit` if a brownfield repo has no root AGENTS.md) — each skill reads its inputs from the files just written, so a fresh session keeps every step cheap>
 ```
+
+_Context hygiene: the roadmap, the ADRs, and `AGENTS.md` are the durable state, so the workflow hands off through files, not the chat. Advise `/clear` between units (after `/roadmap`, after each `/architect`, between features) and `/compact` mid-unit if one run gets long. On Claude Code use `/clear` / `/compact`; use your agent's fresh-session equivalent elsewhere._
