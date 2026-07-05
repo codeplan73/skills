@@ -5,8 +5,8 @@ Roadmap structure `/roadmap` writes to — the reference shapes read while writi
 - **Two parts:** a slim **At a glance** table for a quick scan, then **the plan** as clean feature sections grouped by phase. Build order is just the section order — there is no separate "build order" list to keep in sync.
 - **Clean headings.** A heading is `### <N>. <Feature name>` plus a short status word and short tags **only when they carry real information** (`needs a decision`, a per-feature approach override, `full` weight). Never a pipe-delimited metadata row like `Title | P0 | inherit | …`.
 - **Each fact appears once.** Intent, the definition of done, tasks, and pointers live in the section; the At-a-glance table is the quick index. Status is shown in the table and beside the heading, and nowhere else.
-- **Only what is set.** No `n/a`, no `inherit`, no empty fields. A pointer line (`ADR <n> · code in <path>`) appears under a feature **only once those exist** (`/develop` fills it).
-- **Each feature is short:** a one- or two-line **intent**, a single **Done when:** line (the acceptance-criteria seeds `/architect` will grow into the ADR contract), then the **tasks as checkboxes**. The next step is always the first unticked box. A coarse (not-yet-designed) feature has one box: run `/architect` (when it `needs a decision`), or `/develop` directly, or `/audit` for the standards & tooling feature.
+- **Only what is set.** No `n/a`, no `inherit`, no empty fields. A pointer line (`ADR <n> · code in <path>`) appears **only once those exist** — the ADR link added by `/architect` at capture, the code path by `/develop`.
+- **A feature grows a defined shape.** It has a one- or two-line **intent**, a single **Done when:** line (the acceptance-criteria seeds), and **checkbox steps**. A **not-yet-designed** feature has **one box** (its entry command: `/architect` when it `needs a decision`, else `/develop`, or `/audit` for standards & tooling). **When its ADR is captured, `/architect` fills in the built-ready shape:** `Design it` (ticked) → `Build it: /develop <feature>` with **2 to 5 milestone sub-items rolled up from the ADR** → `Verify it: /verify <feature>` → `Test it: /test <feature>`. **The atomic build tasks stay in the ADR's `## Build plan`, never here** — the roadmap carries only the milestone rollup. The next step is always the first unticked box.
 
 ## Single-file roadmap
 
@@ -24,7 +24,7 @@ Roadmap structure `/roadmap` writes to — the reference shapes read while writi
 |---|---------|-------|--------|
 | 1 | Stack & architecture | Foundation | in-progress |
 | 2 | Coding standards & tooling | Foundation | planned |
-| 3 | Data model | Foundation | planned |
+| 3 | Data model | Foundation | in-progress |
 | 4 | Design system & UI foundation | Foundation | planned |
 | 5 | Core standup loop | Slice 1 | planned |
 | 6 | Daily reminders | Slice 2 | planned |
@@ -47,10 +47,20 @@ Capture conventions, then install lint, format, and pre-commit enforcement from 
 - [ ] Install the tooling: `/develop tooling`
 - [ ] Check it runs clean: `/test`
 
-### 3. Data model · needs a decision
+### 3. Data model · in-progress
+<!-- DESIGNED: /architect captured ADR 0002 and filled in the shape below. The 2 to 5 boxes under
+     "Build it" are a ROLLUP of the ADR's ## Build plan — every table, column, and policy lives in
+     the ADR, NOT here. This is what a feature looks like right after its ADR is captured. -->
 Core entities every feature builds on: users, teams, memberships, standup entries, template.
 **Done when:** entities and relationships support later slices (reminders, templates, history) without a breaking migration.
-- [ ] Design it (ADR): `/architect data model`
+- [x] Design it (ADR): `/architect data model`
+- [ ] Build it: `/develop data model`
+   - [ ] Schema + constraints — tables, keys, unique/check, cascades (AC-1..6)
+   - [ ] Row-level security — per-table policies + helpers (AC-7..9)
+   - [ ] Apply migration, confirm live, generate types (AC-1..9)
+- [ ] Verify it: `/verify data model`
+- [ ] Test it: `/test data model`
+ADR 0002 · code (filled by /develop)
 
 ### 4. Design system & UI foundation · needs a decision
 Visual language, layout primitives, and base components so the flows feel cohesive and accessible.
@@ -79,12 +89,24 @@ Out of scope for the current build pass, kept so the plan stays honest.
 - **Product analytics** — measure signups and habit · needs a decision
 
 ## Legend
-- **Next step** = the first unticked box in a feature.
-- **needs a decision** = run `/architect` first (it writes the ADR and fills that feature's build tasks); otherwise the feature goes straight to `/develop` (or `/audit` for standards & tooling).
-- **Status** (in the At-a-glance table and beside the heading): `planned` → `in-progress` → `done`. Plus `existing` (built before this workflow) and `dropped` (de-scoped, kept for history). `planned` may be left off a heading; the table always carries it.
-- **Approach tag** beside a heading (e.g. `· Facade`) = a per-feature override of the project default; no tag = inherits the default.
-- **Weight tag** `· full` = design review + `/harden` required; `lean`/`medium` are the norm and get no tag.
-- **Pointer line** (`ADR <n> · code in <path>`) sits directly under a feature, added by `/develop` once the ADR and code exist.
+
+**Feature lifecycle** — the roadmap updates as a feature moves; each row is what it shows and who sets it:
+
+| State | Set by | The feature shows |
+|---|---|---|
+| `planned` · needs a decision | `/roadmap` | one box: `Design it (ADR): /architect <feature>` |
+| `in-progress` (designed) | **`/architect` at ADR capture** | `Design it` ticked; ADR linked; `Build it: /develop <feature>` + **2 to 5 milestones rolled up from the ADR**; `Verify it` + `Test it` boxes; any surfaced follow-up enrolled |
+| `in-progress` (building) | `/develop` | milestone sub-boxes tick one by one; code pointer filled |
+| `in-progress` (verified) | `/verify` | `Build it` + milestones ticked; `Verify it` ticked |
+| `done` | `/test`, then `/sync` | all boxes ticked; `/sync` captures the slice's conventions into `AGENTS.md` |
+
+- **Next step** = the first unticked box (always a command or a tracked milestone).
+- **needs a decision** = run `/architect` first; otherwise straight to `/develop` (or `/audit` for standards & tooling). The tag drops once the ADR is captured.
+- **Atomic build tasks live in the ADR's `## Build plan`, not here** — the roadmap carries only the milestone rollup.
+- **Status** `planned` → `in-progress` → `done`, plus `existing` (pre-workflow) and `dropped` (de-scoped, kept for history).
+- **Approach tag** beside a heading (e.g. `· Facade`) overrides the project default for that feature; no tag = inherits it.
+- **Weight tag** `· full` = design review + `/harden` required; `lean`/`medium` get no tag.
+- **Pointer line** (`ADR <n> · code in <path>`): the ADR link added by `/architect`, the code path by `/develop`.
 ```
 
 ## Brownfield enrollment

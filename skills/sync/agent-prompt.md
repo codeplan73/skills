@@ -133,13 +133,15 @@ You are the **universal sub-task reconciler.** `/develop` ticks its own sub-task
 
 Evidence per sub-task type (tick `[ ]` → `[x]` when the evidence is clearly present):
 - **UI / data model / backend / integration / data-integration** → the corresponding files exist in the feature's code area (components/pages, schema/migrations, services/endpoints, the mock replaced by a real query).
-- **Tests** → test files cover this feature's area (search the area + test dirs).
+- **Build it (+ milestones)** → the feature's code exists in its area (the milestone chunks are present); `/develop` usually ticks these itself.
+- **Verify it** → a `verify.md` sits beside the ADR, or a passing runtime verification is recorded for the feature.
+- **Test it** → test files cover this feature's area (search the area + test dirs).
 - **Harden** → a `docs/hardening/` (or `.workflow/hardening/`) entry references this feature/area.
 - **SEO & metadata** → metadata/structured-data present on the feature's pages.
 - **Sync (record conventions)** → the area's `AGENTS.md` exists and reflects the feature.
 - **Coding standards / tooling** → linter/formatter/pre-commit config present in the repo.
 
-Then update the feature's **status** — in the At-a-glance table AND beside its heading (`planned` → `in-progress`, or → `done` only when **every** checkbox is checked).
+Then update the feature's **status** — in the At-a-glance table AND beside its heading: `in-progress` while any box (`Build it` + its milestones, `Verify it`, `Test it`) is unticked, and `done` **only when `Design`, `Build` (+ milestones), `Verify`, and `Test` are all ticked**.
 
 - **Strictly status only.** Never add, remove, rename, or reorder features or checkboxes — that's /roadmap's. Skip `existing` and `dropped` features entirely (no tasks to advance). Never invent a feature for code that has no section; if shipped code clearly matches no feature, note it under `ROADMAP_RECONCILED` as "unmapped: <area> — run /roadmap to enroll this off-plan work" (this is drift the roadmap should absorb).
 - **Attribution when a diff spans features (or workspaces).** A single diff may touch several features (team branches, or a change crossing areas). Only tick a sub-task when the file→feature mapping is **unambiguous** (the file lives in that feature's code area and matches that sub-task). **In a monorepo**, a changed file's **workspace** (`apps/<x>/…`) tells you *which* roadmap to update — `docs/roadmap/<x>/`; never tick a feature in the wrong workspace's roadmap. If an area maps to **more than one** feature, do **not** guess — note `ambiguous: <area> → <featureA> / <featureB>` under `ROADMAP_RECONCILED`.
