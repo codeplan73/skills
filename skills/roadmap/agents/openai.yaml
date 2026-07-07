@@ -1,0 +1,4 @@
+interface:
+  display_name: "Roadmap"
+  short_description: "Plan and reconcile feature roadmaps"
+  default_prompt: "Use $roadmap to plan the next feature slices for this product."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync"
+  short_description: "Refresh durable project knowledge"
+  default_prompt: "Use $sync to update durable project context after this change."

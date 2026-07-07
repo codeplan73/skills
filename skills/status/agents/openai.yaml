@@ -1,0 +1,4 @@
+interface:
+  display_name: "Status"
+  short_description: "Summarize workflow state safely"
+  default_prompt: "Use $status to tell me where this repo stands and what is safe to pick up."

@@ -1,13 +1,15 @@
 # Harden Subagent Prompt Template (lean)
 
-The main model fills this template and passes it as the hardening subagent's prompt. The full systems-level threat rubric, severity scale, and checklist format live in `harden-guide.md`; the main model **inlines that file's full text** into `HARDEN_GUIDE` below before spawning, so the subagent never resolves a skill path (portable across any agent/OS). Placeholders are in ALL_CAPS.
+You may receive this file as a path plus a Placeholder values list; substitute each placeholder with its given value as you read.
+
+The main model fills this template and passes it as the hardening subagent's prompt. The full systems-level threat rubric, severity scale, and checklist format live in `harden-guide.md`; the main model supplies it via `HARDEN_GUIDE` below — normally as an absolute file path for you to Read, or as inlined full text (portable across any agent/OS). Placeholders are in ALL_CAPS.
 
 ---
 
 ## Hardening guide (your rubric — follow it exactly)
 
 HARDEN_GUIDE
-<!-- The main model pastes the full contents of harden-guide.md here. -->
+<!-- The main model supplies harden-guide.md here: an absolute path for you to Read, or its pasted full contents. -->
 
 ---
 

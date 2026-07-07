@@ -11,15 +11,68 @@
 //  4. No non-git shell glue that breaks on PowerShell in a SKILL body
 //     (`>/dev/null`, `&& BASE=`, `|| BASE=`) — express base-branch
 //     selection as prose (git commands themselves are fine).
+//  5. SKILL.md and bundled prompt assets stay within byte budgets — the
+//     SKILL body loads into the main context on every invocation, and the
+//     prompt assets load into subagent contexts when used.
+//  6. Frontmatter `description` stays under 400 characters — every installed
+//     skill's description loads into every session.
+//  7. Every skill ships its OpenAI Codex adapter (`agents/openai.yaml`)
+//     with the `interface:` fields present.
 //
 // Note: `.md` files under templates/ are reference data and are skipped for
 // rules 2-4 (they show generated output, not instructions to run).
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const SKILLS_DIR = new URL('../skills/', import.meta.url).pathname;
 const violations = [];
+
+// Rule 5 budgets. Default is the ceiling for a lean phase skill; overrides
+// are grandfathered exceptions — ratchet them DOWN as files shrink, never up.
+const SKILL_BYTE_BUDGET = 32 * 1024;
+const SKILL_BYTE_OVERRIDES = {};
+const SUPPORT_MD_BYTE_BUDGET = 24 * 1024;
+const SUPPORT_MD_OVERRIDES = {
+  'architect/agent-prompt.md': 28 * 1024, // common ADR writer prompt; ratchet down after more common-rule trimming
+  'architect/internal/design-conversation.md': 26 * 1024, // main-thread design walk; split by stage next if it grows
+};
+const DESCRIPTION_CHAR_CAP = 400;
+const HOT_PATH_BUDGETS = [
+  {
+    name: 'architect main full-design path',
+    budget: 62 * 1024,
+    required: ['architect/SKILL.md', 'architect/internal/design-conversation.md', 'architect/internal/after-subagent.md'],
+  },
+  {
+    name: 'architect subagent write path',
+    budget: 48 * 1024,
+    required: ['architect/agent-prompt.md', 'architect/adr-template.md'],
+    oneOf: [
+      'architect/agent-modes/feature.md',
+      'architect/agent-modes/architecture.md',
+      'architect/agent-modes/enhancement.md',
+      'architect/agent-modes/cross-cutting.md',
+    ],
+  },
+  {
+    name: 'roadmap plan path',
+    budget: 40 * 1024,
+    required: ['roadmap/SKILL.md', 'roadmap/modes/plan.md', 'roadmap/roadmap-template.md'],
+  },
+  {
+    name: 'roadmap replan/add path',
+    budget: 24 * 1024,
+    required: ['roadmap/SKILL.md', 'roadmap/roadmap-template.md'],
+    oneOf: ['roadmap/modes/replan.md', 'roadmap/modes/add.md'],
+  },
+  {
+    name: 'develop UI path',
+    budget: 42 * 1024,
+    required: ['develop/ui-guide.md', 'develop/ui/implementation.md'],
+    oneOf: ['develop/ui/path-design-md.md', 'develop/ui/path-image.md', 'develop/ui/path-no-image.md'],
+  },
+];
 
 function walk(dir) {
   for (const entry of readdirSync(dir)) {
@@ -43,6 +96,30 @@ function check(path) {
   // Rule 1 — allowed-tools on every SKILL.md
   if (isSkillMd && !/^allowed-tools:/m.test(frontmatter(text))) {
     violations.push(`${rel}: missing \`allowed-tools\` in frontmatter`);
+  }
+
+  if (isSkillMd) {
+    const skill = rel.split('/')[0];
+
+    // Rule 5 — SKILL.md byte budget
+    const budget = SKILL_BYTE_OVERRIDES[skill] ?? SKILL_BYTE_BUDGET;
+    const bytes = Buffer.byteLength(text, 'utf8');
+    if (bytes > budget) {
+      violations.push(`${rel}: ${bytes} bytes exceeds its budget of ${budget} — condense or split before it lands`);
+    }
+
+    // Rule 6 — description length cap
+    const desc = frontmatter(text).match(/^description:\s*"([\s\S]*?)"\s*$/m);
+    if (desc && desc[1].length > DESCRIPTION_CHAR_CAP) {
+      violations.push(`${rel}: description is ${desc[1].length} chars (cap ${DESCRIPTION_CHAR_CAP}) — it loads into every session`);
+    }
+  } else if (!isTemplate) {
+    // Rule 5 — bundled prompt/guide byte budget
+    const budget = SUPPORT_MD_OVERRIDES[rel] ?? SUPPORT_MD_BYTE_BUDGET;
+    const bytes = Buffer.byteLength(text, 'utf8');
+    if (bytes > budget) {
+      violations.push(`${rel}: ${bytes} bytes exceeds its support-file budget of ${budget} — condense or split before it lands`);
+    }
   }
 
   if (isTemplate) return; // reference data — skip prose/shell rules
@@ -71,6 +148,46 @@ function check(path) {
 }
 
 walk(SKILLS_DIR.replace(/\/$/, ''));
+
+// Rule 5b — aggregate hot-path budgets. These model the largest combination
+// a normal run should need after router files load their selected references.
+for (const group of HOT_PATH_BUDGETS) {
+  let bytes = 0;
+  for (const rel of group.required) {
+    bytes += Buffer.byteLength(readFileSync(join(SKILLS_DIR, rel), 'utf8'), 'utf8');
+  }
+  if (group.oneOf) {
+    let largest = 0;
+    let largestRel = '';
+    for (const rel of group.oneOf) {
+      const size = Buffer.byteLength(readFileSync(join(SKILLS_DIR, rel), 'utf8'), 'utf8');
+      if (size > largest) {
+        largest = size;
+        largestRel = rel;
+      }
+    }
+    bytes += largest;
+    group.detail = ` (largest optional: ${largestRel})`;
+  }
+  if (bytes > group.budget) {
+    violations.push(`${group.name}: ${bytes} bytes exceeds hot-path budget of ${group.budget}${group.detail ?? ''}`);
+  }
+}
+
+// Rule 7 — every skill ships its OpenAI Codex adapter
+for (const entry of readdirSync(SKILLS_DIR)) {
+  const dir = join(SKILLS_DIR, entry);
+  if (!statSync(dir).isDirectory()) continue;
+  const adapter = join(dir, 'agents', 'openai.yaml');
+  if (!existsSync(adapter)) {
+    violations.push(`${entry}: missing agents/openai.yaml (OpenAI Codex adapter)`);
+  } else {
+    const y = readFileSync(adapter, 'utf8');
+    for (const field of ['interface:', 'display_name:', 'short_description:', 'default_prompt:']) {
+      if (!y.includes(field)) violations.push(`${entry}/agents/openai.yaml: missing \`${field.replace(':', '')}\` field`);
+    }
+  }
+}
 
 // review/SKILL.md's author→reviewer table legitimately names model families
 // in prose (not as spawn directives); filter those false positives.

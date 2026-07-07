@@ -1,6 +1,8 @@
 # Document Subagent Prompt Template (lean)
 
-The main model fills this template and passes it as the subagent's prompt (running on a fast, low-cost model), together with the **one** template for the chosen document type. Placeholders are in ALL_CAPS.
+You may receive this file as a path plus a Placeholder values list; substitute each placeholder with its given value as you read.
+
+The main model fills this template and passes it as the subagent's prompt (running on a fast, low-cost model), together with the **one** template for the chosen document type — normally as an absolute file path for you to Read, or as inlined text. Placeholders are in ALL_CAPS.
 
 ---
 
@@ -13,6 +15,7 @@ TYPE  (one of: pr, changelog, release-note, postmortem)
 ## Structure to follow (the template for this type)
 
 TEMPLATE_CONTENT
+<!-- The main model supplies the chosen template here: an absolute path for you to Read, or its pasted full contents. -->
 
 ## Source material
 

@@ -256,7 +256,7 @@ The artifacts are shared files, so the skills are built for concurrent use:
 These skills follow the open Agent Skills format and are written to be **portable**:
 
 - **Any OS** — macOS, Linux, and Windows. `git` is the only required CLI (identical everywhere); every other step uses your agent's own cross-platform file tools rather than POSIX utilities like `find`/`grep`/`sed`.
-- **Any client** — they install on any skills-compatible agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, and [more](https://agentskills.io/clients)). Bundled files are referenced by relative paths, and anything a subagent needs is passed into its prompt as text, so nothing depends on a fixed install location.
+- **Any client** — they install on any skills-compatible agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, and [more](https://agentskills.io/clients)). Bundled files are referenced relative to the skill folder; when a subagent needs one, the main agent resolves it to an absolute path and the subagent reads it by path. If a client cannot give subagents file-read access to installed skills, each skill falls back to inlining the bundled text in the prompt.
 - **Capability-first, with plain fallbacks.** Several steps use a subagent, a per-step model choice, or an interactive options panel. Every skill is written to **use whatever your agent natively provides, and fall back only where it doesn't** — it never assumes a feature exists. The fallbacks, in order: run the work **inline** (no subagent), use the **parent model** (no per-step model choice), and ask questions as **plain text** (no options panel). Your agent already knows its own tool names, so the skills stay generic; the per-agent mapping lives here:
 
 | Capability | Claude Code | Cursor | Codex | Antigravity |
@@ -265,6 +265,7 @@ These skills follow the open Agent Skills format and are written to be **portabl
 | Per-step model | ✅ per subagent | ✅ `model:` (inherit/id) | one model / roles | parent model only |
 | Options panel | `AskUserQuestion` | plain text | plain text | plain text |
 | `AGENTS.md` context | via `CLAUDE.md` pointer | native (+ nested) | native | native |
+| Subagent file access | passed paths or inline fallback | passed paths or inline fallback | passed paths or inline fallback | passed paths or inline fallback |
 | Read-only enforcement | `allowed-tools` | `readonly:` / sandbox | `sandbox_mode` | inherited scopes |
 | Install path (`-a`) | `.claude/skills/` | `.agents/skills/` | `.agents/skills/` | `.agents/skills/` |
 
@@ -273,7 +274,7 @@ These skills follow the open Agent Skills format and are written to be **portabl
 The suite is a first-class fit for Codex — in several ways it needs *no* degradation:
 
 - **`AGENTS.md` is native.** Codex reads `AGENTS.md` as its project instructions automatically (`project_doc_max_bytes`, `project_doc_fallback_filenames`). The context files `/audit` and `/sync` produce are the exact artifact Codex already consumes — so the workflow's shared memory is first-class, not just compatible.
-- **Subagents work.** Codex ships multi-agent tools on by default (`features.multi_agent` → `spawn_agent`, `wait_agent`, `resume_agent`, …), so the parallel/fan-out build steps and the review/test/harden subagents run natively. Per-step *model* selection (haiku vs opus) is Claude-specific; on Codex use one model, or define roles via `agents.<name>.config_file`.
+- **Subagents work.** Codex ships multi-agent tools on by default (`features.multi_agent` → `spawn_agent`, `wait_agent`, `resume_agent`, …), so the parallel/fan-out build steps and the review/test/harden subagents run natively. Subagents read bundled prompt files from the absolute paths the main agent passes; if your sandbox blocks installed-skill reads, use the inline fallback described in the skill. Per-step *model* selection (haiku vs opus) is Claude-specific; on Codex use one model, or define roles via `agents.<name>.config_file`.
 - **Install:** `npx skills add JavaScript-Mastery-Pro/pilot -a codex` → lands in `.agents/skills/`. Enable/disable individual skills with `skills.config` if desired.
 - **Enforce the read-only skills with Codex's sandbox, not just `allowed-tools`.** Because `allowed-tools` uses Claude tool names, treat it as advisory on Codex and let Codex's own permission layer do the enforcing — run `/status`, `/review`, `/verify` under `sandbox_mode = "read-only"` (or a `default_permissions = ":read-only"` profile). Build skills need `sandbox_mode = "workspace-write"`.
 

@@ -1,8 +1,7 @@
 ---
 name: document
-compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Use this skill to write the human-facing prose about a change — a PR description, changelog entry, release notes, or incident postmortem. Run /document when you need any of those written from the real change (commits, diff) rather than by hand. Pass the type (/document pr | changelog | release-note | postmortem) or let it ask. A precise technical writer drafting from history, writing to the right place (PR body, CHANGELOG.md, docs/releases/, docs/postmortems/). It doesn't write code, tests, or ADRs."
+description: "Write the human facing prose about a change: a PR description, changelog entry, release notes, or incident postmortem. Run /document pr | changelog | release-note | postmortem (or let it ask) and it drafts from the real commits and diff, writing to the right place. It does not write code, tests, or ADRs."
 ---
 
 ## Output style (plain words, no dashes)
@@ -34,7 +33,7 @@ PR text, `CHANGELOG.md`, `docs/releases/`, `docs/postmortems/` — owned by this
 
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` (and optionally `gh`) are the only CLIs, and behave the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `command -v`, or `node -e` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
-- **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them and passes the chosen template's text **into the subagent prompt** — subagents can't resolve skill-relative paths.
+- **Bundled files**: referenced by paths relative to this skill's folder. The main agent resolves this skill's folder to an **absolute path** (it already resolves these relative paths, so it knows the folder) and passes absolute file paths in the subagent prompt — it must **not** read the bundled files' contents into the main context; the subagent reads them by path. Fallback: if your client's subagents cannot read files, read and inline the contents instead.
 - **No subagent / interactive-question support?** The drafting normally runs in a subagent on a fast, low-cost model, and the doc-type pick uses an interactive picker (use whatever your agent provides — a subagent, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: write the document inline yourself following the template, and ask the doc-type question as plain text.
 
 ## Execution
@@ -87,14 +86,13 @@ git tag --sort=-creatordate
 
 ### 3. Spawn the document subagent
 
-Read `agent-prompt.md` (lean) and the **one** template for the chosen type:
-`templates/<type>.md`. Fill and spawn a subagent:
+Resolve this skill's folder to an absolute path (you, the main agent, already resolve these relative paths, so you know the folder) and pass the **absolute paths** of `agent-prompt.md` (lean) and the **one** template for the chosen type, `templates/<type>.md`, in the spawn prompt. Do **not** read their contents into the main context — the subagent's **first action** is to `Read` `agent-prompt.md` by path and follow it. Pass the dynamic values as a labeled list in the spawn prompt (`Placeholder values: ...`). Fallback: if your client's subagents cannot read files, read both files and inline their contents into a filled prompt instead (the old behavior). Spawn a subagent:
 
 - `model`: a fast, low-cost model for `pr`, `changelog`, `release-note` (drafting from real material is well-bounded). **A strong model (e.g. `sonnet` on Claude Code) for `postmortem`** — root-cause synthesis and contributing-factor analysis need stronger reasoning than a cheap model gives.
 - `description: "Document: <type>"`
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write`, `Edit` (Edit for appending to `CHANGELOG.md`; Bash for `gh` only when the engineer opts to create/update a PR)
-- `prompt`: filled template with:
-  1. Document type + its template (the chosen one only)
+- `prompt`: the absolute path to `agent-prompt.md` (Read it first, then follow it), plus `Placeholder values:` — a labeled list supplying:
+  1. Document type + the absolute path to its template (the chosen one only; the subagent reads it)
   2. Source: commit list, diff command, and (postmortem) the incident facts
   3. Project-context contents inline (project name, conventions) — read `AGENTS.md`, or `CLAUDE.md` fallback — + recent ADR paths for the "why"
   4. Output target for the type and today's date
@@ -121,5 +119,5 @@ For `pr`, always show the full text in chat (so it's usable even without `gh`). 
 
 ## Reference files
 
-- `agent-prompt.md` — lean spawn template
-- `templates/` — one structure file per type (`pr.md`, `changelog.md`, `release-note.md`, `postmortem.md`); the subagent reads only the chosen one
+- `agent-prompt.md` — lean spawn template; the main model passes its **absolute path** in the spawn prompt and the subagent reads and follows it
+- `templates/` — one structure file per type (`pr.md`, `changelog.md`, `release-note.md`, `postmortem.md`); the main model passes the chosen one's **absolute path** and the subagent reads only that one

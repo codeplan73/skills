@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test"
+  short_description: "Write focused regression test suites"
+  default_prompt: "Use $test to write focused tests for my current uncommitted change."

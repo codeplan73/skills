@@ -1,8 +1,7 @@
 ---
 name: harden
-compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
 allowed-tools: Bash, Read, Grep, Glob, Write, Task
-description: "Use this skill to stress-test a change against production-only failure modes — edge cases, concurrency, scale, and security. Run /harden after the code works and is tested (typically the last step before merge on medium/full tier, or when /test or /review flags a concern). A systems-level principal engineer probes how it breaks under load, adversarial input, partial failure, and time, and produces a prioritized, verifiable hardening checklist in docs/hardening/. It doesn't rewrite your code."
+description: "Stress test a completed, tested change against production failure modes: edge cases, concurrency, scale, and security. Run /harden after /test or /review, or as the last step before merge on medium or full tier work. It writes a prioritized, verifiable hardening checklist to docs/hardening/. It does not rewrite your code."
 ---
 
 ## Output style (plain words, no dashes)
@@ -37,7 +36,7 @@ Owns the hardening checklist (`docs/hardening/`). Does not write tests (/test), 
 
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS — run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `ls`, `xargs`, or `for` exist. Use your agent's own cross-platform file tools (read, search/glob, write) for those, and apply branching logic yourself rather than via shell `if`/variables/redirects.
-- **Bundled files**: referenced by paths relative to this skill's folder; the main agent reads them. Anything a subagent needs is passed **into its prompt as text** — subagents can't resolve skill-relative paths.
+- **Bundled files**: referenced by paths relative to this skill's folder. The main agent resolves this skill's folder to an **absolute path** (it already resolves these relative paths, so it knows the folder) and passes absolute file paths in the subagent prompt — it must **not** read the bundled files' contents into the main context; the subagent reads them by path. Fallback: if your client's subagents cannot read files, read and inline the contents instead.
 - **No subagent support?** The analysis normally runs in a subagent (use your agent's subagent tool; on a same-model agent it runs on the parent model). On a tool without one, do the hardening analysis inline yourself and write the checklist directly — the rubric and output format are the same.
 
 ## Execution
@@ -68,13 +67,13 @@ Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonic
 
 ### 3. Spawn the subagent
 
-Read two bundled files from this skill's folder (relative paths — you, the main agent, can resolve them): `agent-prompt.md` (the spawn template) and `harden-guide.md` (the threat rubric). Fill the template **and inline the full `harden-guide.md` text into it** — the subagent can't resolve skill paths, so it must receive the rubric as prompt text. Then spawn a subagent with:
+Resolve this skill's folder to an absolute path (you, the main agent, already resolve these relative paths, so you know the folder) and pass the **absolute paths** of two bundled files in the spawn prompt: `agent-prompt.md` (the spawn template) and `harden-guide.md` (the threat rubric). Do **not** read their contents into the main context — the subagent's **first action** is to `Read` `agent-prompt.md` by path and follow it. Pass the dynamic values as a labeled list in the spawn prompt (`Placeholder values: ...`). Fallback: if your client's subagents cannot read files, read both files and inline their contents into a filled prompt instead (the old behavior). Then spawn a subagent with:
 
 - Model: a strong model (e.g. `sonnet`, or `opus` for critical work, on Claude Code) — use the stronger option only for a `critical`, high-blast-radius change (deeper reasoning)
 - Description: "Harden: <N> changed files"
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write` — **no `Edit`** by default (it produces a checklist, not edits). If the engineer later approves a specific fix, re-spawn with `Edit` for that one item.
-- Prompt: filled template with:
-  1. The full `harden-guide.md` content (injected, not referenced)
+- Prompt: the absolute path to `agent-prompt.md` (Read it first, then follow it), plus `Placeholder values:` — a labeled list supplying:
+  1. `HARDEN_GUIDE`: the absolute path to `harden-guide.md` (the subagent reads it as its rubric)
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, changed-file list + the exact `git diff` command
   3. Project-context contents (inline) — `AGENTS.md`, or `CLAUDE.md` fallback
   4. Recent ADR paths + latest review path (read if relevant; inline their text if your client gives subagents no file access)
@@ -109,5 +108,5 @@ Show all **must-fix** items in chat; collapse should-harden and watch to counts 
 
 ## Reference files
 
-- `agent-prompt.md` — lean spawn template the main model fills
-- `harden-guide.md` — systems threat rubric, severity, and checklist format. The main model reads it and **injects its text into the subagent prompt** (portable across agents).
+- `agent-prompt.md` — lean spawn template; the main model passes its **absolute path** in the spawn prompt and the subagent reads and follows it
+- `harden-guide.md` — systems threat rubric, severity, and checklist format. The main model passes its **absolute path** in the subagent prompt; the subagent reads it (inline its text only if your client's subagents cannot read files).

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify"
+  short_description: "Prove changes work in runtime"
+  default_prompt: "Use $verify to run the real app and prove this change works."

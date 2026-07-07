@@ -1,13 +1,15 @@
 # Test Subagent Prompt Template
 
-The main model fills this template and passes it as the subagent's prompt. The detailed rules, strategies, iteration loop, and report format live in `writing-guide.md`; the main model **inlines that file's full text** into `WRITING_GUIDE` below before spawning, so the subagent never has to resolve a skill path (portable across any agent/OS). Placeholders are in ALL_CAPS.
+You may receive this file as a path plus a Placeholder values list; substitute each placeholder with its given value as you read.
+
+The main model passes this file's absolute path in the subagent prompt, plus `writing-guide.md` as an absolute path or inlined fallback text. The detailed rules, strategies, iteration loop, and report format live in `writing-guide.md`; read it from the supplied path when possible. Placeholders are in ALL_CAPS.
 
 ---
 
 ## Writing guide (your rulebook — follow it exactly)
 
 WRITING_GUIDE
-<!-- The main model pastes the full contents of writing-guide.md here. -->
+<!-- The main model supplies writing-guide.md here: an absolute path for you to Read, or its pasted full contents. -->
 
 ---
 

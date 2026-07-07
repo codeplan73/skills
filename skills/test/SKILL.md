@@ -1,41 +1,27 @@
 ---
 name: test
-compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Use this skill to write a test suite for code you just built or changed. Run /test after implementing a feature, component, API route, or fix — it targets the files changed and not yet committed (working tree + staged + untracked), no need to name them. Reads test-preferences.json for your framework; if absent it asks, installs with confirmation, and saves it. A senior test engineer choosing the right strategy per file: happy path, edge cases, error states, and accessibility where relevant."
+description: "Write a test suite for code you just built or changed. Run /test after implementing a feature, route, or fix; it targets uncommitted changes automatically, reads test-preferences.json for your framework (asks and saves it if absent), and picks the right strategy per file: happy path, edge cases, error states, accessibility."
 ---
 
 ## Output style (plain words, no dashes)
 
-Write everything this skill produces (the files and reports it writes, and every message shown to the engineer) in plain, simple language. Keep the technical terms that carry real meaning, but explain each one in plain words so a busy reader understands it fast. Do not use dashes of any kind: no em dash, no en dash, and no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. Clear beats clever.
+Write everything this skill produces (files, reports, every message shown to the engineer) in plain simple language; keep technical terms that carry real meaning but explain each in plain words. No dashes of any kind (em dash, en dash, or hyphen as punctuation); use short sentences, commas, or parentheses instead.
 
 ## What this skill does
 
-**Your role:** a senior test engineer who writes the suite the code deserves — no more, no less. Your instinct is to pin the *behavior that matters* for this slice and ignore the noise: you test what a caller relies on and what would actually break someone, not lines for a coverage number. You choose a strategy per file the way an experienced engineer does — reading what the thing *is* before deciding how to prove it works — and you refuse to write tests that lock in scaffolding the slice was never meant to make real.
+Role: a senior test engineer writing the suite the code deserves, no more, no less. Test what a caller relies on and what would actually break someone, not lines for a coverage number. Pick a strategy per file by reading what the thing is. Refuse tests that lock in scaffolding the slice was never meant to make real.
 
-Writes a thorough, maintainable test suite for **the code that changed in this branch but isn't committed yet**. It reads each changed file, classifies what kind of thing it is (pure logic, component, API route, page/flow), and writes tests with the right strategy for each. Tests verify real behavior and catch regressions, not coverage farming.
+Target: the code changed in this branch but not yet committed. Each changed file is classified (pure logic, component, API route, page/flow) and tested with the right strategy; tests verify real behavior and catch regressions, not coverage farming. A subagent reads the changed files and writes the tests; with a governing ADR, tests trace to its acceptance criteria (Steps 7 and 8).
 
-- **Scope is automatic**: uncommitted git changes (modified, staged, and untracked source files). You don't name files.
-- **First run**: asks which framework, checks if installed, installs with your confirmation, saves `test-preferences.json`.
-- **Subsequent runs**: reads `test-preferences.json` and skips all tool questions.
-- Spawns a subagent to read the changed files and write the tests.
-- **Traces to the contract**: when a governing ADR exists, it locks in the **durable** acceptance criteria as automated tests, tagging each test with the `AC-N` it covers. Any criterion that can't be automated (a manual/visual check) is recorded in NOT_COVERED and deferred to `/verify`'s manual step.
-
-Does not write application code. Does not update the `AGENTS.md`/`CLAUDE.md` context files (/sync owns that).
+Does not write application code. Does not update `AGENTS.md`/`CLAUDE.md` context files (/sync owns that).
 
 ## Asks vs acts
 
-**Acts without asking** when `test-preferences.json` exists, the tool is installed, and there are uncommitted source files to test — it goes straight to writing.
-
-**Always asks one thing** (every run, even when prefs exist): after the tests are written, whether to run the suite now or hand back manual instructions. This is a per-run execution choice, not a saved preference.
-
-**Otherwise asks** only when:
-- No `test-preferences.json` exists (framework; E2E addon only if pages/flows changed)
-- A chosen tool is not installed (confirm before installing)
-- There are **no** uncommitted changes (offer fallbacks — see Step 3)
-- The diff is large (>15 files — see Step 1b)
-
-No scope question. The git working tree defines the scope.
+- Acts without asking when `test-preferences.json` exists, the tool is installed, and uncommitted source files exist: straight to writing.
+- Always asks one thing every run, even with prefs: run the suite after writing, or hand back manual instructions (Step 7.5). Per-run choice, never saved.
+- Otherwise asks only when: no `test-preferences.json` (framework; E2E addon only if pages/flows changed); a chosen tool is not installed (confirm first); no uncommitted changes (Step 3); >15 files (Step 1b).
+- No scope question. The git working tree defines the scope.
 
 ## Artifact ownership
 
@@ -46,10 +32,12 @@ No scope question. The git working tree defines the scope.
 
 ## Portability (any OS, any agent)
 
-This skill targets any Agent Skills client on macOS, Linux, or Windows:
-- **Commands**: `git` is the only required CLI and behaves identically on every OS — run the `git` lines as shown. All other shell snippets are POSIX **reference**, not literal scripts: do not assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `xargs`, `mkdir -p`, or `node -e` exist. Use your agent's own cross-platform file tools (read, search/glob, write) to list files, check existence, read, and search, and apply any branching logic yourself rather than via shell `if`/variables/redirects.
-- **Bundled files**: referenced by path relative to this skill's own folder. The main agent reads them; anything a subagent needs is passed **into its prompt** as text — subagents can't resolve skill-relative paths.
-- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a Task/subagent tool, and the multiple-choice steps assume an interactive picker (use whatever your agent provides — a subagent tool, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: write the tests inline yourself, and ask any multiple-choice question as plain text with the same options.
+Any Agent Skills client on macOS, Linux, or Windows:
+- `git` is the only required CLI, identical everywhere; run the `git` lines as shown. Other shell snippets are POSIX reference, not literal scripts: do not assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `xargs`, `mkdir -p`, or `node -e` exist. Use your agent's cross-platform file tools (read, search/glob, write) and apply branching logic yourself, not via shell `if`/variables/redirects.
+- Bundled files: referenced relative to this skill's folder. The main agent resolves the folder to an absolute path and passes bundled file paths in the subagent prompt; the subagent reads them by path. Fallback: if the client's subagents cannot read files, read and inline the contents instead.
+- No subagent or interactive-question support? Write the tests inline yourself, and ask any multiple-choice question as plain text with the same options.
+
+In the Ask blocks below, each option is `"label": "description"`; render them through your agent's picker (`AskUserQuestion` on Claude Code) or as plain text.
 
 ## Execution
 
@@ -57,24 +45,23 @@ This skill targets any Agent Skills client on macOS, Linux, or Windows:
 
 #### 1. Determine scope from git (do this first — if empty, no point asking anything)
 
-Get the changed-but-uncommitted files (run these `git` commands — cross-platform):
-- Tracked changes vs last commit (staged + unstaged), excluding deletions: `git diff --name-only --diff-filter=ACMR HEAD`
-- Untracked, non-ignored files: `git ls-files --others --exclude-standard`
-- If the repo has no commits yet (`git diff HEAD` errors), use `git diff --name-only --diff-filter=ACMR --cached` instead.
+Changed-but-uncommitted files (cross-platform git):
+- Tracked (staged + unstaged), excluding deletions: `git diff --name-only --diff-filter=ACMR HEAD`
+- Untracked, non-ignored: `git ls-files --others --exclude-standard`
+- No commits yet (`git diff HEAD` errors): use `git diff --name-only --diff-filter=ACMR --cached`.
 
-Combine and de-duplicate the two lists. Then **filter out non-testable files**:
-- Test files themselves: `*.test.*`, `*.spec.*`, `test_*.py`, `*_test.go`, anything under `__tests__/`, `e2e/`, `tests/`, `cypress/`
+Combine, de-duplicate, filter out non-testable files:
+- Test files: `*.test.*`, `*.spec.*`, `test_*.py`, `*_test.go`, anything under `__tests__/`, `e2e/`, `tests/`, `cypress/`
 - Config: `*.config.*`, `.*rc`, `tsconfig*`, `*.json` (except where logic lives in JSON), `Dockerfile`, CI yaml
 - Lock files, `.lock`, generated/build output (`dist/`, `build/`, `.next/`, `coverage/`)
-- Pure styling: `*.css`, `*.scss`, `*.module.css`
-- Type-only declarations: `*.d.ts`
+- Styling: `*.css`, `*.scss`, `*.module.css`; type-only declarations: `*.d.ts`
 - Docs and markdown, ADRs, `design.md`, `test-preferences.json`
 
-**The remaining list is the scope.** If it is empty → go to **Step 3 — No changes**. Otherwise continue.
+The remainder is the scope. Empty: go to Step 3. Otherwise continue.
 
 #### 1b. Classify each scoped file
 
-Tag every file so the subagent knows the strategy. The classification also decides whether E2E is relevant. **Classify from the path and filename alone — do not read file contents in the main thread.** A correct-enough tag is all the subagent needs; if a file is genuinely ambiguous, tag it `logic` and let the subagent re-tag it when it reads.
+Classify from path and filename alone, never read contents in the main thread; if genuinely ambiguous, tag `logic` and the subagent re-tags on read. Record each file's class for the subagent prompt.
 
 | Signals in path / filename | Class | Test strategy |
 |---|---|---|
@@ -84,77 +71,63 @@ Tag every file so the subagent knows the strategy. The classification also decid
 | Plain `.ts`/`.js`/`.py`/`.go`/`.rs` — utils, hooks, services, domain logic | **logic** | Unit test (inputs → outputs, edge cases, errors) |
 | `cli.*`, `bin/**`, `*.command.*`, `cmd/**` | **cli** | Integration test invoking the command |
 
-Record the class next to each file path — it goes into the subagent prompt.
-
 `E2E_RELEVANT = yes` if any file is **page/flow**; otherwise `no`.
 
-**Large diff guard.** If the scope has **more than 15** source files, do not dump them all into one subagent. Prioritise by class (logic and api/server first — they carry the most risk and are cheapest to test well), and ask. Present these as your agent's interactive option picker (`AskUserQuestion` on Claude Code) — or as plain-text options with the same choices if it has none:
+Large diff guard: more than 15 source files, don't dump all into one subagent. Prioritise by class (logic and api/server first, most risk, cheapest to test well) and ask:
 
 ```
-Ask — "<N> changed files is a lot for one pass. How should I focus?"
-  header: "Scope size"
-  options:
-    - label: "Logic & API first (recommended)"
-      description: "Test the <count> logic/api files now; I'll note the rest as not-yet-covered"
-    - label: "Test everything in batches"
-      description: "Cover all <N> files across multiple subagent passes, slower but complete"
-    - label: "Let me narrow it"
-      description: "I'll tell you which files or directory matter most"
+Ask — "<N> changed files is a lot for one pass. How should I focus?"  (header: "Scope size")
+- "Logic & API first (recommended)": "Test the <count> logic/api files now; I'll note the rest as not-yet-covered"
+- "Test everything in batches": "Cover all <N> files across multiple subagent passes, slower but complete"
+- "Let me narrow it": "I'll tell you which files or directory matter most"
 ```
 
-**Monorepo resolution.** For each scoped file, find its nearest enclosing `package.json` (walk up from the file). If files resolve to **different** package roots, group them by root — each group has its own framework, package manager, and test dir. Run installation and the subagent per group. If all files share one root (the common case), treat it as a single project. Record each file's `packageRoot` to pass to the subagent.
+Monorepo resolution: find each scoped file's nearest enclosing `package.json` (walk up). Different roots: group by root (own framework, package manager, test dir; install and spawn per group). One shared root (common case): single project. Record each file's `packageRoot` for the subagent.
 
 ---
 
 #### 2. Load preferences
 
-Read `test-preferences.json` at the project root (use your file tool; treat "not found" as no prefs).
-
-**If found**: load `tool`, `additionalTools`, `e2eTool`, `testDir`, `filePattern`, `packageManager`. Skip to **Step 5 — Installation check**.
-
-**If `NO_PREFS`**: continue to Step 4 (stack detection) → first-run questions.
+Read `test-preferences.json` at the project root (file tool; "not found" = no prefs).
+- Found: load `tool`, `additionalTools`, `e2eTool`, `testDir`, `filePattern`, `packageManager`; skip to Step 5.
+- `NO_PREFS`: continue to Step 4.
 
 ---
 
 #### 3. No uncommitted changes
 
-If Step 1 produced an empty scope, do not ask the framework questions. Tell the engineer and offer fallbacks (ask as above):
+Empty scope: skip the framework questions, tell the engineer, offer fallbacks:
 
 ```
-Ask — "No uncommitted source changes found. What should I test?"
-  header: "No changes"
-  options:
-    - label: "The last commit"
-      description: "Diff HEAD~1..HEAD and test what that commit changed"
-    - label: "Specific files"
-      description: "I'll test the files or directory you name"
-    - label: "Nothing right now"
-      description: "Stop. I'll run /test after I make changes"
+Ask — "No uncommitted source changes found. What should I test?"  (header: "No changes")
+- "The last commit": "Diff HEAD~1..HEAD and test what that commit changed"
+- "Specific files": "I'll test the files or directory you name"
+- "Nothing right now": "Stop. I'll run /test after I make changes"
 ```
 
-- **Last commit**: scope = `git diff --name-only --diff-filter=ACMR HEAD~1 HEAD` (cross-platform git), then re-run Step 1b classification.
-- **Specific files**: use the named files, classify them, continue.
-- **Nothing**: stop cleanly.
+- Last commit: scope = `git diff --name-only --diff-filter=ACMR HEAD~1 HEAD`, re-run Step 1b.
+- Specific files: classify the named files, continue.
+- Nothing: stop cleanly.
 
 ---
 
 #### 4. Stack detection and first-run questions (only when `NO_PREFS`)
 
-Using your file tools (not shell utilities), determine:
-- **Package manager** — by which lockfile is present: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `bun.lockb` → bun, `package-lock.json` → npm.
-- **Language & framework** — read `package.json` and look for `next`/`vite`/`nuxt`/`svelte`/`react`; or `pyproject.toml` (pytest/unittest) → Python; `go.mod` → Go; `Cargo.toml` → Rust.
-- **Already-installed test tools** — in `package.json` look for `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*` (common ones; if the project already uses a different runner — `bun test`, `node:test`, `ava`, `deno test`, etc. — detect and use that instead of installing a new one).
+With file tools (not shell utilities), determine:
+- Package manager by lockfile: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `bun.lockb` → bun, `package-lock.json` → npm.
+- Language and framework: `package.json` for `next`/`vite`/`nuxt`/`svelte`/`react`; `pyproject.toml` (pytest/unittest) → Python; `go.mod` → Go; `Cargo.toml` → Rust.
+- Installed test tools: `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*` in `package.json`. A different runner already in use (`bun test`, `node:test`, `ava`, `deno test`, etc.): detect and use it instead of installing a new one.
 
-**Q0 — No test setup at all? Don't assume they want one.** If **no** test tool is installed (detection above found none) — likely for the whole repo, or for *this* package in a monorepo — first check whether the project **deliberately has no test runner**:
-- Look in the nearest `AGENTS.md` and the governing ADR for a stated convention (e.g. "CI is lint + format + typecheck only", "no test runner — typecheck + `/verify` is the gate"). If found, **respect it** — do **not** push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, and point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite. Ran the typecheck gate; use `/verify` to confirm behavior."
-- If there's no stated convention, **ask** (don't default to installing, ask as above): "This has no test setup. How do you want to gate changes here?" → options: `Set up a test framework` (→ proceed to Q1, install with confirmation) · `No test runner, typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
-- In a **monorepo**, this is **per package** — a package with no tests by design gates on typecheck/`/verify` even if a sibling package has a full suite. Apply per resolved package root.
+**Q0 — No test setup at all? Don't assume they want one.** No test tool installed (whole repo, or this package in a monorepo): first check for a deliberate no-test-runner convention.
+- Stated in the nearest `AGENTS.md` or governing ADR (e.g. "no test runner — typecheck + `/verify` is the gate"): respect it, don't push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite. Ran the typecheck gate; use `/verify` to confirm behavior."
+- Not stated: ask (don't default to installing): "This has no test setup. How do you want to gate changes here?" → `Set up a test framework` (→ Q1, install with confirmation) · `No test runner, typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
+- Per package in a monorepo: a package with no tests by design gates on typecheck/`/verify` even if a sibling has a full suite; apply per resolved package root.
 
 Skip Q1 unless the engineer chose "set up a framework".
 
-**Q1 — Framework for unit/integration** (asked on first run when the engineer opted to set up tests)
+**Q1 — Framework for unit/integration** (first run, engineer opted to set up tests)
 
-Filter by detected language. If a tool is already installed, list it first with `(already installed)` appended and treat it as recommended.
+Filter by detected language. List an already-installed tool first with `(already installed)` appended and treat it as recommended.
 
 | Language | Options (max 4) |
 |---|---|
@@ -163,68 +136,50 @@ Filter by detected language. If a tool is already installed, list it first with 
 | Go | `testing` + testify (recommended), `testing` stdlib only |
 | Rust | `cargo test` (built-in) — no question needed, skip |
 
-For a language not listed, ask with whatever tools you detect; the picker's automatic Other covers a free-text framework, so don't add your own Other option.
+Unlisted language: ask with whatever tools you detect; the picker's automatic Other covers free text, so add no own Other option.
 
 ```
-Ask (as above) — "Which framework for unit & integration tests?"
-  header: "Framework"
-  options: [filtered list]
+Ask — "Which framework for unit & integration tests?"  (header: "Framework")
+- options: [filtered list]
 ```
 
 **Q2 — E2E tool** (ask only if `E2E_RELEVANT = yes`)
 
-Page/flow files were changed, so an E2E layer is worth offering:
-
 ```
-Ask (as above) — "Pages/flows changed. Add end-to-end tests too?"
-  header: "E2E"
-  options:
-    - label: "Playwright (recommended)"
-      description: "Real-browser flow tests for the changed pages"
-    - label: "Cypress"
-      description: "Real-browser flow tests with the Cypress runner"
-    - label: "No E2E (unit/component only)"
-      description: "Skip browser tests; cover pages at the component level"
+Ask — "Pages/flows changed. Add end-to-end tests too?"  (header: "E2E")
+- "Playwright (recommended)": "Real-browser flow tests for the changed pages"
+- "Cypress": "Real-browser flow tests with the Cypress runner"
+- "No E2E (unit/component only)": "Skip browser tests; cover pages at the component level"
 ```
 
 **Q3 — Component testing addon** (JS/TS only, when any **component** or **page/flow** file is in scope and React/Vue/Svelte is detected)
 
 ```
-Ask (as above) — "Add component testing support?"
-  header: "Components"
-  options:
-    - label: "Yes, Testing Library (recommended)"
-      description: "Installs @testing-library/<framework> + user-event for render+interact tests"
-    - label: "No, logic tests only"
-      description: "Plain module/function tests, no DOM rendering"
+Ask — "Add component testing support?"  (header: "Components")
+- "Yes, Testing Library (recommended)": "Installs @testing-library/<framework> + user-event for render+interact tests"
+- "No, logic tests only": "Plain module/function tests, no DOM rendering"
 ```
 
-Skip Q3 entirely if scope is logic/api/cli only — no component tooling needed.
+Skip Q3 entirely if scope is logic/api/cli only.
 
 ---
 
 #### 5. Installation check
 
-For the chosen unit tool, E2E tool (if any), and addon (if any), check whether it's installed using your file tools:
-- **JS/TS** — is the package present under `node_modules/<pkg>`, or listed in `package.json` devDependencies?
-- **Python** — is the tool in `pyproject.toml`/`requirements.txt` (or run `pip show <tool>` where Python is available)?
-- **Go** — does `go.sum` contain `stretchr/testify`?
+Check the chosen unit tool, E2E tool (if any), and addon (if any) with file tools:
+- JS/TS: under `node_modules/<pkg>`, or in `package.json` devDependencies?
+- Python: in `pyproject.toml`/`requirements.txt` (or `pip show <tool>` where Python is available)?
+- Go: `stretchr/testify` in `go.sum`?
 
-**All present** → Step 6.
-
-**Any missing** → confirm before installing:
+All present → Step 6. Any missing → confirm first:
 
 ```
-Ask (as above) — "<missing tools> not installed. Install now?"
-  header: "Install"
-  options:
-    - label: "Yes, install and continue"
-      description: "Run the install with the detected package manager, then write tests"
-    - label: "No, write runnable stubs"
-      description: "Skip install; write tests I can run once I install the tools myself"
+Ask — "<missing tools> not installed. Install now?"  (header: "Install")
+- "Yes, install and continue": "Run the install with the detected package manager, then write tests"
+- "No, write runnable stubs": "Skip install; write tests I can run once I install the tools myself"
 ```
 
-If yes, install with the project's package manager (the examples below show `pnpm`; substitute the detected npm/yarn/bun, or the language's package manager for Python/Go):
+Yes: install with the project's package manager (`pnpm` shown; substitute the detected npm/yarn/bun, or the language's manager for Python/Go):
 
 ```bash
 pnpm add -D vitest                                            # unit
@@ -235,7 +190,7 @@ pip install pytest pytest-mock                                # Python
 go get github.com/stretchr/testify                           # Go
 ```
 
-If "No", record `INSTALL=deferred` so the subagent writes complete tests but the run command is reported as "run after installing".
+"No": record `INSTALL=deferred`; the subagent writes complete tests, the run command is reported as "run after installing".
 
 ---
 
@@ -273,72 +228,51 @@ Then tell the engineer:
 
 #### 7. Gather lightweight pointers (do NOT read heavy files here)
 
-The main model stays lean — it discovers **paths and cheap signals only** and lets the subagent do the heavy reading. Reading ADRs and `design.md` in full here would pin large content in the main context and then duplicate it into the subagent prompt; don't.
+Paths and cheap signals only; the subagent does the heavy reading. Do not read ADRs or `design.md` in full here. Never read source files here; the subagent reads each scoped file.
 
-Using your file tools:
-- List the 3 most-recently-modified ADR files under `docs/adr/` (paths only — don't read them).
-- **Identify the governing ADR** for this change — the feature dir `docs/adr/NNNN-<feature>/` (or single `docs/adr/NNNN-<feature>.md`) that these files implement (match by branch/feature name or the touched surfaces; a `docs/roadmap/` entry, if present, points to it). If one exists, note **its** path and whether a **`verify.md`** sits beside it (`docs/adr/NNNN-<feature>/verify.md`). This is the **contract** the tests trace to; it may not be one of the 3 recent paths.
-- Note whether `design.md` exists at the project root.
-- Read `package.json` and note its `scripts.test` value (decides `RUN_COMMAND`), if any.
-
-What the main model passes to the subagent:
-- **Project context**: read `AGENTS.md` (canonical) — fall back to `CLAUDE.md` if there's no `AGENTS.md` — and inline its contents (short, cheap, consistent with the other skills).
-- **Build approach**: note the slice-shaping approach the team chose, recorded in the roadmap header (or root `AGENTS.md`) — e.g. a thin end-to-end path, a thinnest-usable-whole core loop, a UI-first shell wired to placeholders, or a full user journey per phase. Pass it to the subagent as one line. It doesn't branch the logic; it calibrates the test engineer's judgment about what in this slice is **durably real** (worth pinning as a stable assertion) versus **deliberate scaffolding** (a placeholder the slice is allowed to fake — don't lock a real-backend expectation onto a shell that stubs its data by design).
-- **ADRs**: pass the **3 recent paths**. The subagent reads them itself, and only if relevant to what it's testing.
-- **Governing ADR + contract**: pass the governing ADR path and the `verify.md` path (or `none` for each). The subagent reads the ADR's `## Requirements` acceptance criteria — preferring `verify.md`'s already-resolved `AC-N`-tagged checklist when present — so it knows the `AC-N` list to trace tests to. Pass `TRACE_TO_CONTRACT = yes` when a governing ADR exists, else `no`.
-- **design.md**: pass the **path**, and only when a **component** or **page/flow** file is in scope. The subagent reads it. Pass `none` otherwise.
-- **Source files**: never read here — the subagent reads each scoped file.
-
-**`RUN_COMMAND` source**: if the project defines a `test` script, the run command is `<pkgmgr> test` (or `<pkgmgr> run test` for npm). Only fall back to a raw invocation (e.g. `pnpm exec vitest run`) when no test script exists. Pass the resolved command to the subagent.
+With file tools:
+- List the 3 most-recently-modified ADR paths under `docs/adr/` (paths only).
+- Identify the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single `docs/adr/NNNN-<feature>.md`) these files implement, matched by branch/feature name or touched surfaces (a `docs/roadmap/` entry, if present, points to it). Note its path and whether a `verify.md` sits beside it (`docs/adr/NNNN-<feature>/verify.md`). This contract is what tests trace to; it may not be among the 3 recent paths. Set `TRACE_TO_CONTRACT = yes` when a governing ADR exists, else `no`.
+- Note whether `design.md` exists at the project root; its path goes to the subagent only when a **component** or **page/flow** file is in scope, else `none`.
+- Read `AGENTS.md` (canonical; `CLAUDE.md` if absent) to inline as project context (short and cheap). Also note the build approach as one line: the slice-shaping approach the team chose, recorded in the roadmap header (or root `AGENTS.md`), e.g. thin end-to-end path, thinnest-usable-whole core loop, UI-first shell on placeholders, full user journey per phase. It doesn't branch the logic; it calibrates the subagent's judgment (Step 8, instruction a).
+- Read `package.json`, note `scripts.test`. `RUN_COMMAND` = `<pkgmgr> test` when a `test` script exists (`<pkgmgr> run test` for npm); a raw invocation (e.g. `pnpm exec vitest run`) only when none does.
 
 ---
 
 #### 7.5 Ask whether to run the suite (always)
 
 ```
-Ask (as above) — "Tests will be written for <N> changed files. Run the suite after writing?"
-  header: "Run tests?"
-  options:
-    - label: "Yes, run and fix to green"
-      description: "Execute the suite; I'll fix any test mistakes and flag real bugs the tests catch"
-    - label: "Skip, just write them"
-      description: "Write the tests and give me manual run-and-verify instructions instead"
+Ask — "Tests will be written for <N> changed files. Run the suite after writing?"  (header: "Run tests?")
+- "Yes, run and fix to green": "Execute the suite; I'll fix any test mistakes and flag real bugs the tests catch"
+- "Skip, just write them": "Write the tests and give me manual run-and-verify instructions instead"
 ```
 
-Set `RUN_AFTER = yes | no` from the answer and pass it to the subagent.
+Set `RUN_AFTER = yes | no` and pass it to the subagent.
 
 #### 8. Spawn subagent
 
-Read two bundled files from this skill's folder (relative paths — you, the main agent, can resolve them): `agent-prompt.md` (the spawn template) and `writing-guide.md` (the strategy/rules/report rubric). Fill the template **and inline the full `writing-guide.md` text into it** — the subagent cannot resolve skill paths itself, so it must receive the guide as prompt text. Then spawn:
+Resolve this skill's folder to an absolute path (you already resolve these relative paths, so you know the folder) and pass the absolute paths of `agent-prompt.md` and `writing-guide.md` in the spawn prompt. Do NOT read their contents into the main context. Fallback: if the client's subagents cannot read files, read and inline the contents instead.
 
-- `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
-- `description: "Test: <tool> suite for <N> changed files"`
-- Tools: `Read`, `Bash`, `Write`, `Edit`
-- `prompt`: filled template with:
-  1. The full `writing-guide.md` content (injected, not referenced)
-  2. Unit tool, E2E tool, additional tools, `INSTALL` state
-  3. `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`
-  4. **Classified scope** — each file path with its class (logic / component / page-flow / api-server / cli)
-  5. `RUN_COMMAND` (resolved in Step 7), `RUN_AFTER` flag
-  6. **Project context** inline (short) — `AGENTS.md`, or `CLAUDE.md` fallback — plus the **build approach** line from Step 7. Instruct the subagent to let it calibrate which behaviors are durably real for this slice (lock those in) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet).
-  7. **ADR paths** — the 3 recent paths, or `none`. (If the subagent has no file access in your client, read and inline the relevant ADR text instead.)
-  8. **design.md path** — only if component/page scope, else `none`
-  9. **Contract for traceability** — `TRACE_TO_CONTRACT` flag, the governing ADR path, and the `verify.md` path (each `none` if absent). Instruct the subagent: **when `TRACE_TO_CONTRACT = yes`**, read the acceptance criteria (from `verify.md` if present, else the ADR's `## Requirements`) and **lock in the durable ones** — write an automated test for every criterion that *can* be pinned as a stable assertion, and **tag each test with the `AC-N` it covers** (e.g. a `covers: AC-3` comment on the test, or `AC-3` in the test title) so the suite is traceable back to the contract. For any criterion that **can't** be turned into an automated test — a visual/manual/environmental check (e.g. "email actually arrives", "layout looks right") — do **not** fake it; record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /verify manual step`. (If the subagent has no file access, read and inline the acceptance criteria / `verify.md` text into its prompt.)
+Spawn with `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code); `description: "Test: <tool> suite for <N> changed files"`; tools `Read`, `Bash`, `Write`, `Edit`. The prompt contains:
 
-**Monorepo (multiple package roots from Step 1b)**: spawn **one subagent per root in parallel** with `run_in_background: true`, each scoped to that root's files, tool, and package manager. Isolated contexts keep each subagent lean and prevent one root's files from bleeding into another's. Collect all reports before relaying. For a single root (the common case), spawn one subagent in the foreground.
+1. The two absolute paths, with this instruction: your first action is to Read both files by path; `agent-prompt.md` is your operating template, `writing-guide.md` is the strategy, tool rules, iteration loop, and report format you must follow.
+2. The dynamic values as a labeled list ("Placeholder values: ..."): unit tool, E2E tool, additional tools, `INSTALL` state; `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`; the classified scope (each file path with its class: logic / component / page-flow / api-server / cli); `RUN_COMMAND`, `RUN_AFTER`; project context inline plus the build approach line; the 3 recent ADR paths or `none` (read only if relevant to what it's testing); the design.md path or `none`; `TRACE_TO_CONTRACT`, the governing ADR path, and the `verify.md` path (each `none` if absent).
+3. Two instructions: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the ADR's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /verify manual step`. (Subagents without file access: inline the relevant ADR / acceptance criteria / `verify.md` text instead.)
+
+Monorepo (multiple package roots from Step 1b): one subagent per root in parallel with `run_in_background: true`, each scoped to its root's files, tool, and package manager; isolated contexts keep each lean. Collect all reports before relaying. Single root (common case): one foreground subagent.
 
 ---
 
 ### After subagent completes
 
-**If the subagent errored or produced no report**, say so and offer to re-run — never report a passing or failing suite it didn't actually produce. Otherwise the report differs by branch; relay the matching format.
+Subagent errored or produced no report: say so and offer to re-run; never report a passing or failing suite it didn't actually produce. Otherwise relay the format matching `RUN_AFTER`.
 
-**Update the roadmap.** If this feature is on the roadmap (`docs/roadmap/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now **all** ticked, set the feature's **status** to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. When the feature reaches `done`, advise **`/clear` before the next feature** — nothing needs to carry over in the chat, the roadmap and ADR hold it, and a fresh session keeps the next build cheap.
+Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. On `done`, advise `/clear` before the next feature: the roadmap and ADR hold everything, a fresh session keeps the next build cheap.
 
-**If `RUN_AFTER = yes`** — parse `TESTS_WRITTEN`, `RUN_RESULT`, `BUGS_FOUND`, `NOT_COVERED`, `HARDEN_FLAG`:
+Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, `HARDEN_FLAG`, plus `RUN_RESULT` and `BUGS_FOUND` when `RUN_AFTER = yes`, or `MANUAL_INSTRUCTIONS` when `RUN_AFTER = no`. Relay this template: keep lines marked `← yes` only when `RUN_AFTER = yes`, `← no` only when `RUN_AFTER = no` (a marked heading carries its list lines), unmarked lines always; strip the markers.
 
 ```
-## /test complete (suite run)
+## /test complete (suite run)      ← yes; when no, use: ## /test complete (not run)
 
 **Scope**: <N> changed files (uncommitted)
 **Tool**: <unit tool> [+ E2E tool] [+ addons]
@@ -347,47 +281,22 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 **Tests written**:
 - `<file path>`, <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
 
-**Run result**: <X passed, Y failed> via `<RUN_COMMAND>`
+**Run result**: <X passed, Y failed> via `<RUN_COMMAND>`   ← yes
 
 **Traceability** (only when TRACE_TO_CONTRACT=yes, ADR NNNN):
 - AC-1 ✅ locked in, `<test file · test name>`
 - AC-3 ✅ locked in, `<test file · test name>`
 
-**Bugs caught** (tests failing because the code is wrong, not the test):
+**Bugs caught** (tests failing because the code is wrong, not the test):   ← yes
 - <file:line, what's broken and the failing expectation>   ← only if BUGS_FOUND is non-empty
 
-**Not covered** (consider adding):
-- <gap and why>
-- AC-N, <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
-
-**What /harden should check**: <only if HARDEN_FLAG=yes, one sentence>
-```
-
-If `BUGS_FOUND` is non-empty, lead with it — a green suite is the goal, but a test that correctly fails on real broken code is a genuine finding, not something to silence. /test does not modify application code to make a test pass.
-
-**If `RUN_AFTER = no`** — parse `TESTS_WRITTEN`, `MANUAL_INSTRUCTIONS`, `NOT_COVERED`, `HARDEN_FLAG`:
-
-```
-## /test complete (not run)
-
-**Scope**: <N> changed files (uncommitted)
-**Tool**: <unit tool> [+ E2E tool] [+ addons]
-**Preferences**: loaded | saved to test-preferences.json
-
-**Tests written**:
-- `<file path>`, <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
-
-**Traceability** (only when TRACE_TO_CONTRACT=yes, ADR NNNN):
-- AC-1 ✅ locked in, `<test file · test name>`
-- AC-3 ✅ locked in, `<test file · test name>`
-
-**How to run them**:
+**How to run them**:   ← no
 1. <setup step, e.g. install if INSTALL=deferred>
 2. Run: `<RUN_COMMAND>`
 3. Watch a single file: `<focused command>`
 
-**What you should see**: <expected pass output, and which tests prove which behaviour>
-**If something fails**: <how to read the failure, is it a test gap or a real bug>
+**What you should see**: <expected pass output, and which tests prove which behaviour>   ← no
+**If something fails**: <how to read the failure, is it a test gap or a real bug>   ← no
 
 **Not covered** (consider adding):
 - <gap and why>
@@ -396,11 +305,13 @@ If `BUGS_FOUND` is non-empty, lead with it — a green suite is the goal, but a 
 **What /harden should check**: <only if HARDEN_FLAG=yes, one sentence>
 ```
 
-Omit the harden line entirely when `HARDEN_FLAG=no`. This skill is complete after relaying the report — it does not invoke other skills.
+If `BUGS_FOUND` is non-empty, lead with it: a test that correctly fails on real broken code is a genuine finding, not something to silence. /test does not modify application code to make a test pass.
+
+Omit the harden line entirely when `HARDEN_FLAG=no`. This skill is complete after relaying the report: it does not invoke other skills.
 
 ---
 
 ## Reference files (in this skill's folder; referenced by relative path)
 
-- `agent-prompt.md` — lean spawn template the main model fills
-- `writing-guide.md` — strategy, tool rules, iteration loop, report format. The main model reads this and **injects its text into the subagent prompt** (subagents can't resolve skill paths), so it stays portable across agents.
+- `agent-prompt.md`: the subagent's operating template, read by the subagent via the absolute path passed in the spawn prompt
+- `writing-guide.md`: strategy, tool rules, iteration loop, report format; read the same way (inline its text only as the no-file-access fallback)

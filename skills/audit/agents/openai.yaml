@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit"
+  short_description: "Bootstrap project AI context files"
+  default_prompt: "Use $audit to create or refresh the AGENTS.md context for this project."

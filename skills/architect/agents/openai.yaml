@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architect"
+  short_description: "Design decisions and ADR writing"
+  default_prompt: "Use $architect to design this feature and write the governing ADR before implementation."

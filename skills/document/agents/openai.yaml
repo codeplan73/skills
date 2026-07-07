@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document"
+  short_description: "Draft PRs and release notes"
+  default_prompt: "Use $document to draft the human facing writeup for this change."

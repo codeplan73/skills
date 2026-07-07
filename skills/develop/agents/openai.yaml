@@ -1,0 +1,4 @@
+interface:
+  display_name: "Develop"
+  short_description: "Build features from approved ADRs"
+  default_prompt: "Use $develop to implement the next approved feature from its ADR."

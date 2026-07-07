@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review"
+  short_description: "Run a senior pre merge code review"
+  default_prompt: "Use $review to review the current branch before merge."
