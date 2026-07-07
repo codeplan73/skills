@@ -61,9 +61,11 @@ const HOT_PATH_BUDGETS = [
     ],
   },
   {
+    // Plan reads the router + one repo-shape variant + one chosen build-approach
+    // persona (all four personas are ~2.7KB, so facade.md stands in for the set).
     name: 'roadmap plan path',
-    budget: 40 * 1024,
-    required: ['roadmap/SKILL.md', 'roadmap/modes/plan.md', 'roadmap/roadmap-template.md'],
+    budget: 44 * 1024,
+    required: ['roadmap/SKILL.md', 'roadmap/modes/plan.md', 'roadmap/roadmap-template.md', 'roadmap/approaches/facade.md'],
     oneOf: ['roadmap/modes/plan-greenfield.md', 'roadmap/modes/plan-brownfield.md', 'roadmap/modes/plan-monorepo.md'],
   },
   {

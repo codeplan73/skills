@@ -20,7 +20,7 @@ of any kind.>
 
 ## Context
 
-<!-- DECISION RECORD (the WHY, human context; /develop skips this) -->
+<!-- DECISION RECORD (the WHY, human context; in a directory ADR this section lives in rationale.md, not index.md; /develop skips it) -->
 <What is the problem or decision to be made? What forces are at play (technical constraints,
 team capabilities, cost, performance requirements, compliance)? What is the consequence of not
 deciding? 2 to 4 paragraphs. Do not mention options here, only the problem space.>
@@ -45,7 +45,7 @@ deciding? 2 to 4 paragraphs. Do not mention options here, only the problem space
 
 ## Options considered
 
-<!-- DECISION RECORD (the WHY, human context; /develop skips this) -->
+<!-- DECISION RECORD (the WHY, human context; in a directory ADR this section lives in rationale.md, not index.md; /develop skips it) -->
 ### Option 1: <Name>
 
 <One paragraph describing this option.>
@@ -81,7 +81,7 @@ deciding? 2 to 4 paragraphs. Do not mention options here, only the problem space
 
 ## Rationale
 
-<!-- DECISION RECORD (the WHY, human context; /develop skips this) -->
+<!-- DECISION RECORD (the WHY, human context; in a directory ADR this section lives in rationale.md, not index.md; /develop skips it) -->
 <Why this option over the others? Reference the specific constraints and forces from Context.
 Do not repeat the pros/cons list, explain the reasoning. 1 to 3 paragraphs.>
 
@@ -242,23 +242,29 @@ The ADR's status mirrors its feature's build lifecycle (roadmap: planned→`Prop
 
 **Umbrella child ADRs carry no lifecycle status.** In an umbrella directory (`NNNN-<x>/`), only the `index.md` has a `**Status**:` line — it mirrors the feature. The **child ADRs are spec content**, so **omit the `**Status**:` line on children** (they're governed by the umbrella). `/develop` and `/sync` advance the umbrella `index.md`'s status only, never a child's.
 
-**A directory ADR is a self-mapping manifest.** In a directory ADR (`NNNN-<x>/`), the top file (`index.md`, or the ADR file for a single decision with research) opens with a **`## Structure`** section listing and linking **every** child ADR and **every** research file — one line each: what it is + which decision it supports. Each **child ADR** links its own evidence in a **`## References`** section. **Research files are named by their owner**: `research/NNNN-<topic>.md` for the child numbered `NNNN`, or `research/_shared-<topic>.md` for umbrella-wide evidence — so every file's ownership is obvious, and a developer building a child follows *that child's* `## References` to exactly the research it needs. **Children are flat files by default** — give a child its own subfolder only when it accumulates multiple research/asset files. Each child ADR is **self-sufficient to build from**; `research/` is **optional depth** (the evidence trail), not required reading for `/develop`. Any **cross-child contract** (how children connect) belongs in the umbrella `index.md`.
+**A directory ADR splits build spec from reasoning.** A directory ADR (`NNNN-<x>/`) always contains exactly two core files, plus optional extras:
+- **`index.md`** — the build spec `/develop` reads: `## Summary`, `## Requirements`, `## Decision`, the design/spec section, `## Build plan`, `## Consequences`, `## Follow-up`, and a one-line `## Rationale` pointer to `rationale.md`. For an umbrella, `index.md` also opens with a **`## Structure`** section listing and linking every child ADR (one line each: what it is + which decision it supports) and holds any **cross-child contract**.
+- **`rationale.md`** — everything in the decision record that `/develop` does not need: `## Context`, `## Options considered`, `## Rationale`, the `## References` section, and any supporting evidence (inventories, audits, a landscape scan). There is no separate `research/` folder; bulky evidence goes here, under its own subheading. This is read by humans and by `/architect` on update or supersede, never during a build.
+- Optional: **`verify.md`** (verify steps), and **child ADRs** `NNNN-<child>.md` for an umbrella (each self-sufficient to build from, each with a short inline rationale rather than its own `rationale.md`; promote a child to its own directory only if it grows heavy).
 
 ## Audience split — build spec vs decision record
 
 An ADR serves two audiences, and its sections divide cleanly between them:
 
 - **Build spec** (what `/develop` reads to build): **`## Requirements`** (the acceptance-criteria contract), **`## Decision`**, the design/spec section (**`## Feature design`** for a FEATURE ADR, **`## Proposed stack`** for an ARCHITECTURE ADR, or the equivalent spec table — e.g. `## Standard definition`), **`## Build plan`** (the ordered tasks derived from the surface + acceptance criteria), and **`## Consequences`** (the constraints the build must honor). This is the WHAT — the implementable spec. The **acceptance criteria in `## Requirements` are the contract `/develop` builds to and `/verify` checks.**
-- **Decision record** (human / future decision-maker context — the WHY): **`## Summary`** (the plain-words human quick read), **`## Context`**, **`## Options considered`**, and **`## Rationale`**. This is decision history, not build input; `/develop` can skip it unless a specific constraint sends it back to the reasoning.
+- **Decision record** (human / future decision-maker context — the WHY): **`## Context`**, **`## Options considered`**, **`## Rationale`**, and the **`## References`** section. This is decision history, not build input; `/develop` skips it. (**`## Summary`** stays with the build spec in `index.md` — it is the human quick read that orients before the spec.)
 
-The full reasoning always stays in the ADR — this split only labels which sections each audience needs; it does not remove or reorder anything.
+Where each audience's sections physically live depends on the ADR shape:
+- **Single-file ADR** (`NNNN-title.md`): both audiences share the one file; the decision-record sections stay inline, written tight. Small ADRs are not split.
+- **Directory ADR** (`NNNN-title/`): the build spec is `index.md`, the decision record moves to `rationale.md`. The full reasoning is never removed, only relocated so a build never loads it.
 
 ## Writing rules
 
+- **Be concise — state each point once.** This ADR is loaded by later builds, so words cost tokens every time. Write tight technical prose: prefer bullets and short sentences over long multi-clause paragraphs, never repeat the same point across Context, Rationale, and Consequences, and never pad. Brevity applies to the reasoning most; the build-spec sections stay complete but de-waffled.
 - Summary is the human quick read: plain words, 2 to 4 short sentences, no dashes; it comes first so everyone gets the gist fast
-- Context describes the problem, not the solution
-- Each option must be described fairly — do not write straw-man alternatives
-- Rationale must reference specific forces from Context, not just repeat pros/cons
+- Context describes the problem, not the solution; keep it to the forces that actually shaped the choice
+- **`## Options considered`**: describe each option fairly (no straw men) but compactly — a one to two sentence description plus a tight pros/cons of only the load-bearing tradeoffs, not an essay per option
+- Rationale must reference specific forces from Context, not just repeat pros/cons; a few sentences, not paragraphs
 - Consequences must include negatives — an ADR with only positives is not credible
 - Follow-up items are optional but recommended for full-tier decisions
 - **One decision per ADR — keep it focused and scannable.** Length follows the decision, not a line count: don't pad, and never cut a required design field (data model, state machine, full API table, security model, acceptance criteria) to make the record shorter. If it needs *multiple independent decisions*, or the design won't fit cleanly in one scannable ADR, split it into an **umbrella ADR + child ADRs** (the directory shape) rather than letting one file sprawl.

@@ -15,11 +15,6 @@ No approach starts a feature slice before the ground it stands on exists (workin
 
 Then the feature slices, ordered and phased per Step 3. Phasing column: `Foundation`, `Skeleton`, the slice/journey (e.g. `Slice 2`), or `Deferred`; Order column: integer build sequence across the whole roadmap.
 
-Shape the slices to the approach; it changes WHAT the slices are, not just labels. Every capability as its own fully-built feature with `Slice 1 … Slice N` stapled on has NOT honored the approach. Reason from the principle:
+Shape the slices exactly as the chosen approach's persona directs (`approaches/<name>.md`, already read in Step 3 of `plan.md`, whose role you have adopted). The approach changes WHAT the slices are, not just labels: every capability as its own fully-built feature with `Slice 1 … Slice N` stapled on has NOT honored the approach. Follow the persona's decomposition rule, its first slice or deliverable, its real-vs-deferred split, and its sequencing, and let its worked example calibrate the shape. The four approaches must yield genuinely different roadmaps for the same product.
 
-- **Tracer Bullet** → first post-foundation slice: a thin thread through the core user journey, end to end, the smallest path touching every layer that proves the whole loop works, nothing more (standup app: sign in → create a team → submit today's standup on a default template → see it in the team feed; no invites, custom templates, reminders yet). This IS the walking skeleton; merge them (no separate throwaway skeleton). Later slices thicken one segment of the working thread (invites, custom templates, reminders, history, search, admin); never full auth plus full admin before the core loop runs end to end once.
-- **Skateboard** → first deliverable: the thinnest usable whole product a real user could use; later rows grow it.
-- **Journey** → each phase: one complete user path, end to end, before the next begins.
-- **Facade** → UI shells first on placeholder data, wired to real data later.
-
-A thin thread leans on shared ADRs, so most rows do NOT each need one: the core-loop slice rests on the foundational ADRs (data model, auth); thickening steps usually extend a decided pattern. Still apply the invent-test per row, but expect far fewer `Needs ADR: yes` rows than a flat feature list; nearly every row needing one means you decomposed into full features, re-slice.
+Whatever the approach, most rows do NOT each need their own ADR: the early slice rests on the foundational ADRs (data model, auth), and later slices usually extend a decided pattern. Still apply the invent-test per row, but expect far fewer `Needs ADR: yes` rows than a flat feature list; nearly every row needing one means you decomposed into full features, re-slice.

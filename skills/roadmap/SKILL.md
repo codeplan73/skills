@@ -33,7 +33,7 @@ Every choice is an options panel, never a neutral menu: 2 to 4 concrete options 
 
 ## Artifact ownership
 
-`docs/roadmap/` is the feature roadmap, owned by this skill; `/architect` owns `docs/adr/`. Other skills find a feature by scanning `docs/roadmap/` for its row. Living document: `plan`, `replan`, `add` all edit in place (reconcile and append, never a new dated file). Writes nothing else: no ADRs, code, or `AGENTS.md`. `docs/roadmap/` holds roadmap files only; inventories, analyses, research docs live with the ADR under `docs/adr/…/research/` (owned by `/architect`).
+`docs/roadmap/` is the feature roadmap, owned by this skill; `/architect` owns `docs/adr/`. Other skills find a feature by scanning `docs/roadmap/` for its row. Living document: `plan`, `replan`, `add` all edit in place (reconcile and append, never a new dated file). Writes nothing else: no ADRs, code, or `AGENTS.md`. `docs/roadmap/` holds roadmap files only; inventories, analyses, research docs live with the ADR in its `rationale.md` (owned by `/architect`).
 
 File shape:
 - Small product: one file, `docs/roadmap/roadmap.md` (At-a-glance table + phase-grouped sections + legend).

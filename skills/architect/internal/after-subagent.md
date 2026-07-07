@@ -4,8 +4,8 @@
 
 **First — did it run at all?** If the ADR file is missing or empty, report the failure and offer to re-run; never fabricate an ADR summary. Only if the file exists, continue:
 
-**Self-check before presenting**: Read the written ADR. Verify all required sections:
-- All modes: `## Summary` (the plain-words human quick read, no dashes), `## Context`, `## Requirements` (IDed acceptance criteria, the confirmed spine), `## Options considered` (unless "Documenting a made decision"), `## Decision`, `## Rationale`, `## Consequences`
+**Self-check before presenting**: Read the written ADR. For a directory ADR read both `index.md` and its `rationale.md` (the decision-record sections live in `rationale.md`; the single-file shape has everything in the one file). Verify all required sections exist across the file(s):
+- All modes: `## Summary` (the plain-words human quick read, no dashes, in `index.md`/the file), `## Requirements` (IDed acceptance criteria, the confirmed spine), `## Decision`, `## Consequences` (build spec, in `index.md`/the file); and `## Context`, `## Options considered` (unless "Documenting a made decision"), `## Rationale` (decision record, in `rationale.md` for a directory ADR, inline otherwise). A directory `index.md` also carries the one-line `## Rationale` pointer to `rationale.md`.
 - Data-backed modes: `## Build plan`: ordered tasks, each tagged with the AC(s) it satisfies, migration first; every AC traces to at least one task
 - Feature mode: `## Feature design` with the confirmed data model and Critical test scenarios (mapped to ACs) populated
 - Architecture mode: `## Proposed stack` with every relevant layer filled

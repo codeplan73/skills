@@ -35,6 +35,8 @@ Decides how every feature is sliced and sequenced. No fixed procedure; reason ab
 
 Reason out the pick, never hardcode it or its mechanics: default for a proper production build is Tracer Bullet; shift only when the goal calls for it (fast validation of one core loop → Skateboard; the experience/funnel is the product → Journey; a quick clickable prototype → Facade, said plainly to be prototype-grade). One-line why in terms of this product. Never name a tool; the approach shapes how, not with what.
 
+**Once the approach is chosen, read its persona file and adopt that engineer's role for decomposition** (`approaches/tracer-bullet.md`, `approaches/skateboard.md`, `approaches/facade.md`, or `approaches/journey.md`). Read only the chosen one. Each persona defines how that engineer slices, what the first slice or deliverable is, what is real vs deferred, and the sequencing, with a worked example. All slicing and sequencing in Step 4 and Step 5 follows that persona, so the four approaches produce genuinely different roadmaps for the same product, not the same list relabeled. A per-feature override (Step 5) reads that feature's chosen persona and applies it to that feature only.
+
 Record it (the propagation source) in the roadmap header: `Build approach: <name> — <one-line principle>`. A project-wide convention: `/audit` and `/sync` persist it into root `AGENTS.md`; `/architect`, `/develop`, `/verify` read and honor it. It also sets each feature's Phase (its slice / journey), shown in the At-a-glance table and as section grouping.
 
 Header value = project default; a single feature may override via the optional per-feature Approach (Step 5), a tag beside its heading (e.g. `· Facade`). Precedence: own tag if set, else project default; tag only when it differs (no tag = inherit).
@@ -60,7 +62,7 @@ From the answers, produce the feature list: foundations first (Step 4), then sli
 
 No build-task breakdown here. A not-yet-designed feature gets exactly one checkbox, its entry command: `/architect <feature>` when it `needs a decision`, else `/develop <feature>` (the coding-standards-and-tooling foundation's first box is `/audit`, never `/develop`). Never enumerate UI / data-model / API / test sub-tasks; `/architect` fills the built-ready shape on ADR capture (see What this skill does; atomic tasks stay in the ADR). The next step is then always the first unticked box, always a command or tracked milestone (no separate `Next:` line). See the lifecycle table in `roadmap-template.md`.
 
-Analysis/inventory is not a roadmap row: cataloguing duplication, listing call sites, auditing current state is decision-support research living with the ADR (`/architect` produces it under `docs/adr/…/research/`). Never plan a row or step that writes a `.md` into `docs/roadmap/`.
+Analysis/inventory is not a roadmap row: cataloguing duplication, listing call sites, auditing current state is decision-support research living with the ADR (`/architect` puts it in the ADR's `rationale.md`). Never plan a row or step that writes a `.md` into `docs/roadmap/`.
 
 ### Step 6 — Write the roadmap (single-file or epic-split)
 

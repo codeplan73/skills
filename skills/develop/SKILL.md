@@ -19,7 +19,7 @@ Gates, then acts: no upfront question rounds like `/architect`. Read the decisio
 ## Artifact ownership
 
 - Writes app code (plus CSS/tokens for UI).
-- Roadmap (`docs/roadmap/`): only the Step 4 touches (feature status → `in-progress`, milestone sub-boxes, `Build it` box, code pointer). Never marks a feature `done` (waits for `/verify` and `/test`), never ticks `Verify it` or `Test it`, never creates files in `docs/roadmap/` (roadmaps only; analysis/research is `/architect`'s, under `docs/adr/…/research/`).
+- Roadmap (`docs/roadmap/`): only the Step 4 touches (feature status → `in-progress`, milestone sub-boxes, `Build it` box, code pointer). Never marks a feature `done` (waits for `/verify` and `/test`), never ticks `Verify it` or `Test it`, never creates files in `docs/roadmap/` (roadmaps only; analysis/research is `/architect`'s, in the ADR's `rationale.md`).
 - Never writes ADRs (flags the need, defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); new area conventions go via `/sync` afterwards.
 - One ADR touch: the `**Status**:` line (umbrella decision → the `index.md`'s, never a child's), plus filling the feature's ADR pointer line. Build start: `Proposed` → `In Progress`; build lands (feature → `done`): `In Progress` → `Accepted` (an ADR is not `Accepted` until its feature ships). Never edit ADR content, only that line, surgically: re-read it right before writing; unexpected state (already `Accepted`, `Superseded`) → flag, don't clobber.
 - Artifact base: `docs/` by default, `.workflow/` if `docs/` is a published docs site. Read from whichever exists (paths here assume `docs/`).
