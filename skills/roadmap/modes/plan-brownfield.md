@@ -1,7 +1,7 @@
 # Roadmap Plan Route: brownfield
 
 Brownfield: read root `AGENTS.md` (and any existing roadmap) to plan the next slice on top:
-1. Enroll already-built features for context, from `AGENTS.md` (nested-area docs map to existing areas) + a light code scan, each with a `Code area` pointer. Large repo: offload the scan to a read-only subagent (model set explicitly to a fast, low-cost tier, not inherited from the session; `Read`/`Grep`/`Glob`) returning a compact map, don't read the tree inline. Assess completeness honestly from the code, don't stamp everything done: complete and shipped → `existing` (distinct from `done`); partially built → `in-progress` (so `/develop` can resume). Never mark a half-built feature `existing`.
+1. Enroll already-built features for context, from `AGENTS.md` (nested-area docs map to existing areas) + a light code scan, each with a `Code area` pointer. Large repo: offload the scan to a read-only subagent (on Claude Code the `scout` subagent type, which is read-only and pins a fast, low-cost model; else set the model explicitly to a fast, low-cost tier, not inherited; `Read`/`Grep`/`Glob`) returning a compact map, don't read the tree inline. Assess completeness honestly from the code, don't stamp everything done: complete and shipped → `existing` (distinct from `done`); partially built → `in-progress` (so `/develop` can resume). Never mark a half-built feature `existing`.
 2. Plan the next slice as `planned` rows; don't re-plan `existing` features. No root `AGENTS.md`: note in the report that `/audit` should run first for real context.
 
 Re-run (roadmap exists): read the union, don't duplicate or fragment:

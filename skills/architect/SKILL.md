@@ -143,7 +143,7 @@ The spawn prompt tells the subagent:
 
 Then spawn a subagent:
 
-- `model`: set explicitly to a strong model; do not inherit the session model (Claude Code: `sonnet`, reserving the top tier like `opus` for a genuinely hard or high-risk design)
+- `model`: set explicitly to a strong model; do not inherit the session model (Claude Code: `sonnet`, reserving the top tier like `opus` for a genuinely hard or high-risk design). On Claude Code, spawn this as the `writer` subagent type (its `model` is pinned), which guarantees it does not inherit the session model even if the parameter is missed.
 - `description: "Architect: <mode> — research and draft ADR"`
 - Tools: `Read`, `Bash`, `Write`, `Edit`. Add `WebSearch`, `WebFetch` only when `REFERENCES_LEVEL` is `sources+links` (they verify links, fetch to confirm before linking; sourcing rules in `agent-prompt.md`).
 - `prompt`: the three absolute file paths (`agent-prompt.md`, matching `agent-modes/<mode>.md`, `adr-template.md`), the read instructions above, and the Placeholder values list. Include `MODE_FILE_PATH=<absolute matching mode file path>` in the Placeholder values list.

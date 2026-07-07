@@ -269,6 +269,22 @@ These skills follow the open Agent Skills format and are written to be **portabl
 | Read-only enforcement | `allowed-tools` | `readonly:` / sandbox | `sandbox_mode` | inherited scopes |
 | Install path (`-a`) | `.claude/skills/` | `.agents/skills/` | `.agents/skills/` | `.agents/skills/` |
 
+### Cheaper subagents on Claude Code (model pinning)
+
+By default a Claude Code subagent **inherits the main session's model**, so if you run on Opus, every read-only helper (exploration, skill/MCP discovery, doc-check, sourcing) inherits Opus too and burns tokens it never needed. Prose in a skill cannot fix this — the harness only honors a structured model field.
+
+This repo ships three role subagents in [`.claude/agents/`](.claude/agents/) that pin the model:
+
+| Agent type | Model | Used for |
+|---|---|---|
+| `scout` | `haiku` | read-only code exploration and repo scans |
+| `researcher` | `haiku` | Agent Skill / MCP discovery, doc-checks, source verification |
+| `writer` | `sonnet` | the ADR / `AGENTS.md` / test-suite writers |
+
+The skills spawn these types by name on Claude Code (with the plain "set the model explicitly" behavior as the fallback everywhere else), so the read-only helpers run on Haiku and the heavy writers on Sonnet, never the inherited session model.
+
+**To get this in the repos where you actually run the skills**, copy `.claude/agents/` into that project (or into `~/.claude/agents/` to enable it for every project). The resolution order Claude Code uses is: `CLAUDE_CODE_SUBAGENT_MODEL` env var → the spawn's `model` parameter → the agent type's `model:` → the session model. Do **not** set `CLAUDE_CODE_SUBAGENT_MODEL` to a fixed model if you want the per-role split, since it overrides everything.
+
 ### Running on Codex
 
 The suite is a first-class fit for Codex — in several ways it needs *no* degradation:

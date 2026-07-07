@@ -2,4 +2,6 @@
 
 # Local-only: optional dogfooding of skills into an agent read-path (e.g. .claude/skills).
 # Canonical source is top-level skills/ — never commit a second copy.
-.claude/
+# Ignore everything under .claude/ EXCEPT the shipped role subagents (Layer B model pinning).
+.claude/*
+!.claude/agents/

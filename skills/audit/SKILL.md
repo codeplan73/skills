@@ -46,7 +46,7 @@ The `AGENTS.md` files hold the content: create root if missing (Phase 1, 2) and 
 
 ## Execution
 
-Every spawn below: set `model` explicitly to a strong model, do not inherit the session model (Claude Code: `sonnet`, reserving `opus` for the largest scans); `prompt` built per the Bundled files rule (the absolute `agent-prompt.md` path, the read-those-files-first instruction, the phase's Placeholder values; repo file paths in the values are for the subagent to read itself). Per-phase subagent instructions live in `agent-prompt.md`.
+Every spawn below: set `model` explicitly to a strong model, do not inherit the session model (Claude Code: `sonnet`, reserving `opus` for the largest scans; spawn as the `writer` subagent type, which pins the model); `prompt` built per the Bundled files rule (the absolute `agent-prompt.md` path, the read-those-files-first instruction, the phase's Placeholder values; repo file paths in the values are for the subagent to read itself). Per-phase subagent instructions live in `agent-prompt.md`.
 
 ### Pre-flight (main model does this before anything else)
 
