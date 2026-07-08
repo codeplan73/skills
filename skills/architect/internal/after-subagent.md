@@ -2,7 +2,7 @@
 
 ### After the ADR is written
 
-You wrote the ADR yourself on the main thread. Now check it, review it, and confirm it with the engineer, all on the main thread; never spawn anyone to critique or cross-check it, and never re-fetch any of its links (they were fetched once during the design conversation and are now human-facing).
+You wrote the ADR yourself on the main thread. Now run the completeness self-check, offer the engineer a cross-check, and confirm it. The self-check and every fix stay on the main thread; the only thing you may delegate is an optional read-only cross-check the engineer asks for (it reads the ADR and returns a critique, writing nothing). Never re-fetch any of the ADR's links at any point (they were fetched once during the design conversation and are now human-facing).
 
 **First — did the write land?** If the ADR file is missing or empty, something went wrong in the write; report it and re-write, never fabricate an ADR summary. Only if the file exists, continue:
 
@@ -17,15 +17,28 @@ You wrote the ADR yourself on the main thread. Now check it, review it, and conf
 
 If a required section is missing or a field is blank/placeholder, add this line directly after the ADR path in the presentation: `⚠️ Incomplete: [section name] came out blank, e.g. "⚠️ Incomplete: ## Feature design > Security model was left as a placeholder. Request it in your feedback."`
 
-**Design-review pass (full-weight features — optional for lean/medium).** Before presenting a full-tier / high-risk / compliance-touching / foundational ARCHITECTURE ADR, stress-test your own draft on the main thread: read it back with fresh eyes and challenge it (does the design hold up? is there a materially simpler option? what failure mode is missed?). Reason from the ADR text and your own knowledge only; do NOT fetch or re-fetch its reference links, they were already verified during the design conversation. Note the outcome in a short "Design review" line, and fix clear issues by targeted Edit before or during confirmation. Skip for trivial/lean-tier decisions.
+**Cross-check (part of the review preview — the engineer picks how).** Right after the self-check and before the accept panel, ask the engineer how they want the ADR cross-checked. Present a panel (capability-first: `AskUserQuestion` on Claude Code, else the same options as plain text; exactly one option marked recommended, the picker adds the custom slot):
+- **question**: "Cross-check this ADR before you review it?"
+- **header**: "Cross-check"
+- **options**:
+  - `Another model` — a read-only critique pass on a different, capable model, which catches what the model that wrote the ADR is blind to.
+  - `Same model` — a read-only critique pass on this same model (a fresh-eyes self-critique).
+  - `I'll review it myself` — no AI critique; show the ADR and let the engineer scrutinise it.
+  - `Skip` — go straight to accept.
+- Mark exactly one recommended by the ADR's weight: for a full-weight / high-risk / compliance-touching / foundational ARCHITECTURE ADR, recommend `Another model`; for a trivial / lean ADR, recommend `Skip`.
 
-1. Tell the engineer the ADR path, a one-line preview from your report, and (if run) the design-review note:
+Act on the pick:
+- **Another model / Same model** → spawn a READ-ONLY cross-check subagent that reads the drafted ADR and returns its critique only; it writes nothing, the main thread applies any fix. Set its model explicitly, not inherited: for `Another model`, a capable model different from the one that wrote the ADR; for `Same model`, this session's model. Brief it to stress-test the design from the ADR text and its own knowledge only (does it hold up? is there a materially simpler option? what failure mode is missed?), and to NOT fetch or re-fetch the ADR's reference links (human-facing). Surface its findings as a short "Cross-check" note, and fix clear issues yourself by targeted Edit before confirmation. No subagent capability → do the same-model pass inline on the main thread.
+- **I'll review it myself** → run no AI critique; present the ADR for the engineer to read and note they are reviewing it themselves.
+- **Skip** → no critique; go straight to the accept panel.
+
+1. Tell the engineer the ADR path, a one-line preview from your report, and (if a cross-check ran) its note:
 
    ```
    Draft ADR written to `docs/adr/<NNNN-title>.md`
    Decision: <Decision line from report>
    Key tradeoff: <Key tradeoff line from report>
-   Design review: <one-line verdict + any issue raised, or "skipped (lean)">
+   Cross-check: <one-line verdict + any issue raised · or "you're reviewing it yourself" · or "skipped">
    ```
 
    Then present the confirmation decision panel (capability-first: `AskUserQuestion` on Claude Code, else the same options as plain text):

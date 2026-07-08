@@ -32,14 +32,15 @@ An ADR documenting already-shipped work (the "already built" path, or a linked f
 
 Writes no code. Never updates `AGENTS.md`/`CLAUDE.md` (/sync owns that).
 
-## Subagents (main thread writes; subagents only read or fetch)
+## Subagents (main thread writes; subagents only read, fetch, or cross-check)
 
-The main thread runs the whole design conversation AND writes the ADR itself. It never hands the writing to a subagent. A subagent is spawned in only two cases, and always on the cheapest model your agent offers (Claude Code: `haiku`), never inheriting the session model:
+The main thread runs the whole design conversation AND writes the ADR itself. It never hands the writing (or any fix) to a subagent. Every subagent it does spawn is read-only and never inherits the session model:
 
-- **Read the codebase**: a read-only scan of existing code when the repo is large (ENHANCEMENT/CROSS-CUTTING). Claude Code: the `scout` type. Returns a compact map, never file dumps.
-- **Fetch from the web**: the current tool-landscape check and the Agent Skill / MCP discovery, both during the design conversation (Stage c), when a decision needs current facts. Claude Code: the `researcher` type. Returns a compact summary, never raw pages.
+- **Read the codebase** (cheapest model, Claude Code `haiku`): a read-only scan of existing code when the repo is large (ENHANCEMENT/CROSS-CUTTING). Claude Code: the `scout` type. Returns a compact map, never file dumps.
+- **Fetch from the web** (cheapest model, Claude Code `haiku`): the current tool-landscape check and the Agent Skill / MCP discovery, both during the design conversation (Stage c), when a decision needs current facts. Claude Code: the `researcher` type. Returns a compact summary, never raw pages.
+- **Cross-check the drafted ADR, only when the engineer asks** (the review preview offers it): a read-only pass that reads the finished ADR and returns a critique, writing nothing, on the model the engineer picked (a different capable model, or this session's). The main thread applies any fix. See *After the ADR is written*.
 
-Web fetching happens once, at the point a decision needs it (the Stage (c) landscape and tool-discovery checks). The links those checks return are written into the ADR's References for a human to follow later; the AI never re-fetches them, not while cross-checking the drafted ADR, not in /develop, not in /audit. Never spawn a subagent to write, critique, or cross-check the ADR; the main thread does all of that.
+Web fetching happens once, at the point a decision needs it (the Stage (c) landscape and tool-discovery checks). The links those checks return are written into the ADR's References for a human to follow later; the AI never re-fetches them, not during the cross-check, not in /develop, not in /audit. No subagent ever writes to the ADR; the main thread does all writing and all fixes.
 
 ## Asks vs acts
 
