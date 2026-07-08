@@ -267,5 +267,5 @@ Where each audience's sections physically live depends on the ADR shape:
 - **`## Options considered`**: describe each option fairly (no straw men) but compactly — a one to two sentence description plus a tight pros/cons of only the load-bearing tradeoffs, not an essay per option
 - Rationale must reference specific forces from Context, not just repeat pros/cons; a few sentences, not paragraphs
 - Consequences must include negatives — an ADR with only positives is not credible
-- Follow-up items are optional but recommended for full-tier decisions
+- Follow-up items are optional but recommended for high-risk or foundational decisions
 - **One decision per ADR — keep it focused and scannable.** Length follows the decision, not a line count: don't pad, and never cut a required design field (data model, state machine, full API table, security model, acceptance criteria) to make the record shorter. If it needs *multiple independent decisions*, or the design won't fit cleanly in one scannable ADR, split it into an **umbrella ADR + child ADRs** (the directory shape) rather than letting one file sprawl.

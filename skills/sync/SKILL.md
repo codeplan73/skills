@@ -1,7 +1,7 @@
 ---
 name: sync
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task
-description: "Keep durable knowledge current after a change is complete. Run /sync as the last step on medium or full tier work, around merge. It updates root and nested AGENTS.md, reconciles the roadmap from repo evidence, and flags ADRs the change made stale. Surgical, additive edits only."
+description: "Keep durable knowledge current after a change is complete. Run /sync as the last step after a change is complete, around merge. It updates root and nested AGENTS.md, reconciles the roadmap from repo evidence, and flags ADRs the change made stale. Surgical, additive edits only."
 ---
 
 ## Output style (plain words, no dashes)

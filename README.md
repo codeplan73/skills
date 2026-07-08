@@ -1,6 +1,6 @@
 # Engineering Workflow Skills
 
-A set of [Agent Skills](https://agentskills.io) that encode a complete, tiered, phase-based engineering workflow — from **a vague idea** to **shipped, documented, verified code** — for any AI coding agent.
+A set of [Agent Skills](https://agentskills.io) that encode a complete, phase-based engineering workflow — from **a vague idea** to **shipped, documented, verified code** — for any AI coding agent. One skill per phase; run whichever ones a change needs, in any order.
 
 The core idea: **one skill per phase, one artifact per skill.** Each skill does a single job well, writes its results to a durable file (a roadmap, an ADR, a context file), and hands off to the next. Because the state lives in files — not in a chat session — work survives across sessions, picks up where it left off, and works for a whole team.
 
@@ -38,7 +38,7 @@ Then, depending on where you're starting:
 
 **Any single change**
 
-Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below, then start with the first skill in that tier's playbook. A **fix** (something broken) goes straight to `/debug`:
+Run the skills it needs, in any order (see [Right-sizing](#right-sizing--run-only-what-a-change-needs) below). A **fix** (something broken) goes straight to `/debug`:
 ```
 /debug the double-charge bug on checkout
 ```
@@ -58,7 +58,7 @@ Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below,
 | [`verify`](skills/verify/) | **Verify** | Runs the *real app* end-to-end — plus a **spec-conformance** pass: every acceptance criterion met and every specced surface built (catches missed pages / un-applied migrations), not just green tests. |
 | [`test`](skills/test/) | **Verify** | A senior test suite for your uncommitted change; detects/saves your framework. |
 | [`review`](skills/review/) | **Verify** | Rigorous code review on a **different model** than wrote the code, so a fresh set of eyes catches what the author missed. |
-| [`harden`](skills/harden/) | **Verify** | Systems-level adversarial pass for concurrency, scale, and security failure modes (for `full`-tier work). |
+| [`harden`](skills/harden/) | **Verify** | Systems-level adversarial pass for concurrency, scale, and security failure modes (for a risky or high-blast-radius change). |
 | [`debug`](skills/debug/) | **Fix** | A disciplined root-cause loop — reproduce, localize, hypothesize, prove, fix at the root, add a regression test. |
 | [`document`](skills/document/) | **Ship** | PR text, changelog, release notes, or a postmortem — drafted from the real diff. |
 | [`sync`](skills/sync/) | **Close** | Keeps `AGENTS.md` current, **reconciles the roadmap** from what actually shipped, and flags ADRs the change made stale. |
@@ -68,7 +68,7 @@ Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below,
 
 ## How the workflow flows
 
-You rarely run all twelve. The [Tiers table](#tiers--right-sizing-the-process) (or the roadmap) tells you which subset a given piece of work needs.
+You rarely run all twelve. Run the subset a given piece of work needs, in any order (see [Right-sizing](#right-sizing--run-only-what-a-change-needs)); the roadmap and `/status` help you see what's owed.
 
 ### Greenfield — a new product
 1. **`/roadmap`** decomposes the idea into a **coarse, living** roadmap and picks the build approach, **foundations first**: **stack** → **scaffold** → **coding standards** → **data model** → design system → a **walking-skeleton** slice, *then* the feature slices.
@@ -87,16 +87,16 @@ The loop is **spec-driven**: `/roadmap` fixes the *what*, `/architect` designs t
 ```
 /roadmap → /architect → /develop → /verify → /test → /harden* → /review → /document → /sync → replan
  what       how (walk to  build the   spec-      lock    stress    fresh-    write     sync     queue
- (seed)     the ADR)      slice       conformance         (full)*   model     up        context  next
+ (seed)     the ADR)      slice       conformance         (risky)*  model     up        context  next
 ```
 
 - **`/roadmap`** seeds the *what* — a feature's intent plus acceptance-criteria **seeds** (the definition-of-done).
 - **`/architect`** designs the *how* as a **step-by-step walk** — it asks one dimension at a time (requirements → data model → stack/tool → API → security → edge cases), suggesting an option at each and letting you pick, never dumping a finished model or stack in a box. It writes an **ADR** whose spine is `## Requirements` (IDed acceptance criteria `AC-1…`, *the contract*), a Design section, and a `## Build plan`; a **decision-only ADR** (stack/architecture or cross-cutting standard) records just the decision, no build plan. On capture it **updates the roadmap feature** to `Design → Build (2–5 milestones rolled up from the ADR) → Verify → Test`, and when it settles on a tool it **offers that tool's Agent Skill and MCP server** (you choose, nothing is auto-installed).
 - **`/develop`** builds the **vertical slice** (data → logic → API → UI, end-to-end), runs and confirms migrations, ticks the roadmap milestones, and emits **verify steps** tied back to each `AC-N`. For UI it composes the **full product surface** (brand, copy, layout, states), not a bare widget, and pulls the real design from a **Figma MCP** when one is connected.
 - **`/verify`** runs the **spec-conformance** pass — every acceptance criterion met and every specced surface (page, route, table, migration) actually built. This is what catches a missed page or an un-applied migration that green tests never reveal.
-- **`/test`** locks in the durable checks · **`/harden`** stress-tests `full`-weight work · **`/review`** re-reads on a fresh model · **`/document`** writes it up · **`/sync`** reconciles context + roadmap · then **replan** queues the next slice.
+- **`/test`** locks in the durable checks · **`/harden`** stress-tests risky, high-blast-radius work · **`/review`** re-reads on a fresh model · **`/document`** writes it up · **`/sync`** reconciles context + roadmap · then **replan** queues the next slice.
 
-`/develop` **gates** on the ADR: if the feature needs a design system, a provider, a data model, or a behavior you haven't decided, it stops and sends you to `/architect` first. The **Tracer Bullet vertical slice is the default** for a proper build; the **Facade** UI-first path (a shell on placeholder data) is a *prototype* option — chosen as the build approach at roadmap time. `*`harden only on `full`-weight work (payments, auth, migrations).
+`/develop` **gates** on the ADR: if the feature needs a design system, a provider, a data model, or a behavior you haven't decided, it stops and sends you to `/architect` first. The **Tracer Bullet vertical slice is the default** for a proper build; the **Facade** UI-first path (a shell on placeholder data) is a *prototype* option — chosen as the build approach at roadmap time. `*`harden only on risky, high-blast-radius work (payments, auth, migrations).
 
 **Bugs** skip this entirely: `/debug` runs a root-cause loop and hands a regression test to `/test`.
 
@@ -160,7 +160,7 @@ A feature **starts as a single box** (`Design it (ADR): /architect …`). **When
 
   The choice is **recorded once and honored everywhere**: `/roadmap` writes it into the roadmap header → `/audit`/`/sync` persist it into root `AGENTS.md` → `/architect`, `/develop`, `/verify` read it and shape the ADR's build plan, the build, and what "working" means to fit it. Change the approach and the whole pipeline follows.
 - **Foundations-first sequencing** — whatever the phasing, the ground comes first and isn't up for a vote: **stack → scaffold → coding standards → data model → design system → a walking-skeleton slice**, *then* the features. (The stack is decided and the project scaffolded *before* `/audit` seeds conventions + tooling, so it reads the real project rather than an empty one.)
-- **Per-feature process weight** — the `Weight` column right-sizes each feature (it turns design-review and `/harden` on or off downstream). This **replaces the old triage step** — right-sizing is one column, not a separate skill.
+- **Per-feature risk hint (optional)** — the `Weight` column is a soft flag on a feature that clearly warrants the heavier checks (a fresh-model `/review`, `/harden` for failure modes), so a payments feature is marked and a copy tweak isn't. It's a hint, not a gate: you can still run any skill on any feature, in any order.
 - **The replan beat** — the roadmap is *living*. `/roadmap replan` after each feature or phase ships reconciles what landed, enrolls follow-ups surfaced during the build (from the ADR's `## Consequences` / `## Follow-up`), reorders, and queues the next slice. `/roadmap add <feature>` enrolls one ad-hoc feature without re-planning the whole product.
 - **Epic-split** — a small product is a single `roadmap.md`; a big one splits by epic into an `index.md` + one file per epic (mirroring the ADR umbrella and the per-workspace layout).
 
@@ -201,22 +201,18 @@ When `/architect` or `/audit` settles on a tool, it checks whether that tool has
 
 ---
 
-## Tiers — right-sizing the process
+## Right-sizing — run only what a change needs
 
-The amount of process scales with risk. **Right-size each change against the table below, then run the matching playbook** — so a typo doesn't get the full treatment and a payments change doesn't get skipped. When in doubt between two tiers, pick the higher one.
+There are no fixed tiers or mandated playbooks. Run the skills a change actually needs, in whatever order fits it. The flow at the top of this README is the typical path for a substantial feature, not a required sequence:
 
-| Tier | Triggers (**all** for just-do-it/lean · **any** for medium/full) | Playbook |
-|---|---|---|
-| **just-do-it** | One-liner, typo, config value, or copy update · fully reversible with one revert · no production risk · one file, no shared systems | act directly |
-| **lean** | Well-understood, self-contained · single area · low blast radius, easy revert · doesn't touch auth / payments / migrations / shared infra | `/develop → /verify → /test → /document` |
-| **medium** | Cross-cutting (multiple areas) · new external dependency or integration · touches shared state, APIs, or data models · moderate blast radius | `/audit → /architect → /develop → /verify → /test → /review → /document` |
-| **full** | Production auth, payments, data migration, or compliance · large refactor or architectural change · breaking API or infra change · high blast radius · security-sensitive | `/audit → /architect → /develop → /verify → /test → /harden → /review → /document → /sync` |
+- A **tiny change** (a typo, a config value, a one-liner) can just be made directly, or `/develop → /verify`.
+- A **normal feature** runs the per-feature loop (`/architect → /develop → /verify → /test → /review → /document → /sync`), skipping any step it doesn't need.
+- A change that **touches something risky** (auth, payments, migrations, shared infra) is where the heavier checks earn their place: `/architect` for the decision, `/review` for a fresh-model pass, `/harden` for failure modes. When a change doesn't touch those, skip them.
+- A **fix** (something broken, failing, throwing, or behaving wrong) takes the fix path: `/debug` (root-cause) → `/test` (regression) → `/sync`, adding `/verify` if it touches a user-facing flow.
 
-`/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern); for a medium/full change that reuses already-decided patterns, `/develop`'s ADR gate confirms none is needed and skips straight to building. `/debug` and `/status` are **on-demand**, not playbook steps — `/debug` whenever `/verify` or `/test` surfaces a failure, `/status` to orient before starting.
+`/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern); when a change reuses already-decided patterns, `/develop`'s ADR gate confirms none is needed and goes straight to building. `/debug` and `/status` are **on-demand**, not sequence steps — `/debug` whenever `/verify` or `/test` surfaces a failure, `/status` to orient before starting.
 
-**Build vs fix.** Decide what *kind* of task this is first. A **build** (feature, change, addition) takes the tiered playbooks above. A **fix** (something broken, failing, throwing, or behaving wrong) is a defect and takes the fix path — `/debug` (root-cause) → `/test` (regression) → `/sync`, adding `/verify` if it touches a user-facing flow. The tiers still set a fix's severity (a payments bug is `full`), but the skill path is the fix path, not build.
-
-**Starting a whole product or a fresh batch of features** isn't one change — run `/roadmap` first to produce the feature roadmap (in `docs/roadmap/`), then right-size each feature off that list one at a time.
+**Starting a whole product or a fresh batch of features** isn't one change — run `/roadmap` first to produce the feature roadmap (in `docs/roadmap/`), then work each feature off that list one at a time.
 
 **Greenfield vs brownfield order.** Where `/audit` sits depends on whether code exists yet:
 - **Brownfield** (existing codebase): `/audit → /architect → …` — understand what's there *before* deciding the change.

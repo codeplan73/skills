@@ -25,7 +25,7 @@ If a required section is missing or a field is blank/placeholder, add this line 
   - `Same model` — a read-only critique pass on this same model (a fresh-eyes self-critique).
   - `I'll review it myself` — no AI critique; show the ADR and let the engineer scrutinise it.
   - `Skip` — go straight to accept.
-- Mark exactly one recommended by the ADR's weight: for a full-weight / high-risk / compliance-touching / foundational ARCHITECTURE ADR, recommend `Another model`; for a trivial / lean ADR, recommend `Skip`.
+- Mark exactly one recommended by the ADR's stakes: for a high-risk / compliance-touching / foundational ARCHITECTURE ADR, recommend `Another model`; for a small or trivial ADR, recommend `Skip`.
 
 Act on the pick:
 - **Another model / Same model** → spawn a READ-ONLY cross-check subagent that reads the drafted ADR and returns its critique only; it writes nothing, the main thread applies any fix. Set its model explicitly, not inherited: for `Another model`, a capable model different from the one that wrote the ADR; for `Same model`, this session's model. Brief it to stress-test the design from the ADR text and its own knowledge only (does it hold up? is there a materially simpler option? what failure mode is missed?), and to NOT fetch or re-fetch the ADR's reference links (human-facing). Surface its findings as a short "Cross-check" note, and fix clear issues yourself by targeted Edit before confirmation. No subagent capability → do the same-model pass inline on the main thread.

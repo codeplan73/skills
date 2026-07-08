@@ -92,7 +92,7 @@ Tracks:
   - **question**: "Save these verify steps to the feature's `verify.md`, or just show them in this summary?"
   - **header**: "Save verify steps?"
   - **options**:
-    1. `Save to verify.md` — "Recommended for data, auth, or full-weight features: a durable checklist `/verify` can run and `/test` can later lock." → write/append the steps to `verify.md` (below).
+    1. `Save to verify.md` — "Recommended for data, auth, or higher-risk features: a durable checklist `/verify` can run and `/test` can later lock." → write/append the steps to `verify.md` (below).
     2. `Just show in summary` — "Keep them inline in this report only; don't write a file." → include them in the report and stop.
 
   The tool appends "Other" as a free-text option automatically. On **Save**, write/append `verify.md` beside the ADR. Single-file ADR → promote it to a directory, `docs/adr/NNNN-feature.md` → `docs/adr/NNNN-feature/{index.md, rationale.md, verify.md}` (split the decision-record sections Context/Options considered/Rationale/References into `rationale.md`, keep the build spec in `index.md`, never double the name), and repoint the roadmap feature's `ADR` link to the new `…/index.md` path. Directory ADR → drop `verify.md` in. Existing `verify.md` → append, don't clobber. Format (so `/verify` can consume it and `/test` can lock the durable steps):
@@ -108,6 +108,6 @@ Tracks:
   - AC-1 … covered by step … · AC-2 … · …
   ```
 - Relay the track's report (the `## /develop complete` block from `ui-guide.md` and/or `logical-guide.md`).
-- Recommend the next step per tier: usually `/verify` (run the steps just emitted/saved), then `/test` to lock the durable ones, then `/sync` to promote new area conventions into `AGENTS.md`. Always end by advising `/clear` before the next feature (the roadmap, ADR, and `AGENTS.md` hold the state, so a fresh session loses nothing; long sessions cost more even when cached). Suggest `/compact` mid-build if this single feature runs long. (On Claude Code `/clear` / `/compact`; your agent's fresh-session equivalent elsewhere.)
+- Recommend the next step: usually `/verify` (run the steps just emitted/saved), then `/test` to lock the durable ones, then `/sync` to promote new area conventions into `AGENTS.md`. Always end by advising `/clear` before the next feature (the roadmap, ADR, and `AGENTS.md` hold the state, so a fresh session loses nothing; long sessions cost more even when cached). Suggest `/compact` mid-build if this single feature runs long. (On Claude Code `/clear` / `/compact`; your agent's fresh-session equivalent elsewhere.)
 
 `/develop` builds; it does not run `/verify`, `/test`, `/sync`, or `/architect` for you — it points; you decide.

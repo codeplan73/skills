@@ -57,7 +57,7 @@ Only in refactor mode. It drives the app twice and holds two output sets, so run
 
 ### Step 0b — Load the spec contract (if a governing ADR exists)
 
-Before scoping, find the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single file `docs/adr/NNNN-<feature>.md`) this change implements. Match by branch/feature name or touched surfaces; a roadmap under `docs/roadmap/` points to the ADR. No governing ADR (trivial change, lean-tier task with no record)? Skip this step and verify against observed behavior only.
+Before scoping, find the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single file `docs/adr/NNNN-<feature>.md`) this change implements. Match by branch/feature name or touched surfaces; a roadmap under `docs/roadmap/` points to the ADR. No governing ADR (a trivial change with no record)? Skip this step and verify against observed behavior only.
 
 The ADR carries the contract: `## Requirements` with IDed acceptance criteria (`AC-1`, `AC-2`, …) plus the surfaces it specs (pages, routes, tables, migrations). Load the checklist:
 

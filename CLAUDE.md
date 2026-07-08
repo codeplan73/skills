@@ -1,20 +1,11 @@
 # Project: Engineering Workflow Skills
 
-A collection of Claude Code skills encoding a tiered, phase-based engineering workflow.
+A collection of Claude Code skills encoding a phase-based engineering workflow. There are no fixed tiers or mandated playbooks: run whichever skills a change needs, in whatever order fits.
 
 ## Stack
 
 - Skills (source, for distribution via `npx skills`): `skills/<name>/SKILL.md`
 - Decision records: `docs/adr/`
-
-## Tiers
-
-| Tier | When |
-|---|---|
-| just-do-it | Trivial, reversible, low-risk |
-| lean | Small, well-understood change |
-| medium | Moderate scope or cross-cutting |
-| full | High risk, large scope, or compliance-sensitive |
 
 ## Skills
 
