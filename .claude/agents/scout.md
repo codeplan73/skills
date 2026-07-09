@@ -1,6 +1,6 @@
 ---
 name: scout
-description: Read-only code exploration and repo scanning. Use for the develop exploration step, the roadmap brownfield code scan, or any task that reads across many files and returns a compact map. Never edits.
+description: Read-only code exploration and repo scanning. Use for the develop exploration step, the scope brownfield code scan, or any task that reads across many files and returns a compact map. Never edits.
 model: haiku
 tools: Read, Grep, Glob
 ---

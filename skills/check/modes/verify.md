@@ -51,7 +51,7 @@ Only in refactor mode. It drives the app twice and holds two output sets, so run
 
 ### Step 0b — Load the spec contract (if a governing ADR exists)
 
-Before scoping, find the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single file `docs/adr/NNNN-<feature>.md`) this change implements. Match by branch/feature name or touched surfaces; a roadmap under `docs/roadmap/` points to the ADR. No governing ADR (a trivial change with no record)? Skip this step and verify against observed behavior only.
+Before scoping, find the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single file `docs/adr/NNNN-<feature>.md`) this change implements. Match by branch/feature name or touched surfaces; a scope under `docs/scope/` points to the ADR. No governing ADR (a trivial change with no record)? Skip this step and verify against observed behavior only.
 
 The ADR carries the contract: `## Requirements` with IDed acceptance criteria (`AC-1`, `AC-2`, …) plus the surfaces it specs (pages, routes, tables, migrations). Load the checklist:
 
@@ -71,7 +71,7 @@ You now hold the `AC-N` list to confirm and the specced-surface list to confirm 
 
 ### Step 0c — Calibrate "working" to the build approach
 
-Know what this slice was meant to be. Read the build approach for THIS feature with precedence: the feature's roadmap-row `Approach` override if its row declares one, else the project default (root `AGENTS.md`, else the roadmap header). This mirrors ADR-overrides-`AGENTS.md`: a feature declaring its own approach (e.g. a Facade prototype in an otherwise Skateboard project) is verified by ITS approach; every other feature uses the project default. If neither records one, use the reasoned default (an end-to-end / Tracer-Bullet slice for production work) and note the assumption. The wrong bar produces false failures (dinging a prototype for lacking a real backend) or false passes (blessing a slice that never proved the path it existed to prove).
+Know what this slice was meant to be. Read the build approach for THIS feature with precedence: the feature's scope-row `Approach` override if its row declares one, else the project default (root `AGENTS.md`, else the scope header). This mirrors ADR-overrides-`AGENTS.md`: a feature declaring its own approach (e.g. a Facade prototype in an otherwise Skateboard project) is verified by ITS approach; every other feature uses the project default. If neither records one, use the reasoned default (an end-to-end / Tracer-Bullet slice for production work) and note the assumption. The wrong bar produces false failures (dinging a prototype for lacking a real backend) or false passes (blessing a slice that never proved the path it existed to prove).
 
 Reason as the acceptance engineer about what done means for this slice; no fixed per-approach script. The judgment: what did this slice promise to make real, and what is it explicitly still allowed to fake? Verify the former hard; don't fail the slice for the latter. Common framings and their bars: a thin end-to-end path wired through every layer (the whole path carries a real request to a real result); a thinnest-usable-whole core loop (that one loop genuinely works, not the trimmings); a UI-first shell wired to placeholders (the shell and its placeholder flow render and navigate; a stubbed data source is the plan, not a defect); a full user journey per phase (the journey end to end, not isolated screens). Let the label set the bar, then carry it into the scope and the conformance verdict. Acceptance criteria govern what must be true; the approach tells how much of the stack behind them is expected to be real yet.
 
@@ -81,7 +81,7 @@ Base branch `BASE`: `git rev-parse --verify main`; on success use `main`, otherw
 
 Spec contract loaded (Step 0b)? The checklist is your scope: each `verify.md` step / `AC-N` is an observable behavior to exercise, each specced surface (page, route, table, migration) a thing to confirm was built. Don't narrow to only the changed files: an AC or surface with no implementation is exactly the miss this gate catches; keep it listed and let Step 4b flag it. Use the git diff to locate where each is (or isn't) implemented.
 
-No ADR? From the changed files write the 2–5 concrete things a human could watch to know the change works, e.g. "the /pricing page renders all three tiers and the CTA opens checkout". If a feature roadmap exists (in `docs/roadmap/`), anchor these to that feature's acceptance criteria / sub-tasks. Keep them observable, not internal.
+No ADR? From the changed files write the 2–5 concrete things a human could watch to know the change works, e.g. "the /pricing page renders all three tiers and the CTA opens checkout". If a feature scope exists (in `docs/scope/`), anchor these to that feature's acceptance criteria / sub-tasks. Keep them observable, not internal.
 
 ### Step 2 — Determine how to run the app
 
@@ -124,7 +124,7 @@ Missing = never built (a scope miss); not-applied = built but not live/correct a
 
 ### Step 5 — Report
 
-Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the verdict is PASS, tick its `Verify it` box; leave `Test it` and the `done` status to `/test` and `/sync`. On FAIL, tick nothing and report the gaps. On PASS, point to `/test <feature>` next and advise `/clear` before moving to a new feature (the ADR and `verify.md` hold the state, so a fresh session loses nothing and stays cheap).
+Update the scope: if this feature is on the scope (`docs/scope/`) and the verdict is PASS, tick its `Verify it` box; leave `Test it` and the `done` status to `/test` and `/sync`. On FAIL, tick nothing and report the gaps. On PASS, point to `/test <feature>` next and advise `/clear` before moving to a new feature (the ADR and `verify.md` hold the state, so a fresh session loses nothing and stays cheap).
 
 ```
 ## /check verify complete

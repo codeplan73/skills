@@ -44,9 +44,9 @@ ROOT_AGENTS_MD
 
 ADR_PATHS
 
-## Feature roadmap for the relevant workspace(s) the diff touches — NOT all of docs/roadmap/ (you may RECONCILE status only — never add/remove/reorder features)
+## Feature scope for the relevant workspace(s) the diff touches — NOT all of docs/scope/ (you may RECONCILE status only — never add/remove/reorder features)
 
-ROADMAP_PATH_OR_NONE
+SCOPE_PATH_OR_NONE
 
 ## Tool discovery result from the main model
 
@@ -69,7 +69,7 @@ Make the edit only if it is:
 
 **Stack consistency:** if root has `## Stack` and an architecture ADR (one with `## Proposed stack`) exists, check they agree. Root missing the decided stack (e.g. greenfield root seeded before the ADR): add it surgically. Contradiction: do not rewrite curated stack lines; flag under `CONFLICTS`, noting which ADR.
 
-**Build approach consistency:** root's `## Build approach` mirrors the roadmap header's build-approach line (its source of truth); never invent an approach. If they diverge (different approach, or root lacks the line the roadmap sets), make a single surgical edit to that one root line (as for a changed stack) and record it under `AGENTS_UPDATED`. If root's version is elaborated curated prose, or you can't tell which side is authoritative, do not overwrite; flag the divergence under `CONFLICTS`, naming the roadmap file.
+**Build approach consistency:** root's `## Build approach` mirrors the scope header's build-approach line (its source of truth); never invent an approach. If they diverge (different approach, or root lacks the line the scope sets), make a single surgical edit to that one root line (as for a changed stack) and record it under `AGENTS_UPDATED`. If root's version is elaborated curated prose, or you can't tell which side is authoritative, do not overwrite; flag the divergence under `CONFLICTS`, naming the scope file.
 
 **Agent Skill and MCP records:** if `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, or `DECLINED_TOOLS_OR_NONE` is not `none`, record it surgically in the most specific relevant AGENTS.md:
 - Project-wide tools (framework, ORM, styling, core DB, hosting, test runner) belong in root AGENTS.md.
@@ -112,18 +112,18 @@ For each path in DELETED_PATHS:
 ### 4. Reconcile linked ADRs' Status line (edit ONLY the `**Status**:` line — never ADR content)
 
 An ADR's status mirrors its feature's build lifecycle:
-- `Proposed`: not yet built (roadmap `planned`).
-- `In Progress`: being built (roadmap `in-progress`).
-- `Accepted`: built and verified (roadmap `done`); an ADR is not `Accepted` until its feature ships.
-- `Superseded`: replaced by a later ADR (never set this from roadmap status; flag under `STALE_ADRS` instead).
+- `Proposed`: not yet built (scope `planned`).
+- `In Progress`: being built (scope `in-progress`).
+- `Accepted`: built and verified (scope `done`); an ADR is not `Accepted` until its feature ships.
+- `Superseded`: replaced by a later ADR (never set this from scope status; flag under `STALE_ADRS` instead).
 
 For an **umbrella decision**, reconcile the linked `index.md` (child ADRs carry no status and are not reconciled).
 
-This applies **only to ADRs that link to a buildable roadmap feature.** A **standalone decision ADR** (a foundational/stack or cross-cutting standard with no linked feature) is decision-status: `Proposed` when written, `Accepted` once ratified, never feature-mirrored. Leave it as-is; do not reconcile or flag it under `STALE_ADRS` (e.g. "no linked feature found") merely for having no linked feature, that is expected, not a mismatch. Only genuinely stale/superseded standalone ADRs (Step 5) get flagged.
+This applies **only to ADRs that link to a buildable scope feature.** A **standalone decision ADR** (a foundational/stack or cross-cutting standard with no linked feature) is decision-status: `Proposed` when written, `Accepted` once ratified, never feature-mirrored. Leave it as-is; do not reconcile or flag it under `STALE_ADRS` (e.g. "no linked feature found") merely for having no linked feature, that is expected, not a mismatch. Only genuinely stale/superseded standalone ADRs (Step 5) get flagged.
 
-For each ADR whose linked feature appears in the reconciled roadmap:
-1. Find the feature this ADR governs (its title/links reference a roadmap feature, which may link back).
-2. Read the feature's current roadmap status and derive the target ADR status from the mapping above.
+For each ADR whose linked feature appears in the reconciled scope:
+1. Find the feature this ADR governs (its title/links reference a scope feature, which may link back).
+2. Read the feature's current scope status and derive the target ADR status from the mapping above.
 3. **Re-read the ADR just before writing** (a teammate or another session may have edited it). If the `**Status**:` line already equals the target, do nothing (idempotent). Otherwise make a single surgical edit to that one line only.
 4. Record the change under `ADR_STATUS_RECONCILED`.
 
@@ -133,13 +133,13 @@ For each ADR whose linked feature appears in the reconciled roadmap:
 
 Be **strict**, noise erodes trust. Read an ADR only if the changed paths plausibly touch its subject (judge from its title/first lines; don't read all blindly). Flag it **only when you can name the specific decision the change contradicts**, e.g. the ADR mandates one datastore and this change adds an adapter for a different one, or the ADR fixes an interface/boundary the change breaks. Also flag an ADR a **later ADR supersedes** (its status should become `Superseded`, /architect's job, not a Status-line reconciliation). Never flag vague "might be affected" cases; when in doubt, do not flag. Record genuine hits under `STALE_ADRS` with the contradicted point and recommend /architect to update or supersede; never edit ADR content yourself.
 
-### 6. Reconcile the feature roadmap (only if ROADMAP_PATH_OR_NONE is a path)
+### 6. Reconcile the feature scope (only if SCOPE_PATH_OR_NONE is a path)
 
-**Scope:** only the roadmap file(s) you were handed. Never hunt for or reconcile other files under `docs/roadmap/`; one workspace's change does not license editing another's.
+**Scope:** only the scope file(s) you were handed. Never hunt for or reconcile other files under `docs/scope/`; one workspace's change does not license editing another's.
 
 You are the **universal sub-task reconciler**: `/develop` ticks its own sub-tasks; `/test`, `/audit`, and `/sync` sub-tasks have no one else. For **every feature the diff touched**, re-evaluate each of its sub-tasks against repo evidence (not just what this diff added) and tick the genuinely complete ones: the diff picks *which features* to re-check, the repo state decides *which sub-tasks are done*. Look directly with Read/Bash/Grep/Glob.
 
-**Malformed roadmap** (no At-a-glance table or feature sections, non-standard status, broken headings, a bad hand-edit): do not edit it; note `roadmap malformed: <file> — needs a human or /roadmap re-run` under `ROADMAP_RECONCILED` and skip it. Never act on a misread.
+**Malformed scope** (no At-a-glance table or feature sections, non-standard status, broken headings, a bad hand-edit): do not edit it; note `scope malformed: <file> — needs a human or /scope re-run` under `SCOPE_RECONCILED` and skip it. Never act on a misread.
 
 > Step 1's source-file filtering (dropping `*.test.*`, `docs/**`) governs what you sync AGENTS.md from; it does not limit reconciliation. Here you may and should inspect test files, AGENTS.md, and config to judge completion.
 
@@ -154,8 +154,8 @@ Evidence per sub-task type (tick `[ ]` → `[x]` when the evidence is clearly pr
 
 Then update the feature's **status**, in the At-a-glance table AND beside its heading: `in-progress` while any box (`Build it` + its milestones, `Verify it`, `Test it`) is unticked; `done` **only when `Design`, `Build` (+ milestones), `Verify`, and `Test` are all ticked**.
 
-- **Strictly status only.** Never add, remove, rename, or reorder features or checkboxes (that's /roadmap's). Skip `existing` and `dropped` features entirely. Never invent a feature for code that has no section; if shipped code clearly matches no feature, note "unmapped: <area> — run /roadmap to enroll this off-plan work" under `ROADMAP_RECONCILED`.
-- **Attribution across features and workspaces.** Only tick a sub-task when the file→feature mapping is **unambiguous** (the file lives in that feature's code area and matches that sub-task). In a monorepo, a changed file's **workspace** (`apps/<x>/…`) selects the roadmap to update, `docs/roadmap/<x>/`; never tick a feature in the wrong workspace's roadmap. If an area maps to more than one feature, do not guess; note `ambiguous: <area> → <featureA> / <featureB>` under `ROADMAP_RECONCILED`.
+- **Strictly status only.** Never add, remove, rename, or reorder features or checkboxes (that's /scope's). Skip `existing` and `dropped` features entirely. Never invent a feature for code that has no section; if shipped code clearly matches no feature, note "unmapped: <area> — run /scope to enroll this off-plan work" under `SCOPE_RECONCILED`.
+- **Attribution across features and workspaces.** Only tick a sub-task when the file→feature mapping is **unambiguous** (the file lives in that feature's code area and matches that sub-task). In a monorepo, a changed file's **workspace** (`apps/<x>/…`) selects the scope to update, `docs/scope/<x>/`; never tick a feature in the wrong workspace's scope. If an area maps to more than one feature, do not guess; note `ambiguous: <area> → <featureA> / <featureB>` under `SCOPE_RECONCILED`.
 - **Idempotent**: a box already `[x]` stays `[x]`; re-running changes nothing.
 - **Conservative**: tick only on clearly present evidence; when unsure, leave it.
 
@@ -175,11 +175,11 @@ AGENTS_CREATED:
 ORPHANS_CLEANED:
 - <path>, <removed orphaned doc / fixed broken pointer after deletion>
 
-ROADMAP_RECONCILED:
+SCOPE_RECONCILED:
 - <feature>, <sub-tasks ticked / status advanced to match the diff; or "unmapped: <area>">
 
 ADR_STATUS_RECONCILED:
-- <docs/adr/file>, <Status line: Proposed→In Progress→Accepted to match the feature's roadmap status>
+- <docs/adr/file>, <Status line: Proposed→In Progress→Accepted to match the feature's scope status>
 
 STALE_ADRS:
 - <docs/adr/file>, <why the change makes it stale, or a status mismatch you couldn't safely reconcile>

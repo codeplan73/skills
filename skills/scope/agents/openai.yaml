@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scope"
+  short_description: "Plan and reconcile feature scopes"
+  default_prompt: "Use $scope to plan the next feature slices for this product."

@@ -147,9 +147,9 @@ Paths and cheap signals only; the heavy reading happens at write time (by you, o
 
 With file tools:
 - List the 3 most-recently-modified ADR paths under `docs/adr/` (paths only).
-- Identify the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single `docs/adr/NNNN-<feature>.md`) these files implement, matched by branch/feature name or touched surfaces (a `docs/roadmap/` entry, if present, points to it). Note its path and whether a `verify.md` sits beside it (`docs/adr/NNNN-<feature>/verify.md`). This contract is what tests trace to; it may not be among the 3 recent paths. Set `TRACE_TO_CONTRACT = yes` when a governing ADR exists, else `no`.
+- Identify the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single `docs/adr/NNNN-<feature>.md`) these files implement, matched by branch/feature name or touched surfaces (a `docs/scope/` entry, if present, points to it). Note its path and whether a `verify.md` sits beside it (`docs/adr/NNNN-<feature>/verify.md`). This contract is what tests trace to; it may not be among the 3 recent paths. Set `TRACE_TO_CONTRACT = yes` when a governing ADR exists, else `no`.
 - Note whether `design.md` exists at the project root; use its path only when a **component** or **page/flow** file is in scope, else `none`.
-- Read `AGENTS.md` (canonical; `CLAUDE.md` if absent) as project context (short and cheap). Also note the build approach as one line: the slice-shaping approach the team chose, recorded in the roadmap header (or root `AGENTS.md`), e.g. thin end-to-end path, thinnest-usable-whole core loop, UI-first shell on placeholders, full user journey per phase. It doesn't branch the logic; it calibrates your judgment when writing (Step 8, rule a).
+- Read `AGENTS.md` (canonical; `CLAUDE.md` if absent) as project context (short and cheap). Also note the build approach as one line: the slice-shaping approach the team chose, recorded in the scope header (or root `AGENTS.md`), e.g. thin end-to-end path, thinnest-usable-whole core loop, UI-first shell on placeholders, full user journey per phase. It doesn't branch the logic; it calibrates your judgment when writing (Step 8, rule a).
 - Read `package.json`, note `scripts.test`. `RUN_COMMAND` = `<pkgmgr> test` when a `test` script exists (`<pkgmgr> run test` for npm); a raw invocation (e.g. `pnpm exec vitest run`) only when none does.
 
 ---
@@ -180,7 +180,7 @@ Monorepo (multiple package roots from Step 1b): write each root's suite in turn,
 
 If the write failed or produced no report: say so and re-do it; never report a passing or failing suite you didn't actually produce. Otherwise relay the format matching `RUN_AFTER`.
 
-Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. On `done`, advise `/clear` before the next feature: the roadmap and ADR hold everything, a fresh session keeps the next build cheap.
+Update the scope: if this feature is on the scope (`docs/scope/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. On `done`, advise `/clear` before the next feature: the scope and ADR hold everything, a fresh session keeps the next build cheap.
 
 Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, plus `RUN_RESULT` and `BUGS_FOUND` when `RUN_AFTER = yes`, or `MANUAL_INSTRUCTIONS` when `RUN_AFTER = no`. Relay this template: keep lines marked `← yes` only when `RUN_AFTER = yes`, `← no` only when `RUN_AFTER = no` (a marked heading carries its list lines), unmarked lines always; strip the markers.
 

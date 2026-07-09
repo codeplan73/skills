@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: Read-only web and registry lookup. Use for Agent Skill / MCP discovery (npx skills find, MCP search), current-usage doc-checks, and roadmap source verification. Returns only a compact summary, never raw pages.
+description: Read-only web and registry lookup. Use for Agent Skill / MCP discovery (npx skills find, MCP search), current-usage doc-checks, and scope source verification. Returns only a compact summary, never raw pages.
 model: haiku
 tools: Read, Bash, WebSearch, WebFetch
 ---

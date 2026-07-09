@@ -1,4 +1,4 @@
-Roadmap structure `/roadmap` writes to — the reference shapes read while writing the roadmap and the completion report. All rules and guidance live in `SKILL.md`.
+Scope structure `/scope` writes to — the reference shapes read while writing the scope and the completion report. All rules and guidance live in `SKILL.md`.
 
 ## What keeps it readable (the format rules)
 
@@ -6,12 +6,12 @@ Roadmap structure `/roadmap` writes to — the reference shapes read while writi
 - **Clean headings.** A heading is `### <N>. <Feature name>` plus a short status word and short tags **only when they carry real information** (`needs a decision`, a per-feature approach override, `full` weight). Never a pipe-delimited metadata row like `Title | P0 | inherit | …`.
 - **Each fact appears once.** Intent, the definition of done, tasks, and pointers live in the section; the At-a-glance table is the quick index. Status is shown in the table and beside the heading, and nowhere else.
 - **Only what is set.** No `n/a`, no `inherit`, no empty fields. A pointer line (`ADR <n> · code in <path>`) appears **only once those exist** — the ADR link added by `/architect` at capture, the code path by `/develop`.
-- **A feature grows a defined shape.** It has a one- or two-line **intent**, a single **Done when:** line (the acceptance-criteria seeds), and **checkbox steps**. A **not-yet-designed** feature has **one box** (its entry command: `/architect` when it `needs a decision`, else `/develop`, or `/audit` for standards & tooling). **When its ADR is captured, `/architect` fills in the built-ready shape:** `Design it` (ticked) → `Build it: /develop <feature>` with **2 to 5 milestone sub-items rolled up from the ADR** → `Verify it: /check verify <feature>` → `Test it: /test <feature>`. **The atomic build tasks stay in the ADR's `## Build plan`, never here** — the roadmap carries only the milestone rollup. The next step is always the first unticked box.
+- **A feature grows a defined shape.** It has a one- or two-line **intent**, a single **Done when:** line (the acceptance-criteria seeds), and **checkbox steps**. A **not-yet-designed** feature has **one box** (its entry command: `/architect` when it `needs a decision`, else `/develop`, or `/audit` for standards & tooling). **When its ADR is captured, `/architect` fills in the built-ready shape:** `Design it` (ticked) → `Build it: /develop <feature>` with **2 to 5 milestone sub-items rolled up from the ADR** → `Verify it: /check verify <feature>` → `Test it: /test <feature>`. **The atomic build tasks stay in the ADR's `## Build plan`, never here** — the scope carries only the milestone rollup. The next step is always the first unticked box.
 
-## Single-file roadmap
+## Single-file scope
 
 ```markdown
-# Roadmap — <Product name>
+# Scope — <Product name>
 
 <One or two plain sentences: what the product is and who it serves.>
 
@@ -90,11 +90,11 @@ Out of scope for the current build pass, kept so the plan stays honest.
 
 ## Legend
 
-**Feature lifecycle** — the roadmap updates as a feature moves; each row is what it shows and who sets it:
+**Feature lifecycle** — the scope updates as a feature moves; each row is what it shows and who sets it:
 
 | State | Set by | The feature shows |
 |---|---|---|
-| `planned` · needs a decision | `/roadmap` | one box: `Design it (ADR): /architect <feature>` |
+| `planned` · needs a decision | `/scope` | one box: `Design it (ADR): /architect <feature>` |
 | `in-progress` (designed) | **`/architect` at ADR capture** | `Design it` ticked; ADR linked; `Build it: /develop <feature>` + **2 to 5 milestones rolled up from the ADR**; `Verify it` + `Test it` boxes; any surfaced follow-up enrolled |
 | `in-progress` (building) | `/develop` | milestone sub-boxes tick one by one; code pointer filled |
 | `in-progress` (verified) | `/check verify` | `Build it` + milestones ticked; `Verify it` ticked |
@@ -102,7 +102,7 @@ Out of scope for the current build pass, kept so the plan stays honest.
 
 - **Next step** = the first unticked box (always a command or a tracked milestone).
 - **needs a decision** = run `/architect` first; otherwise straight to `/develop` (or `/audit` for standards & tooling). The tag drops once the ADR is captured.
-- **Atomic build tasks live in the ADR's `## Build plan`, not here** — the roadmap carries only the milestone rollup.
+- **Atomic build tasks live in the ADR's `## Build plan`, not here** — the scope carries only the milestone rollup.
 - **Status** `planned` → `in-progress` → `done`, plus `existing` (pre-workflow) and `dropped` (de-scoped, kept for history).
 - **Approach tag** beside a heading (e.g. `· Facade`) overrides the project default for that feature; no tag = inherits it.
 - **Weight tag** `· full` = a fresh-model `/check review` warranted; `lean`/`medium` get no tag.
@@ -125,21 +125,21 @@ Partial catalog; finish the remaining pieces via /develop. code in `src/catalog/
 
 ## Large product — epic-split
 
-When `roadmap.md` outgrows a comfortable scan (roughly a dozen-plus features across clearly distinct areas), split by epic: **rename `roadmap.md` to `docs/roadmap/index.md`** (keep the At-a-glance table across all epics + a one-line status rollup per epic, each linking its file), and **move each area's feature sections out into its own `docs/roadmap/<epic>.md`**. Promote **on demand**; don't pre-split a small product. File names are always **semantic** (`roadmap.md` / `index.md` / `<epic>.md`), never numbered. In a monorepo, each workspace gets its own `docs/roadmap/<workspace>/` the same way, with a top-level `docs/roadmap/index.md` mapping the workspaces (one line + rollup each).
+When `scope.md` outgrows a comfortable scan (roughly a dozen-plus features across clearly distinct areas), split by epic: **rename `scope.md` to `docs/scope/index.md`** (keep the At-a-glance table across all epics + a one-line status rollup per epic, each linking its file), and **move each area's feature sections out into its own `docs/scope/<epic>.md`**. Promote **on demand**; don't pre-split a small product. File names are always **semantic** (`scope.md` / `index.md` / `<epic>.md`), never numbered. In a monorepo, each workspace gets its own `docs/scope/<workspace>/` the same way, with a top-level `docs/scope/index.md` mapping the workspaces (one line + rollup each).
 
 ## Completion report block
 
 ```
-## /roadmap complete
+## /scope complete
 
 **Product**: <one line>
 **Behavior**: <plan | replan | add (inferred from the situation, not a typed subcommand)>
 **Build approach**: <name (one-line principle)> · **Per-feature overrides**: <feature → approach, … (or "none, all inherit")>
 **Weight profile**: <e.g. billing full (payments), everything else lean/medium (or "all default")>
-**Roadmap file**: <docs/roadmap/roadmap.md> (<created new | updated in place | new epic file for <area>>)
-**Scope (this pass)**: <N> new features to build, <M> already on the roadmap, <K> deferred
+**Scope file**: <docs/scope/scope.md> (<created new | updated in place | new epic file for <area>>)
+**Scope (this pass)**: <N> new features to build, <M> already on the scope, <K> deferred
 **Build order**: <feature 1> → <feature 2> → …
 **First step**: <run `/clear` first, then the first unticked box, usually `/architect <first feature>` (or `/audit` if a brownfield repo has no root AGENTS.md) — each skill reads its inputs from the files just written, so a fresh session keeps every step cheap>
 ```
 
-_Context hygiene: the roadmap, the ADRs, and `AGENTS.md` are the durable state, so the workflow hands off through files, not the chat. Advise `/clear` between units (after `/roadmap`, after each `/architect`, between features) and `/compact` mid-unit if one run gets long. On Claude Code use `/clear` / `/compact`; use your agent's fresh-session equivalent elsewhere._
+_Context hygiene: the scope, the ADRs, and `AGENTS.md` are the durable state, so the workflow hands off through files, not the chat. Advise `/clear` between units (after `/scope`, after each `/architect`, between features) and `/compact` mid-unit if one run gets long. On Claude Code use `/clear` / `/compact`; use your agent's fresh-session equivalent elsewhere._

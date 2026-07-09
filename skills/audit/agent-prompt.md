@@ -35,9 +35,9 @@ This keeps the `/architect → /audit` handoff order-independent: root absorbs t
 
 ## Build approach (every phase that writes or audits root)
 
-Root's `## Build approach` is a project-wide convention, the default build strategy every skill reads, exactly like `## Stack`. Capture it as a convention, never invent or prescribe one; the source of truth is the roadmap header (the build-approach line `/roadmap` records).
-- Creating root (greenfield, whole-repo): seed from the roadmap header if one exists, a short line: name + one-line principle. If no roadmap, or none set, write `<TBD, set by /roadmap>` rather than guessing.
-- Auditing existing root (gap-fill): missing while the roadmap header names one → ROOT_GAPS; the two name different approaches → CONTRADICTIONS. Never silently overwrite a curated line.
+Root's `## Build approach` is a project-wide convention, the default build strategy every skill reads, exactly like `## Stack`. Capture it as a convention, never invent or prescribe one; the source of truth is the scope header (the build-approach line `/scope` records).
+- Creating root (greenfield, whole-repo): seed from the scope header if one exists, a short line: name + one-line principle. If no scope, or none set, write `<TBD, set by /scope>` rather than guessing.
+- Auditing existing root (gap-fill): missing while the scope header names one → ROOT_GAPS; the two name different approaches → CONTRADICTIONS. Never silently overwrite a curated line.
 
 ## Phase
 
@@ -92,11 +92,11 @@ New project, possibly just scaffolded from its chosen stack (there may be a mani
 
 **Step 1 — Minimal discovery**
 
-With your file tools, list the top couple of project levels (excluding `.git`); read the manifest if present (note language, package manager). Check `docs/adr/` for numbered ADRs (`NNNN-*.md`); if an architecture ADR exists (`## Proposed stack` section), read it: the stack is already decided via `/architect`, use it for `## Stack`, no placeholders, never contradict it. Check `docs/roadmap/` (or `.workflow/roadmap/`): if the roadmap header records a build approach (name + one-line principle), capture it verbatim as the `## Build approach` seed; else `<TBD, set by /roadmap>`.
+With your file tools, list the top couple of project levels (excluding `.git`); read the manifest if present (note language, package manager). Check `docs/adr/` for numbered ADRs (`NNNN-*.md`); if an architecture ADR exists (`## Proposed stack` section), read it: the stack is already decided via `/architect`, use it for `## Stack`, no placeholders, never contradict it. Check `docs/scope/` (or `.workflow/scope/`): if the scope header records a build approach (name + one-line principle), capture it verbatim as the `## Build approach` seed; else `<TBD, set by /scope>`.
 
 **Step 2 — Create root AGENTS.md**
 
-Use the template below. `## Stack`: ADR, else findings, else `<to be filled>`. `## Build approach`: roadmap header, else `<TBD, set by /roadmap>`. `## Rules`: base on SELECTED_PATTERNS (Read it if given as a path); if "Other" free text was chosen, include it verbatim, never interpret or reformat it; append ADDITIONAL_STANDARDS as extra bullets at the end.
+Use the template below. `## Stack`: ADR, else findings, else `<to be filled>`. `## Build approach`: scope header, else `<TBD, set by /scope>`. `## Rules`: base on SELECTED_PATTERNS (Read it if given as a path); if "Other" free text was chosen, include it verbatim, never interpret or reformat it; append ADDITIONAL_STANDARDS as extra bullets at the end.
 
 If `INSTALLED_SKILLS_OR_NONE` is provided, write a `## Agent skills` section (template above): ONE bullet per installed skill, `- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it covers>`, so a later skill loads only the ones a task needs, never a single dense line of names. Detect the project's real skills directory (`.claude/skills/` on Claude Code, `.agents/skills/` on other agents, or a plain `skills/`) and use it in the link; never hardcode a Claude-only path, since every tool reads this file. Keep the registry source `<owner>/<repo>` on each bullet as the tool-agnostic identity a different agent resolves in its own dir. If `DECLINED_TOOLS_OR_NONE` is provided, add a compact `Declined: <tool>, <tool>` line in that section (a decline has nothing to load, so it needs no location; it stops a later `/audit` or `/architect` re-offering). If `MCP_SERVERS_OR_NONE`, add a compact `MCP servers: <server> (connected|recommended)` line (a connected service has no local file to open). Project-wide tech at root; area-specific at that area's nested doc, using the same `## Agent skills` section.
 
@@ -190,10 +190,10 @@ With your file tools, list the project tree a few levels deep, skipping vendored
 
 **Step 3 — Find four kinds of finding**
 
-- (a) Global facts missing from root: a daily command, stack element, project-wide rule, or the build approach (in the roadmap header but absent from root) that's true but not recorded. Collect each as a `ROOT_GAPS` line (exact markdown + target section) and apply it only with the engineer's permission (the gap-handling step in `modes/gapfill.md`), never silently, since a root line may be curated.
+- (a) Global facts missing from root: a daily command, stack element, project-wide rule, or the build approach (in the scope header but absent from root) that's true but not recorded. Collect each as a `ROOT_GAPS` line (exact markdown + target section) and apply it only with the engineer's permission (the gap-handling step in `modes/gapfill.md`), never silently, since a root line may be curated.
 - (b) Undocumented areas: a major area with distinct conventions/gotchas and no nested AGENTS.md. Create the nested doc (nested template + sibling CLAUDE.md pointer) and add its root pointer line via Edit (safe to do directly: creating, not overwriting).
 - (c) Stale/incomplete nested docs: an existing nested AGENTS.md missing something now true of its area. Return as `PROPOSED_ADDITIONS`; do NOT edit it yourself.
-- (d) Contradictions: a doc states something the codebase or its governing records disprove (documented test runner or framework isn't the one actually used; `## Stack` conflicts with the architecture ADR; `## Build approach` differs from the roadmap header; a documented command no longer exists). Worse than a gap, the docs are actively wrong; do NOT auto-fix (the line may be curated). Collect each as a `CONTRADICTIONS` entry naming the doc, what it says, and what the code/ADR/roadmap actually shows; surface these to the human, don't auto-fix.
+- (d) Contradictions: a doc states something the codebase or its governing records disprove (documented test runner or framework isn't the one actually used; `## Stack` conflicts with the architecture ADR; `## Build approach` differs from the scope header; a documented command no longer exists). Worse than a gap, the docs are actively wrong; do NOT auto-fix (the line may be curated). Collect each as a `CONTRADICTIONS` entry naming the doc, what it says, and what the code/ADR/scope actually shows; surface these to the human, don't auto-fix.
 
 Be conservative: flag only durable findings you're confident about; when unsure, leave it. Do not flag implementation detail, TODOs, or anything that churns.
 
@@ -216,8 +216,8 @@ Be conservative: flag only durable findings you're confident about; when unsure,
 ## Build approach
 
 <The project's default build strategy, a short line: name + one-line principle. A project-wide
- convention every skill reads (like the stack). Seeded from the roadmap header; `<TBD, set by
- /roadmap>` if none is set yet. The approach is one of:
+ convention every skill reads (like the stack). Seeded from the scope header; `<TBD, set by
+ /scope>` if none is set yet. The approach is one of:
  - **Tracer Bullet**, vertical end-to-end slices, thin but complete through every layer
  - **Skateboard**, ship the thinnest usable whole, then grow it
  - **Facade**, UI-first shell, then wire the real behavior behind it (prototype-led)

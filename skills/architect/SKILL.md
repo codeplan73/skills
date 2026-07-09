@@ -23,10 +23,10 @@ Runs structured discovery, weighs options, and writes or updates an Architecture
 - **Update**: evolving an existing decision → edit existing ADR in place
 - **Supersede**: replacing a past decision → new ADR + update old ADR's status line
 
-ADR status behaves one of two ways, decided by whether a buildable roadmap feature links the ADR (a `docs/roadmap/` row whose `ADR` cell points to it):
+ADR status behaves one of two ways, decided by whether a buildable scope feature links the ADR (a `docs/scope/` row whose `ADR` cell points to it):
 
-- **Feature-linked ADR** (typical FEATURE/ENHANCEMENT, or an ARCHITECTURE foundation that has a roadmap row): status mirrors the feature lifecycle. /architect creates it as `Proposed` and owns its content but never advances the status; /develop advances it to `In Progress` when the feature goes in-progress, then `Accepted` when built and verified (roadmap `done`). Engineer confirmation ratifies content only; `Accepted` means shipped.
-- **Standalone decision ADR** (foundational/stack or cross-cutting standard, no roadmap row links it): decision-status. `Proposed` when written, `Accepted` once the engineer ratifies it on confirmation (the decision is then in force). /develop does not advance it.
+- **Feature-linked ADR** (typical FEATURE/ENHANCEMENT, or an ARCHITECTURE foundation that has a scope row): status mirrors the feature lifecycle. /architect creates it as `Proposed` and owns its content but never advances the status; /develop advances it to `In Progress` when the feature goes in-progress, then `Accepted` when built and verified (scope `done`). Engineer confirmation ratifies content only; `Accepted` means shipped.
+- **Standalone decision ADR** (foundational/stack or cross-cutting standard, no scope row links it): decision-status. `Proposed` when written, `Accepted` once the engineer ratifies it on confirmation (the decision is then in force). /develop does not advance it.
 
 An ADR documenting already-shipped work (the "already built" path, or a linked feature already `existing`) is born `Accepted`.
 
@@ -58,18 +58,18 @@ Recommendations align with the stack in use (on a BaaS, prefer its auth/storage 
 
 ## Artifact ownership
 
-ADR files in `docs/adr/`, created or updated by this skill only, plus any supporting evidence it produces (inventories, audits), which lives in the ADR's `rationale.md` (directory ADR) or inline (single-file ADR), never in the roadmap folder (`docs/roadmap/` is owned by `/roadmap`, not an ADR).
+ADR files in `docs/adr/`, created or updated by this skill only, plus any supporting evidence it produces (inventories, audits), which lives in the ADR's `rationale.md` (directory ADR) or inline (single-file ADR), never in the scope folder (`docs/scope/` is owned by `/scope`, not an ADR).
 
 Two independent choices, location (repo shape) and shape (decision size):
 
-- **Location = repo shape.** Single repo → `docs/adr/`. Monorepo → `docs/adr/<workspace>/` for a workspace decision, `docs/adr/_root/` for a repo-wide one (mirrors the roadmap). Numbering is per location (scan that dir for the next `NNNN`). Call the resolved location `$ADR_DIR`.
+- **Location = repo shape.** Single repo → `docs/adr/`. Monorepo → `docs/adr/<workspace>/` for a workspace decision, `docs/adr/_root/` for a repo-wide one (mirrors the scope). Numbering is per location (scan that dir for the next `NNNN`). Call the resolved location `$ADR_DIR`.
 - **Shape = decision size**, the same in any repo shape. Simple decision: one file `$ADR_DIR/NNNN-title.md` (everything inline, written tight). A decision that is an umbrella (related sub-decisions), or heavy/foundational, or warrants a `verify.md`, uses the directory shape: `$ADR_DIR/NNNN-title/` with `index.md` as its top file plus a `rationale.md` beside it (and child ADRs `NNNN-<child>.md` for an umbrella). Never double the name (`NNNN-title/NNNN-title.md`); the directory carries the number, the top file is `index.md`. Default to a single file; use the directory shape when there are child decisions, or the ADR is heavy enough that keeping the reasoning out of every build read pays off, or a `verify.md` is warranted.
 
   A directory ADR always has exactly two core files (plus optional `verify.md` and child ADRs):
   - **`index.md`** — the build spec `/develop` reads: `## Summary`, `## Requirements`, `## Decision`, the design/spec section, `## Build plan`, `## Consequences`, `## Follow-up`, and a one-line `## Rationale` pointer to `rationale.md`. For an umbrella it also opens with a `## Structure` manifest listing and linking every child ADR (one line each: what it is plus which decision it supports), and holds any cross-child contract.
   - **`rationale.md`** — the decision record `/develop` skips: `## Context`, `## Options considered`, `## Rationale`, the `## References` section, and any bulky evidence (inventories, audits) under its own subheading. There is no `research/` folder; all evidence lives here.
   - Child ADRs (umbrella only) are flat `NNNN-<child>.md` files, each self-sufficient to build from with a short inline rationale (not its own `rationale.md`); promote a child to its own directory only when it grows heavy. Cross-child contracts live in the umbrella `index.md`.
-- **One narrow exception into the roadmap:** after the ADR is confirmed, update the matching feature to the built-ready shape (exact edits in *After the ADR is written*, step 3). Never dump the atomic task list into the roadmap. No matching feature: offer to enroll one (see the derive-tasks step).
+- **One narrow exception into the scope:** after the ADR is confirmed, update the matching feature to the built-ready shape (exact edits in *After the ADR is written*, step 3). Never dump the atomic task list into the scope. No matching feature: offer to enroll one (see the derive-tasks step).
 
 **Artifact base.** ADRs live under `docs/` by default. If `docs/` is a published docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` instead (`.workflow/adr/`). Always follow whichever base already exists (paths here assume `docs/`).
 
@@ -98,13 +98,13 @@ Wait for the answer; use it as the design topic before pre-flight.
 Run these steps (the `git` commands are literal; everything else uses your agent's file tools):
 
 - **Freshness (teams):** `git fetch` quietly, pick the base branch (`main` if `git rev-parse --verify main` succeeds, else `master`), count commits behind with `git rev-list --count HEAD..origin/<base>`. If >0, warn "pull first" before deciding (a teammate may have added ADRs or changed this feature).
-- **Resolve the ADR location** (`ADR_DIR`) = the roadmap workspace mirrored into `docs/adr/`: single repo → `docs/adr/`; monorepo workspace → `docs/adr/<workspace>/`; repo-wide → `docs/adr/_root/`. Determine `<workspace>` as the roadmap does (topic/path/roadmap row). Create the directory if missing.
+- **Resolve the ADR location** (`ADR_DIR`) = the scope workspace mirrored into `docs/adr/`: single repo → `docs/adr/`; monorepo workspace → `docs/adr/<workspace>/`; repo-wide → `docs/adr/_root/`. Determine `<workspace>` as the scope does (topic/path/scope row). Create the directory if missing.
 - **Today's date**: use today's date (inject it into the ADR).
 - **List existing ADRs in this location**: files named `NNNN-*.md` plus any `index.md` in `$ADR_DIR`, for numbering (per location) and related-decision detection.
 - **Count source files** (e.g. `.ts`, `.tsx`, `.js`, `.py`, `.go`, `.rs`, `.java`), excluding `node_modules/`, `.git/`, `dist/`. Informs how much code there is to read, and whether to offload that reading to a `scout` subagent.
 - **Read project context**, the source of truth for the stack and community skills: root `AGENTS.md` (fall back to `CLAUDE.md`, else MISSING), plus the nested `<area>/AGENTS.md` for this feature's area if one exists (e.g. `src/auth/AGENTS.md` for an auth feature).
-- **Read the build approach for THIS feature**: the delivery strategy that governs how the ADR's `## Build plan` is ordered and sliced. Precedence: this feature's roadmap-row `Approach` override if declared, else the project default (root `AGENTS.md` first, else the roadmap header in `docs/roadmap/`). A feature with its own approach is built by ITS approach; others use the project default. The family: **Tracer Bullet** (thin vertical slices end-to-end through every layer), **Skateboard** (thinnest usable whole first, then grow), **Facade** (UI shell first, wire the backend later, a prototype path), **Journey** (one complete user path per phase), or a project-specific variant. If neither records one, note the assumption and set the default by Staff/Principal judgment (prefer end-to-end / Tracer-Bullet slices for production work). Carry what you find into the ADR. Reason about what the approach implies for this feature; no fixed per-approach recipe. The four approaches imply materially different `## Build plan` orderings, not the same order relabeled: Facade leads with the UI shell on placeholder data and defers the migration; Journey completes one user path's tasks fully before another's; Tracer Bullet stands up a thin end-to-end thread first, then thickens; Skateboard builds the smallest usable slice. Let the recorded approach visibly shape the ordering.
-- **Locate the linked roadmap feature (if any):** cheaply scan `docs/roadmap/` filenames/headings (including per-workspace subdirs) for a feature matching this topic; open only the single roadmap file containing it (`roadmap.md`, or the matching `<epic>.md` in a split). If found, read that row's intent plus any acceptance-criteria seeds (they seed Stage (a)) and remember the file/row for the derive-tasks and linking steps; this also settles feature-linked vs standalone status. If no row matches, note the standalone-decision path and don't create one now.
+- **Read the build approach for THIS feature**: the delivery strategy that governs how the ADR's `## Build plan` is ordered and sliced. Precedence: this feature's scope-row `Approach` override if declared, else the project default (root `AGENTS.md` first, else the scope header in `docs/scope/`). A feature with its own approach is built by ITS approach; others use the project default. The family: **Tracer Bullet** (thin vertical slices end-to-end through every layer), **Skateboard** (thinnest usable whole first, then grow), **Facade** (UI shell first, wire the backend later, a prototype path), **Journey** (one complete user path per phase), or a project-specific variant. If neither records one, note the assumption and set the default by Staff/Principal judgment (prefer end-to-end / Tracer-Bullet slices for production work). Carry what you find into the ADR. Reason about what the approach implies for this feature; no fixed per-approach recipe. The four approaches imply materially different `## Build plan` orderings, not the same order relabeled: Facade leads with the UI shell on placeholder data and defers the migration; Journey completes one user path's tasks fully before another's; Tracer Bullet stands up a thin end-to-end thread first, then thickens; Skateboard builds the smallest usable slice. Let the recorded approach visibly shape the ordering.
+- **Locate the linked scope feature (if any):** cheaply scan `docs/scope/` filenames/headings (including per-workspace subdirs) for a feature matching this topic; open only the single scope file containing it (`scope.md`, or the matching `<epic>.md` in a split). If found, read that row's intent plus any acceptance-criteria seeds (they seed Stage (a)) and remember the file/row for the derive-tasks and linking steps; this also settles feature-linked vs standalone status. If no row matches, note the standalone-decision path and don't create one now.
 - **(Optional)** list installed skills dirs for availability only (`.claude/skills/`, `.agents/skills/`, `skills/`). Relevance is decided by AGENTS.md plus the feature, not name-matching.
 
 From the ADR list (paths relative to `$ADR_DIR`):
@@ -123,7 +123,7 @@ From the ADR list (paths relative to `$ADR_DIR`):
 3. Available ≠ relevant. You may list the installed skills dirs to see what exists, but relevance comes from the feature plus `AGENTS.md`. If a clearly relevant skill is installed but not yet referenced in `AGENTS.md`, use it anyway and flag (ADR Follow-up) that it belongs in the right context file: root if project-wide, nested `<area>/AGENTS.md` if area-specific.
 4. Whatever the context files show the project already uses (a BaaS, an ORM, a payment provider, an auth library) is what your library/provider recommendation must build on or prefer, not an unrelated external tool. If a genuinely better option isn't installed, note it as an ADR Follow-up rather than silently assuming it.
 
-**Workflow skills** (never treat as community skills): `audit`, `architect`, `roadmap`, `develop`, `check`, `test`, `document`, `debug`, `sync`, plus new workflow skills as they're created.
+**Workflow skills** (never treat as community skills): `audit`, `architect`, `scope`, `develop`, `check`, `test`, `document`, `debug`, `sync`, plus new workflow skills as they're created.
 
 ---
 
@@ -150,14 +150,14 @@ The inferred MODE (from Framing) is already one of `FEATURE` / `ARCHITECTURE` / 
 The inputs to apply (you already have them from the design conversation and pre-flight):
 1. Design topic (from the user's original message)
 2. The inferred framing: MODE, platform (web/mobile/API), stack & conventions (from `AGENTS.md`), and any constraints/compliance inferred or confirmed
-2a. The feature's build approach (pre-flight precedence: roadmap-row `Approach` override, else the project default from `AGENTS.md`/roadmap header, else the noted default) → `BUILD_APPROACH`; order and slice `## Build plan` by what the approach implies for this feature
+2a. The feature's build approach (pre-flight precedence: scope-row `Approach` override, else the project default from `AGENTS.md`/scope header, else the noted default) → `BUILD_APPROACH`; order and slice `## Build plan` by what the approach implies for this feature
 3. All staged-conversation answers, stage by stage: the confirmed acceptance criteria (already IDed AC-1…, to seed `## Requirements`), the confirmed data model (entities/fields/relationships, to seed `## Build plan` task 1), the confirmed stack/tool picks, API surface, authz model, and edge cases. On the documentation path (staged conversation skipped) treat it as `"Staged design skipped — documenting an already-made decision"`, not an error
 3a. The RECOMMEND items → `RECOMMEND_ITEMS_OR_NONE`: the specific decisions you must make and justify (tool/provider aligned to the stack, session model, etc.); make each call, don't echo it back as an open question. If none, treat as `"none"`
 3b. The References level → `REFERENCES_LEVEL` (`none` | `sources` | `sources+links`, per the rule above). If Stage (c) never ran and you have not asked, default to `none`
 4. Context-file contents: `AGENTS.md` (root + the feature area's nested), or `CLAUDE.md` as fallback, or "MISSING"
 5. Existing ADR list (filenames + first line of each)
 6. Related ADR paths (flagged in pre-flight)
-7. The resolved ADR location (`$ADR_DIR`), next number, and shape: a single file `$ADR_DIR/NNNN-title.md`, or a directory `$ADR_DIR/NNNN-title/` (`index.md` + `rationale.md`, plus child ADRs for an umbrella). Umbrella: write the named child decisions; any inventory/audit goes in `rationale.md`, never in `docs/roadmap/`, never loose in the code tree. Only the `index.md` carries a `**Status**:` line (it mirrors the feature); child ADRs omit the lifecycle Status (spec content governed by the umbrella)
+7. The resolved ADR location (`$ADR_DIR`), next number, and shape: a single file `$ADR_DIR/NNNN-title.md`, or a directory `$ADR_DIR/NNNN-title/` (`index.md` + `rationale.md`, plus child ADRs for an umbrella). Umbrella: write the named child decisions; any inventory/audit goes in `rationale.md`, never in `docs/scope/`, never loose in the code tree. Only the `index.md` carries a `**Status**:` line (it mirrors the feature); child ADRs omit the lifecycle Status (spec content governed by the umbrella)
 8. Source file count (whether there's code to read; for a large ENHANCEMENT/CROSS-CUTTING codebase, offload the reading to a `scout` subagent per *Subagents* and write from its map)
 9. Operation: `create` | `update` | `supersede`
 10. Today's date (from pre-flight)
@@ -168,7 +168,7 @@ The inputs to apply (you already have them from the design conversation and pre-
 
 ### After the ADR is written
 
-Once the ADR file exists, read `internal/after-subagent.md` and follow it for the ADR self-check, self-review, confirmation, status ratification, roadmap linking, and the final spoken summary. Do not read it before you write the ADR.
+Once the ADR file exists, read `internal/after-subagent.md` and follow it for the ADR self-check, self-review, confirmation, status ratification, scope linking, and the final spoken summary. Do not read it before you write the ADR.
 
 ### Update / Supersede path
 

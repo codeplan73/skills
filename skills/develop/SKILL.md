@@ -1,7 +1,7 @@
 ---
 name: develop
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion, WebSearch, WebFetch
-description: "Run /develop to build a feature, UI or backend, from an approved design — a page, component, API, service, or data slice. If something load-bearing is undecided and no ADR records it, it stops and routes you to /architect; otherwise it reads the ADR plus AGENTS.md, builds, and advances the roadmap."
+description: "Run /develop to build a feature, UI or backend, from an approved design — a page, component, API, service, or data slice. If something load-bearing is undecided and no ADR records it, it stops and routes you to /architect; otherwise it reads the ADR plus AGENTS.md, builds, and advances the scope."
 ---
 
 ## Output style (plain words, no dashes)
@@ -19,11 +19,11 @@ Gates, then acts: no upfront question rounds like `/architect`. Read the decisio
 ## Artifact ownership
 
 - Writes app code (plus CSS/tokens for UI).
-- Roadmap (`docs/roadmap/`): only the Step 4 touches (feature status → `in-progress`, milestone sub-boxes, `Build it` box, code pointer). Never marks a feature `done` (waits for `/check verify` and `/test`), never ticks `Verify it` or `Test it`, never creates files in `docs/roadmap/` (roadmaps only; analysis/research is `/architect`'s, in the ADR's `rationale.md`).
+- Scope (`docs/scope/`): only the Step 4 touches (feature status → `in-progress`, milestone sub-boxes, `Build it` box, code pointer). Never marks a feature `done` (waits for `/check verify` and `/test`), never ticks `Verify it` or `Test it`, never creates files in `docs/scope/` (scopes only; analysis/research is `/architect`'s, in the ADR's `rationale.md`).
 - Never writes ADRs (flags the need, defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); new area conventions go via `/sync` afterwards.
 - One ADR touch: the `**Status**:` line (umbrella decision → the `index.md`'s, never a child's), plus filling the feature's ADR pointer line. Build start: `Proposed` → `In Progress`; build lands (feature → `done`): `In Progress` → `Accepted` (an ADR is not `Accepted` until its feature ships). Never edit ADR content, only that line, surgically: re-read it right before writing; unexpected state (already `Accepted`, `Superseded`) → flag, don't clobber.
 - Artifact base: `docs/` by default, `.workflow/` if `docs/` is a published docs site. Read from whichever exists (paths here assume `docs/`).
-- Shared roadmap: re-read it right before ticking, edit only the specific checkbox, status, or pointer line (never rewrite the file); feature not as expected (already `done`, reworked) → flag, don't overwrite. The freshness pre-check guards against rebuilding what a teammate shipped.
+- Shared scope: re-read it right before ticking, edit only the specific checkbox, status, or pointer line (never rewrite the file); feature not as expected (already `done`, reworked) → flag, don't overwrite. The freshness pre-check guards against rebuilding what a teammate shipped.
 
 ---
 
@@ -49,7 +49,7 @@ Before mutating anything (skip silently if solo, offline, or non-git): `git fetc
 
 - Behind (count > 0) → stop and warn: "You're N commits behind `origin/$BASE`. A teammate may have already changed or shipped this. Pull first, then run again."
 - Uncommitted work in the area you'll touch → warn: "You have uncommitted changes here. Commit or stash first so this build doesn't tangle with them." Let them proceed if they insist.
-- Feature `in-progress` in the roadmap AND its code area (pointer line's path) has recent commits by another author (`git log --format='%an' -- <area>`) → warn: "*<feature>* looks like it's mid-build by someone else. Coordinate before continuing it." Confirm before proceeding.
+- Feature `in-progress` in the scope AND its code area (pointer line's path) has recent commits by another author (`git log --format='%an' -- <area>`) → warn: "*<feature>* looks like it's mid-build by someone else. Coordinate before continuing it." Confirm before proceeding.
 
 Warnings, not hard blocks, but surface them.
 
@@ -69,10 +69,10 @@ NOT owed for pure implementation already specified: a small bug fix, a component
 
 Don't hardcode to page names; apply the invent-test to whatever was asked (a "home page" or "search filter" fails on a fresh project, passes once an ADR/`design.md` exists). False negatives are the failure mode, building a real decision without noticing (what "just build the home page" looks like): when unsure, treat as owed and ask (panel below).
 
-Read only what this feature needs, never the whole `docs/` tree: its one roadmap file and its one governing ADR (single file, or umbrella `index.md` plus the one child speccing this sub-task). No other features' rows, roadmap files, workspaces, or unrelated ADRs.
+Read only what this feature needs, never the whole `docs/` tree: its one scope file and its one governing ADR (single file, or umbrella `index.md` plus the one child speccing this sub-task). No other features' rows, scope files, workspaces, or unrelated ADRs.
 
 **Check, in order:**
-1. **Locate this feature's roadmap file (only that one).** Monorepo → `docs/roadmap/<workspace>/` for the task's package. Pick the file (`roadmap.md`, or the matching `<epic>.md` in a split) from the At-a-glance table alone; read just this feature's section. `needs a decision` with no ADR pointer yet → decision owed and missing. Malformed → flag and ask, don't guess.
+1. **Locate this feature's scope file (only that one).** Monorepo → `docs/scope/<workspace>/` for the task's package. Pick the file (`scope.md`, or the matching `<epic>.md` in a split) from the At-a-glance table alone; read just this feature's section. `needs a decision` with no ADR pointer yet → decision owed and missing. Malformed → flag and ask, don't guess.
 2. **Open the governing ADR via the feature's `ADR` pointer**, reading only its build-spec sections as defined in the build flow (`flow/build.md`), Step 2 item 1. Found → it's the spec; proceed. No pointer and no linked ADR → targeted look in `docs/adr/<workspace>/` for one matching this feature's scope, never a blanket read.
 3. The **nearest** `AGENTS.md` (workspace/area) may already capture the decision, synced from an earlier feature (e.g. "the auth provider is already chosen") → proceed without a new ADR.
 
@@ -83,7 +83,7 @@ Decision owed and unrecorded → don't guess, don't silently stop. Ask (single-s
 - **options**:
   1. `Architect it first` — "Recommended. Capture the decision in an ADR before building, so the build has a spec." → **end here** with the handoff below. Do not build.
   2. `No, not needed` — "I've judged there's no real decision here; build directly." → proceed to the build flow (`flow/build.md`).
-  3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to the build flow (`flow/build.md`), leaving the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in the roadmap (`docs/roadmap/`).
+  3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to the build flow (`flow/build.md`), leaving the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in the scope (`docs/scope/`).
 
 The tool appends "Other" as a free-text option automatically.
 
@@ -99,7 +99,7 @@ No decision owed (pure implementation) → skip the question, proceed.
 
 ### Build flow (Steps 1-4)
 
-Once the gate clears (no decision owed, or the engineer chose `No, not needed` / `Skip for now`), read `flow/build.md` and follow its Steps 1-4: classify the track, load the decision and conventions, explore, optional doc-check, build, then update the roadmap and report. Do not read `flow/build.md` when the gate ends the run (`Architect it first`, no build).
+Once the gate clears (no decision owed, or the engineer chose `No, not needed` / `Skip for now`), read `flow/build.md` and follow its Steps 1-4: classify the track, load the decision and conventions, explore, optional doc-check, build, then update the scope and report. Do not read `flow/build.md` when the gate ends the run (`Architect it first`, no build).
 
 ---
 

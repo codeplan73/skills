@@ -1,4 +1,4 @@
-# Roadmap Plan Route: greenfield
+# Scope Plan Route: greenfield
 
 Greenfield: decompose the whole MVP from scratch, foundations-first. Apply the foundations-first sequencing below at Step 4 of `plan.md`, after the build approach is chosen in Step 3.
 
@@ -13,8 +13,8 @@ No approach starts a feature slice before the ground it stands on exists (workin
 5. **Design system / UI foundation**: `/architect` → `design.md`, then base components (`Needs ADR: yes`), if the product has meaningful UI; every page depends on it.
 6. **Walking-skeleton slice**: a thin vertical slice wired end-to-end (DB → API → UI) doing one trivial real thing (e.g. one record created and rendered), proving the stack is connected before feature work. Weight `medium`; usually leans on the foundation ADRs, not its own. Under Tracer Bullet it merges with the first real slice (below).
 
-Then the feature slices, ordered and phased per Step 3. Phasing column: `Foundation`, `Skeleton`, the slice/journey (e.g. `Slice 2`), or `Deferred`; Order column: integer build sequence across the whole roadmap.
+Then the feature slices, ordered and phased per Step 3. Phasing column: `Foundation`, `Skeleton`, the slice/journey (e.g. `Slice 2`), or `Deferred`; Order column: integer build sequence across the whole scope.
 
-Shape the slices exactly as the chosen approach's persona directs (`approaches/<name>.md`, already read in Step 3 of `plan.md`, whose role you have adopted). The approach changes WHAT the slices are, not just labels: every capability as its own fully-built feature with `Slice 1 … Slice N` stapled on has NOT honored the approach. Follow the persona's decomposition rule, its first slice or deliverable, its real-vs-deferred split, and its sequencing, and let its worked example calibrate the shape. The four approaches must yield genuinely different roadmaps for the same product.
+Shape the slices exactly as the chosen approach's persona directs (`approaches/<name>.md`, already read in Step 3 of `plan.md`, whose role you have adopted). The approach changes WHAT the slices are, not just labels: every capability as its own fully-built feature with `Slice 1 … Slice N` stapled on has NOT honored the approach. Follow the persona's decomposition rule, its first slice or deliverable, its real-vs-deferred split, and its sequencing, and let its worked example calibrate the shape. The four approaches must yield genuinely different scopes for the same product.
 
 Whatever the approach, most rows do NOT each need their own ADR: the early slice rests on the foundational ADRs (data model, auth), and later slices usually extend a decided pattern. Still apply the invent-test per row, but expect far fewer `Needs ADR: yes` rows than a flat feature list; nearly every row needing one means you decomposed into full features, re-slice.

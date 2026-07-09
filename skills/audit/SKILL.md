@@ -12,11 +12,11 @@ Write everything this skill produces (files, reports, every message to the engin
 
 The context bootstrapper: writes the `AGENTS.md` files every later skill and AI tool reads.
 
-- Greenfield (no code yet): ask for coding standards, seed root `AGENTS.md` from the answers plus the build approach (name and one line principle) from the roadmap header if `/roadmap` set one. Runs after the project is scaffolded with its chosen stack (`/roadmap` → `/architect` decides the stack → scaffold → `/audit`); earlier is premature.
+- Greenfield (no code yet): ask for coding standards, seed root `AGENTS.md` from the answers plus the build approach (name and one line principle) from the scope header if `/scope` set one. Runs after the project is scaffolded with its chosen stack (`/scope` → `/architect` decides the stack → scaffold → `/audit`); earlier is premature.
 - Brownfield, undocumented (code, no `AGENTS.md`): scan the whole project, write root `AGENTS.md` and nested `<area>/AGENTS.md` files, judging what is global (root) vs area specific (nested).
 - Brownfield, partially documented: check existing root and nested docs against the whole codebase; add only what is missing (new global facts, nested docs for undocumented areas); never clobber curated content.
 
-Does not create ADRs (/architect owns those), maintain files after changes (/sync owns that), or write the feature roadmap (/roadmap owns `docs/roadmap/`).
+Does not create ADRs (/architect owns those), maintain files after changes (/sync owns that), or write the feature scope (/scope owns `docs/scope/`).
 
 ## Context-file convention (AGENTS.md is canonical)
 
@@ -56,7 +56,7 @@ Gather several signals (a file count alone misleads: a scaffold inflates it, an 
 2. Source count across common ecosystems (extensions like `.ts/.tsx/.js/.jsx/.py/.go/.rs/.java/.rb/.swift/.kt/.php/.cs/.dart/.ex/.exs/.scala/.c/.cpp/.h/.lua/.clj`), excluding vendored/generated dirs (`node_modules`, `.git`, `dist`, `build`) and config files (`*.config.*`).
 3. Established signals: `git log --oneline` for commit-history depth; a real manifest (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `composer.json`, `*.csproj`, `pubspec.yaml`, `mix.exs`, `Gemfile`).
 4. Monorepo signal: workspace markers (`pnpm-workspace.yaml`, `turbo.json`, a `"workspaces"` field in `package.json`) or any `apps/*/package.json` / `packages/*/package.json` near the root.
-5. **Workflow-setup signal (`WORKFLOW_SETUP`)**: root AGENTS.md is MISSING while the workflow has already decided the stack, i.e. a `docs/adr/` architecture ADR exists (a file with a `## Proposed stack` section), and/or `docs/roadmap/` has a "Stack and architecture" (or similar foundational scaffold) feature. This is the intended greenfield order (`/roadmap` → `/architect` decides the stack → `/develop` scaffolds it → `/audit`): the project is freshly scaffolded from its chosen stack and still needs its coding standards captured. When this signal fires, the manifest and scaffold source that now exist are the scaffold, not a pre-existing codebase.
+5. **Workflow-setup signal (`WORKFLOW_SETUP`)**: root AGENTS.md is MISSING while the workflow has already decided the stack, i.e. a `docs/adr/` architecture ADR exists (a file with a `## Proposed stack` section), and/or `docs/scope/` has a "Stack and architecture" (or similar foundational scaffold) feature. This is the intended greenfield order (`/scope` → `/architect` decides the stack → `/develop` scaffolds it → `/audit`): the project is freshly scaffolded from its chosen stack and still needs its coding standards captured. When this signal fires, the manifest and scaffold source that now exist are the scaffold, not a pre-existing codebase.
 
 Pick the phase. The order of checks matters: the workflow-setup signal outranks the raw code count, because a fresh scaffold has a manifest and source files yet is still greenfield.
 
@@ -64,7 +64,7 @@ Pick the phase. The order of checks matters: the workflow-setup signal outranks 
 |---|---|
 | Area path given as argument | Phase 3 |
 | `ROOT_EXISTS` (or `ROOT_LEGACY` after migration) | Phase 4 |
-| `ROOT_MISSING` and `WORKFLOW_SETUP` (stack ADR and/or roadmap stack feature) | **Phase 1**, even though a manifest and scaffold source now exist. Ask the coding standards; seed root from the ADR's stack. Never treat a just-scaffolded workflow project as brownfield. |
+| `ROOT_MISSING` and `WORKFLOW_SETUP` (stack ADR and/or scope stack feature) | **Phase 1**, even though a manifest and scaffold source now exist. Ask the coding standards; seed root from the ADR's stack. Never treat a just-scaffolded workflow project as brownfield. |
 | `ROOT_MISSING`, no `WORKFLOW_SETUP`, no source files AND no manifest | Phase 1 |
 | `ROOT_MISSING`, no `WORKFLOW_SETUP`, has code (source ≥ 10 or a manifest), ≥ 2 commits and clearly real feature code (not just scaffold) | Phase 2, any language |
 | `ROOT_MISSING`, no `WORKFLOW_SETUP`, has code but it looks like untouched scaffold, or ≤ 1 commit, or you can't tell greenfield from brownfield | Phase 0, ask |

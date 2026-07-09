@@ -28,8 +28,8 @@ deciding? 2 to 4 paragraphs. Do not mention options here, only the problem space
 ## Requirements
 
 <!-- BUILD SPEC (the WHAT, /develop builds to this; /check verify checks against it) -->
-<!-- The contract. Seed the user stories + acceptance criteria from the roadmap feature's intent
-     and its acceptance-criteria seeds when a roadmap row exists, then refine with the engineer.
+<!-- The contract. Seed the user stories + acceptance criteria from the scope feature's intent
+     and its acceptance-criteria seeds when a scope row exists, then refine with the engineer.
      Acceptance criteria are the contract /develop builds to and /check verify checks. -->
 
 **User stories**:
@@ -139,8 +139,8 @@ Do not repeat the pros/cons list, explain the reasoning. 1 to 3 paragraphs.>
      (Tracer Bullet, Skateboard, Facade, Journey, or a variant, read in pre-flight), reasoned about for
      this feature rather than by a fixed recipe. The data-model migration is normally task 1 (from the
      confirmed data model) and stays early; a UI-first Facade/prototype approach may lead with the shell.
-     When a roadmap feature row links this ADR, these tasks are also written into that row's sub-tasks;
-     with no roadmap row, they live here as the source of truth (see /architect's derive-tasks step). -->
+     When a scope feature row links this ADR, these tasks are also written into that row's sub-tasks;
+     with no scope row, they live here as the source of truth (see /architect's derive-tasks step). -->
 
 1. <Build task, e.g. "Create the migration for the confirmed data model">, satisfies **AC-1**
 2. <Build task>, satisfies **AC-2**, **AC-3**
@@ -227,17 +227,17 @@ N. <Build task>, satisfies **AC-N**
 
 ## Status values
 
-The ADR's status mirrors its feature's build lifecycle (roadmap: planned→`Proposed`, in-progress→`In Progress`, done→`Accepted`):
+The ADR's status mirrors its feature's build lifecycle (scope: planned→`Proposed`, in-progress→`In Progress`, done→`Accepted`):
 
 | Status | Meaning |
 |---|---|
 | `Proposed` | ADR written, decision agreed, feature NOT yet built. Set by /architect at creation. |
 | `In Progress` | The feature governed by this ADR is being built. Set by /develop when the feature goes in-progress. |
-| `Accepted` | The feature is built and verified (roadmap `done`) — the "done and dusted" state. An ADR is NOT `Accepted` until its feature ships. Set by /develop on completion or reconciled by /sync. |
+| `Accepted` | The feature is built and verified (scope `done`) — the "done and dusted" state. An ADR is NOT `Accepted` until its feature ships. Set by /develop on completion or reconciled by /sync. |
 | `Superseded by [NNNN](NNNN-title.md)` | Replaced by a newer ADR |
 
-**Which status behavior applies depends on whether a buildable roadmap feature links this ADR:**
-- **Feature-linked ADR** (a `docs/roadmap/` row's `ADR` cell points to it) → **feature-mirrored**: `Proposed` → `In Progress` → `Accepted`, tracking the feature's build lifecycle (table above). Confirmation ratifies content but does not set `Accepted`; /develop advances it.
+**Which status behavior applies depends on whether a buildable scope feature links this ADR:**
+- **Feature-linked ADR** (a `docs/scope/` row's `ADR` cell points to it) → **feature-mirrored**: `Proposed` → `In Progress` → `Accepted`, tracking the feature's build lifecycle (table above). Confirmation ratifies content but does not set `Accepted`; /develop advances it.
 - **Standalone decision ADR** (a foundational/stack or cross-cutting standard with **no linked buildable feature**) → **decision-status**: `Proposed` when written, then **`Accepted` once the engineer ratifies it** (on confirmation). There's no build phase to gate on, so it is not feature-mirrored.
 - **ADR documenting already-shipped work** (the "already built" path, or a feature already `existing`) → **born `Accepted`** — it describes reality that already exists.
 
