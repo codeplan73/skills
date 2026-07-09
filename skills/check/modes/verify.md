@@ -157,7 +157,7 @@ Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the 
 **What /test should lock in**:
 - <the behaviors above, as permanent assertions>
 
-**For /check review or /harden**:
+**For /check review**:
 - <anything that worked but looked fragile: slow response, console warning, missing empty state>
 ```
 

@@ -137,18 +137,17 @@ Be **strict**, noise erodes trust. Read an ADR only if the changed paths plausib
 
 **Scope:** only the roadmap file(s) you were handed. Never hunt for or reconcile other files under `docs/roadmap/`; one workspace's change does not license editing another's.
 
-You are the **universal sub-task reconciler**: `/develop` ticks its own sub-tasks; `/test`, `/harden`, `/audit`, and `/sync` sub-tasks have no one else. For **every feature the diff touched**, re-evaluate each of its sub-tasks against repo evidence (not just what this diff added) and tick the genuinely complete ones: the diff picks *which features* to re-check, the repo state decides *which sub-tasks are done*. Look directly with Read/Bash/Grep/Glob.
+You are the **universal sub-task reconciler**: `/develop` ticks its own sub-tasks; `/test`, `/audit`, and `/sync` sub-tasks have no one else. For **every feature the diff touched**, re-evaluate each of its sub-tasks against repo evidence (not just what this diff added) and tick the genuinely complete ones: the diff picks *which features* to re-check, the repo state decides *which sub-tasks are done*. Look directly with Read/Bash/Grep/Glob.
 
 **Malformed roadmap** (no At-a-glance table or feature sections, non-standard status, broken headings, a bad hand-edit): do not edit it; note `roadmap malformed: <file> — needs a human or /roadmap re-run` under `ROADMAP_RECONCILED` and skip it. Never act on a misread.
 
-> Step 1's source-file filtering (dropping `*.test.*`, `docs/**`) governs what you sync AGENTS.md from; it does not limit reconciliation. Here you may and should inspect test files, `docs/hardening/`, AGENTS.md, and config to judge completion.
+> Step 1's source-file filtering (dropping `*.test.*`, `docs/**`) governs what you sync AGENTS.md from; it does not limit reconciliation. Here you may and should inspect test files, AGENTS.md, and config to judge completion.
 
 Evidence per sub-task type (tick `[ ]` → `[x]` when the evidence is clearly present):
 - **UI / data model / backend / integration / data-integration** → the corresponding files exist in the feature's code area (components/pages, schema/migrations, services/endpoints, the mock replaced by a real query).
 - **Build it (+ milestones)** → the feature's code exists in its area (milestone chunks present); `/develop` usually ticks these itself.
 - **Verify it** → a `verify.md` beside the ADR, or a recorded passing runtime verification for the feature.
 - **Test it** → test files cover this feature's area (search the area + test dirs).
-- **Harden** → a `docs/hardening/` (or `.workflow/hardening/`) entry references this feature/area.
 - **SEO & metadata** → metadata/structured-data present on the feature's pages.
 - **Sync (record conventions)** → the area's `AGENTS.md` exists and reflects the feature.
 - **Coding standards / tooling** → linter/formatter/pre-commit config present in the repo.

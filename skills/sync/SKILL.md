@@ -28,7 +28,7 @@ Closes the loop on a completed change: syncs AGENTS.md files, the roadmap, and l
 | Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |
 | Reconcile an ADR's `**Status**:` line to its feature's roadmap status (`planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`) | ✅ Status line only | /sync |
 | Edit an ADR's **content** / supersede it | ❌ flags as stale | /architect |
-| Reconcile the roadmap — for the **relevant workspace's** roadmap file only (not all of `docs/roadmap/`) — tick **any** completed sub-task from repo **evidence** (code, tests, hardening entry, AGENTS.md), advance status | ✅ corrects | /sync |
+| Reconcile the roadmap — for the **relevant workspace's** roadmap file only (not all of `docs/roadmap/`) — tick **any** completed sub-task from repo **evidence** (code, tests, AGENTS.md), advance status | ✅ corrects | /sync |
 | Add / reorder features or sub-tasks in the roadmap | ❌ leaves alone | /roadmap |
 | Overwrite or rewrite curated AGENTS.md prose | ❌ flags conflict instead | human |
 
@@ -40,7 +40,7 @@ The dividing line on creation is **context, not policy**: create only when this 
 
 ## Artifact ownership
 
-Owns exactly what the Boundaries table grants and writes nothing else. As the **universal sub-task reconciler** it ticks any roadmap sub-task it can verify from repo evidence (sweeping the `/test`/`/harden`/`/audit`/`/sync` sub-tasks other skills don't tick) and advances feature status; exact rules in `agent-prompt.md`.
+Owns exactly what the Boundaries table grants and writes nothing else. As the **universal sub-task reconciler** it ticks any roadmap sub-task it can verify from repo evidence (sweeping the `/test`/`/audit`/`/sync` sub-tasks other skills don't tick) and advances feature status; exact rules in `agent-prompt.md`.
 
 **Artifact base.** ADRs and the roadmap live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site; use whichever base exists in the repo (paths here assume `docs/`).
 

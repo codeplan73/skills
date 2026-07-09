@@ -105,7 +105,7 @@ Out of scope for the current build pass, kept so the plan stays honest.
 - **Atomic build tasks live in the ADR's `## Build plan`, not here** — the roadmap carries only the milestone rollup.
 - **Status** `planned` → `in-progress` → `done`, plus `existing` (pre-workflow) and `dropped` (de-scoped, kept for history).
 - **Approach tag** beside a heading (e.g. `· Facade`) overrides the project default for that feature; no tag = inherits it.
-- **Weight tag** `· full` = design review + `/harden` required; `lean`/`medium` get no tag.
+- **Weight tag** `· full` = a fresh-model `/check review` warranted; `lean`/`medium` get no tag.
 - **Pointer line** (`ADR <n> · code in <path>`): the ADR link added by `/architect`, the code path by `/develop`.
 ```
 

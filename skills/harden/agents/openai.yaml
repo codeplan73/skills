@@ -1,4 +1,0 @@
-interface:
-  display_name: "Harden"
-  short_description: "Find production failure modes"
-  default_prompt: "Use $harden to stress test this completed change before merge."

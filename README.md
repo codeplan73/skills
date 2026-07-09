@@ -5,8 +5,8 @@ A set of [Agent Skills](https://agentskills.io) that encode a complete, phase-ba
 The core idea: **one skill per phase, one artifact per skill.** Each skill does a single job well, writes its results to a durable file (a roadmap, an ADR, a context file), and hands off to the next. Because the state lives in files — not in a chat session — work survives across sessions, picks up where it left off, and works for a whole team.
 
 ```
-idea ─▶ /roadmap ─▶ /audit ─▶ /architect ─▶ /develop ─▶ /check verify ─▶ /test ─▶ /check review ─▶ /harden ─▶ /document ─▶ /sync
-        scope       map        decide        build       prove it works   lock     fresh-model       stress     write up     keep current
+idea ─▶ /roadmap ─▶ /audit ─▶ /architect ─▶ /develop ─▶ /check verify ─▶ /test ─▶ /check review ─▶ /document ─▶ /sync
+        scope       map        decide        build       prove it works   lock     fresh-model       write up     keep current
         └──────────────── bare /roadmap (orient anytime) ────────────────┘   /debug (root-cause a bug, anytime)
 ```
 
@@ -55,11 +55,11 @@ A bare `/roadmap` at any time tells you where things stand and what's safe to pi
 | [`architect`](skills/architect/) | **Decide** | Staff-engineer system design as a **step-by-step walk** — one dimension at a time (requirements → data model → stack → API → security → edge cases), it suggests and you pick, nothing bundled upfront — writing a complete build-spec **ADR** to `docs/adr/`. A feature ADR carries `## Requirements` (acceptance criteria), Design, and `## Build plan`; a decision-only stack/standard ADR records just the decision. On capture it **updates the roadmap feature** (milestones + Verify/Test boxes) and **offers the chosen tool's Agent Skill and MCP server**. |
 | [`develop`](skills/develop/) | **Build** | Builds a feature — UI *and* logic — from its ADR as a **vertical slice**, runs migrations, ticks the roadmap milestones, and emits verify steps. For a UI screen it composes the **whole product surface** (brand, copy, layout, states), never a bare widget. **Gates on the decision first**: if building would mean inventing something undecided, it routes you to `/architect`. |
 | [`check`](skills/check/) | **Verify** | Two pre-merge modes. `/check verify` runs the *real app* end-to-end plus a **spec-conformance** pass — every acceptance criterion met and every specced surface built (catches missed pages / un-applied migrations), not just green tests. `/check review` re-reads the diff on a **different model** than wrote the code, so a fresh set of eyes catches what the author missed. |
-| [`test`](skills/test/) | **Verify** | A senior test suite for your uncommitted change; detects/saves your framework. |
-| [`harden`](skills/harden/) | **Verify** | Systems-level adversarial pass for concurrency, scale, and security failure modes (for a risky or high-blast-radius change). |
-| [`debug`](skills/debug/) | **Fix** | A disciplined root-cause loop — reproduce, localize, hypothesize, prove, fix at the root, add a regression test. |
+| [`test`](skills/test/) | **Verify** | A senior test suite for your uncommitted change; detects/saves your framework. || [`debug`](skills/debug/) | **Fix** | A disciplined root-cause loop — reproduce, localize, hypothesize, prove, fix at the root, add a regression test. |
 | [`document`](skills/document/) | **Ship** | PR text, changelog, release notes, or a postmortem — drafted from the real diff. |
 | [`sync`](skills/sync/) | **Close** | Keeps `AGENTS.md` current, **reconciles the roadmap** from what actually shipped, and flags ADRs the change made stale. |
+
+> Hardening (systems-level failure-mode analysis: concurrency, scale, security) is temporarily removed and will return as a system-design specialization.
 
 ---
 
@@ -82,18 +82,18 @@ You rarely run all ten. Run the subset a given piece of work needs, in any order
 The loop is **spec-driven**: `/roadmap` fixes the *what*, `/architect` designs the *how* as an acceptance-criteria contract, and every later step traces back to that contract.
 
 ```
-/roadmap → /architect → /develop → /check verify → /test → /harden* → /check review → /document → /sync → replan
- seed the    design        build the   prove it        lock    stress     fresh-model      write     sync      queue
- what        (the ADR)     slice       works           in      (risky)*   review           it up     context   next
+/roadmap → /architect → /develop → /check verify → /test → /check review → /document → /sync → replan
+ seed the    design        build the   prove it        lock    fresh-model      write     sync      queue
+ what        (the ADR)     slice       works           in      review           it up     context   next
 ```
 
 - **`/roadmap`** seeds the *what* — a feature's intent plus acceptance-criteria **seeds** (the definition-of-done).
 - **`/architect`** designs the *how* as a **step-by-step walk** — it asks one dimension at a time (requirements → data model → stack/tool → API → security → edge cases), suggesting an option at each and letting you pick, never dumping a finished model or stack in a box. It writes an **ADR** whose spine is `## Requirements` (IDed acceptance criteria `AC-1…`, *the contract*), a Design section, and a `## Build plan`; a **decision-only ADR** (stack/architecture or cross-cutting standard) records just the decision, no build plan. On capture it **updates the roadmap feature** to `Design → Build (2–5 milestones rolled up from the ADR) → Verify → Test`, and when it settles on a tool it **offers that tool's Agent Skill and MCP server** (you choose, nothing is auto-installed).
 - **`/develop`** builds the **vertical slice** (data → logic → API → UI, end-to-end), runs and confirms migrations, ticks the roadmap milestones, and emits **verify steps** tied back to each `AC-N`. For UI it composes the **full product surface** (brand, copy, layout, states), not a bare widget, and pulls the real design from a **Figma MCP** when one is connected.
 - **`/check verify`** runs the **spec-conformance** pass — every acceptance criterion met and every specced surface (page, route, table, migration) actually built. This is what catches a missed page or an un-applied migration that green tests never reveal.
-- **`/test`** locks in the durable checks · **`/harden`** stress-tests risky, high-blast-radius work · **`/check review`** re-reads on a fresh model · **`/document`** writes it up · **`/sync`** reconciles context + roadmap · then **replan** queues the next slice.
+- **`/test`** locks in the durable checks · **`/check review`** re-reads on a fresh model · **`/document`** writes it up · **`/sync`** reconciles context + roadmap · then **replan** queues the next slice.
 
-`/develop` **gates** on the ADR: if the feature needs a design system, a provider, a data model, or a behavior you haven't decided, it stops and sends you to `/architect` first. The **Tracer Bullet vertical slice is the default** for a proper build; the **Facade** UI-first path (a shell on placeholder data) is a *prototype* option — chosen as the build approach at roadmap time. `*`harden only on risky, high-blast-radius work (payments, auth, migrations).
+`/develop` **gates** on the ADR: if the feature needs a design system, a provider, a data model, or a behavior you haven't decided, it stops and sends you to `/architect` first. The **Tracer Bullet vertical slice is the default** for a proper build; the **Facade** UI-first path (a shell on placeholder data) is a *prototype* option — chosen as the build approach at roadmap time.
 
 **Bugs** skip this entirely: `/debug` runs a root-cause loop and hands a regression test to `/test`.
 
@@ -116,7 +116,6 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 | **App code** | your source tree | `develop` |
 | **Tests** | your test dirs | `test` |
 | **Review findings** | `docs/reviews/` | `check` (review mode) |
-| **Hardening checklists** | `docs/hardening/` | `harden` |
 | **Human docs** | PR body, `CHANGELOG.md`, `docs/releases/`, `docs/postmortems/` | `document` |
 
 > If `docs/` is a *published* docs site (Docusaurus, VitePress, MkDocs, Starlight, Nextra), the workflow artifacts move to `.workflow/` automatically so they don't ship to your site.
@@ -157,7 +156,7 @@ A feature **starts as a single box** (`Design it (ADR): /architect …`). **When
 
   The choice is **recorded once and honored everywhere**: `/roadmap` writes it into the roadmap header → `/audit`/`/sync` persist it into root `AGENTS.md` → `/architect`, `/develop`, `/check verify` read it and shape the ADR's build plan, the build, and what "working" means to fit it. Change the approach and the whole pipeline follows.
 - **Foundations-first sequencing** — whatever the phasing, the ground comes first and isn't up for a vote: **stack → scaffold → coding standards → data model → design system → a walking-skeleton slice**, *then* the features. (The stack is decided and the project scaffolded *before* `/audit` seeds conventions + tooling, so it reads the real project rather than an empty one.)
-- **Per-feature risk hint (optional)** — the `Weight` column is a soft flag on a feature that clearly warrants the heavier checks (a fresh-model `/check review`, `/harden` for failure modes), so a payments feature is marked and a copy tweak isn't. It's a hint, not a gate: you can still run any skill on any feature, in any order.
+- **Per-feature risk hint (optional)** — the `Weight` column is a soft flag on a feature that clearly warrants the heavier checks (a fresh-model `/check review`), so a payments feature is marked and a copy tweak isn't. It's a hint, not a gate: you can still run any skill on any feature, in any order.
 - **The replan beat** — the roadmap is *living*. `/roadmap replan` after each feature or phase ships reconciles what landed, enrolls follow-ups surfaced during the build (from the ADR's `## Consequences` / `## Follow-up`), reorders, and queues the next slice. `/roadmap add <feature>` enrolls one ad-hoc feature without re-planning the whole product.
 - **Epic-split** — a small product is a single `roadmap.md`; a big one splits by epic into an `index.md` + one file per epic (mirroring the ADR umbrella and the per-workspace layout).
 
@@ -204,7 +203,7 @@ There are no fixed tiers or mandated playbooks. Run the skills a change actually
 
 - A **tiny change** (a typo, a config value, a one-liner) can just be made directly, or `/develop → /check verify`.
 - A **normal feature** runs the per-feature loop (`/architect → /develop → /check verify → /test → /check review → /document → /sync`), skipping any step it doesn't need.
-- A change that **touches something risky** (auth, payments, migrations, shared infra) is where the heavier checks earn their place: `/architect` for the decision, `/check review` for a fresh-model pass, `/harden` for failure modes. When a change doesn't touch those, skip them.
+- A change that **touches something risky** (auth, payments, migrations, shared infra) is where the heavier checks earn their place: `/architect` for the decision and `/check review` for a fresh-model pass. When a change doesn't touch those, skip them.
 - A **fix** (something broken, failing, throwing, or behaving wrong) takes the fix path: `/debug` (root-cause) → `/test` (regression) → `/sync`, adding `/check verify` if it touches a user-facing flow.
 
 `/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern); when a change reuses already-decided patterns, `/develop`'s ADR gate confirms none is needed and goes straight to building. `/debug` and a bare `/roadmap` are **on-demand**, not sequence steps — `/debug` whenever `/check verify` or `/test` surfaces a failure, a bare `/roadmap` to orient before starting.
@@ -228,7 +227,7 @@ The workflow is first-class on monorepos (pnpm/turbo/nx workspaces, or `apps/*`/
 
 So `/roadmap web` → `/architect` (reads `apps/web`'s stack) → `/develop` (builds in `apps/web`) flows cleanly, app by app.
 
-**Context & token efficiency on large repos.** The biggest cost on a big monorepo is *reading* code to understand where to build — so the skills follow Anthropic's context-engineering guidance and **isolate that reading in a read-only exploration subagent** that returns a compact map (~1–2k tokens), keeping the main thread's context clean for the decisions and the edits (`/develop` Step 2.5; `/roadmap`'s brownfield scan; `/architect`, `/check review`, `/test`, `/harden` already read via their subagents). The operating rules: scope to **one workspace / one roadmap file / one governing ADR**; do **one sub-task per run** and `/clear` between features so context doesn't accumulate; and **match the model to the work** — exploration and mechanical rollouts on a fast/cheap model, deep logic and orchestration on a strong one.
+**Context & token efficiency on large repos.** The biggest cost on a big monorepo is *reading* code to understand where to build — so the skills follow Anthropic's context-engineering guidance and **isolate that reading in a read-only exploration subagent** that returns a compact map (~1–2k tokens), keeping the main thread's context clean for the decisions and the edits (`/develop` Step 2.5; `/roadmap`'s brownfield scan; `/architect`, `/check review`, `/test` already read via their subagents). The operating rules: scope to **one workspace / one roadmap file / one governing ADR**; do **one sub-task per run** and `/clear` between features so context doesn't accumulate; and **match the model to the work** — exploration and mechanical rollouts on a fast/cheap model, deep logic and orchestration on a strong one.
 
 ---
 
@@ -282,7 +281,7 @@ The skills spawn these two types by name on Claude Code (with the plain "set the
 The suite is a first-class fit for Codex — in several ways it needs *no* degradation:
 
 - **`AGENTS.md` is native.** Codex reads `AGENTS.md` as its project instructions automatically (`project_doc_max_bytes`, `project_doc_fallback_filenames`). The context files `/audit` and `/sync` produce are the exact artifact Codex already consumes — so the workflow's shared memory is first-class, not just compatible.
-- **Subagents work.** Codex ships multi-agent tools on by default (`features.multi_agent` → `spawn_agent`, `wait_agent`, `resume_agent`, …), so the read-only scout/researcher helpers and the review/harden subagents run natively. Those helpers get a brief from the main agent; where one needs a bundled file it reads it from the absolute path passed, with an inline fallback if your sandbox blocks installed-skill reads. Per-step *model* selection (haiku vs opus) is Claude-specific; on Codex use one model, or define roles via `agents.<name>.config_file`.
+- **Subagents work.** Codex ships multi-agent tools on by default (`features.multi_agent` → `spawn_agent`, `wait_agent`, `resume_agent`, …), so the read-only scout/researcher helpers and the review subagent run natively. Those helpers get a brief from the main agent; where one needs a bundled file it reads it from the absolute path passed, with an inline fallback if your sandbox blocks installed-skill reads. Per-step *model* selection (haiku vs opus) is Claude-specific; on Codex use one model, or define roles via `agents.<name>.config_file`.
 - **Install:** `npx skills add JavaScript-Mastery-Pro/pilot -a codex` → lands in `.agents/skills/`. Enable/disable individual skills with `skills.config` if desired.
 - **Enforce the read-only skills with Codex's sandbox, not just `allowed-tools`.** Because `allowed-tools` uses Claude tool names, treat it as advisory on Codex and let Codex's own permission layer do the enforcing — run `/check review` and `/check verify` under `sandbox_mode = "read-only"` (or a `default_permissions = ":read-only"` profile). Build skills need `sandbox_mode = "workspace-write"`.
 
@@ -291,7 +290,7 @@ The suite is a first-class fit for Codex — in several ways it needs *no* degra
 Antigravity (Google) is another strong fit — it shares the two things that matter most:
 
 - **`AGENTS.md` is read natively** to align the agent's behavior and planning phase with your conventions — the same artifact `/audit` and `/sync` produce.
-- **Subagents are first-class** via `invoke_subagent` (async, with built-in `research`/`browser`/`self` roles and `define_subagent` for custom ones), so the read-only scout/researcher helpers and the review/harden subagents run natively. Antigravity's `browser` subagent is a natural fit for `/check verify`'s runtime checks.
+- **Subagents are first-class** via `invoke_subagent` (async, with built-in `research`/`browser`/`self` roles and `define_subagent` for custom ones), so the read-only scout/researcher helpers and the review subagent run natively. Antigravity's `browser` subagent is a natural fit for `/check verify`'s runtime checks.
 - **One key constraint:** an Antigravity subagent **runs on the parent's model** (no per-subagent model choice). So `/check review`'s cross-model guarantee can't be automated there — it now detects this and falls back to an inline, same-model review (flagged as reduced independence), or you switch your active model and re-run. The read-only helpers (scout/researcher) that would pick a *cheaper* model simply run on the parent model.
 - **Install:** `npx skills add JavaScript-Mastery-Pro/pilot -a antigravity` → project skills land in `.agents/skills/`. Subagents inherit the parent's approved command/file scopes, and any tool needing confirmation bubbles up to the subagent panel — so Antigravity's own permission model is the enforcement layer, with `allowed-tools` as an advisory hint (as on Codex).
 
@@ -300,7 +299,7 @@ Antigravity (Google) is another strong fit — it shares the two things that mat
 Cursor is the closest match to Claude Code:
 
 - **`AGENTS.md` is native** — read at the root *and in nested subdirectories* (auto-applied per directory), exactly how `/audit` and `/sync` structure context. Cursor also reads `.claude/agents/` for compatibility.
-- **Subagents via `Task`** (same tool name as Claude Code), with built-in `Explore`/`Bash`/`Browser` roles and parallel execution — so the read-only scout/researcher helpers and the review/harden subagents run natively.
+- **Subagents via `Task`** (same tool name as Claude Code), with built-in `Explore`/`Bash`/`Browser` roles and parallel execution — so the read-only scout/researcher helpers and the review subagent run natively.
 - **Per-subagent model is supported** (`model: inherit` or a specific id), so `/check review`'s cross-model pass works here. Cursor falls back to a compatible model under admin/plan/Max-Mode limits — the same case `/check review`'s fallback already handles.
 - **Read-only skills map to Cursor's `readonly: true` subagent flag** (no edits, no state-changing shell) — a native fit for `/check review` and `/check verify`.
 - **Install:** `npx skills add JavaScript-Mastery-Pro/pilot -a cursor` → `.agents/skills/`.

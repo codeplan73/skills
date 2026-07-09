@@ -182,7 +182,7 @@ If the write failed or produced no report: say so and re-do it; never report a p
 
 Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. On `done`, advise `/clear` before the next feature: the roadmap and ADR hold everything, a fresh session keeps the next build cheap.
 
-Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, `HARDEN_FLAG`, plus `RUN_RESULT` and `BUGS_FOUND` when `RUN_AFTER = yes`, or `MANUAL_INSTRUCTIONS` when `RUN_AFTER = no`. Relay this template: keep lines marked `← yes` only when `RUN_AFTER = yes`, `← no` only when `RUN_AFTER = no` (a marked heading carries its list lines), unmarked lines always; strip the markers.
+Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, plus `RUN_RESULT` and `BUGS_FOUND` when `RUN_AFTER = yes`, or `MANUAL_INSTRUCTIONS` when `RUN_AFTER = no`. Relay this template: keep lines marked `← yes` only when `RUN_AFTER = yes`, `← no` only when `RUN_AFTER = no` (a marked heading carries its list lines), unmarked lines always; strip the markers.
 
 ```
 ## /test complete (suite run)      ← yes; when no, use: ## /test complete (not run)
@@ -214,13 +214,11 @@ Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, `HARDEN_FLAG`, plus `RUN_
 **Not covered** (consider adding):
 - <gap and why>
 - AC-N, <criterion that can't be automated (visual/manual/env)> → defer to /check verify manual step   ← when TRACE_TO_CONTRACT=yes
-
-**What /harden should check**: <only if HARDEN_FLAG=yes, one sentence>
 ```
 
 If `BUGS_FOUND` is non-empty, lead with it: a test that correctly fails on real broken code is a genuine finding, not something to silence. /test does not modify application code to make a test pass.
 
-Omit the harden line entirely when `HARDEN_FLAG=no`. This skill is complete after relaying the report: it does not invoke other skills.
+This skill is complete after relaying the report: it does not invoke other skills.
 
 ---
 

@@ -39,5 +39,5 @@ One line, imperative mood, ≤ 72 chars. Match the project's commit convention i
 Rules:
 - Group changes by intent, not by file or commit. A reviewer wants the story, not `git log`.
 - Keep "What" skimmable. A busy reviewer reads it first.
-- If a hardening checklist or review findings exist for this change, reference accepted residual risks under "Risk & rollout".
+- If review findings exist for this change, reference accepted residual risks under "Risk & rollout".
 - Do not invent test steps. Derive them from the actual tests or the change's behaviour.

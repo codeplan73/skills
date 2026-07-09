@@ -123,7 +123,7 @@ From the ADR list (paths relative to `$ADR_DIR`):
 3. Available ≠ relevant. You may list the installed skills dirs to see what exists, but relevance comes from the feature plus `AGENTS.md`. If a clearly relevant skill is installed but not yet referenced in `AGENTS.md`, use it anyway and flag (ADR Follow-up) that it belongs in the right context file: root if project-wide, nested `<area>/AGENTS.md` if area-specific.
 4. Whatever the context files show the project already uses (a BaaS, an ORM, a payment provider, an auth library) is what your library/provider recommendation must build on or prefer, not an unrelated external tool. If a genuinely better option isn't installed, note it as an ADR Follow-up rather than silently assuming it.
 
-**Workflow skills** (never treat as community skills): `audit`, `architect`, `roadmap`, `develop`, `verify`, `test`, `review`, `harden`, `document`, `debug`, `sync`, `status`, plus new workflow skills as they're created.
+**Workflow skills** (never treat as community skills): `audit`, `architect`, `roadmap`, `develop`, `check`, `test`, `document`, `debug`, `sync`, plus new workflow skills as they're created.
 
 ---
 
