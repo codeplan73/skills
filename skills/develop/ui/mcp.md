@@ -2,7 +2,7 @@
 
 ## Figma or design MCP source
 
-Use this route when the ADR or direct user answer says to pull the design from Figma or another connected design MCP.
+Use this route when the spec or direct user answer says to pull the design from Figma or another connected design MCP.
 
 Pull the real design into `./design.md`: tokens, spacing, components, named frames, and any asset references. Use real values from the design source, not invented approximations. Record which file and frames were used in the report.
 

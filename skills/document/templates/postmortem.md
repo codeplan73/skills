@@ -1,6 +1,6 @@
 # Postmortem Template
 
-Write a blameless incident postmortem to `docs/postmortems/<DATE>-<slug>.md`. Build it from INCIDENT_FACTS (the engineer's account) plus any root-cause detail in the diff or a /debug record. Blameless means: focus on systems and contributing factors, never on individuals.
+Write a blameless incident postmortem to `docs/postmortems/<DATE>-<slug>.md`. Build it from INCIDENT_FACTS (the engineer's account) plus any root cause detail in the diff or a /debug record. Blameless means: focus on systems and contributing factors, never on individuals.
 
 ## Structure
 
@@ -47,12 +47,12 @@ _All times <timezone>._
 
 ## Lessons
 
-<The durable takeaway. If an ADR or a concrete follow-up should come out of this, name it.>
+<The durable takeaway. If a spec or a concrete follow-up should come out of this, name it.>
 ```
 
 Rules:
 - Blameless throughout, "the deploy lacked a health check", never "X forgot to add a health check".
 - The timeline is facts with timestamps, not analysis. Keep analysis in Root cause / Contributing factors.
 - Every action item is specific and assignable, and tagged Prevent (stop recurrence), Detect (find it faster), or Mitigate (reduce impact). No vague "be more careful".
-- If the root cause maps to a systems failure mode, recommend a concrete follow-up action; if a past decision contributed, note the ADR.
+- If the root cause maps to a systems failure mode, recommend a concrete follow-up action; if a past decision contributed, note the spec.
 - Only state facts present in INCIDENT_FACTS or the change; mark genuine unknowns as "Unknown, to investigate" rather than guessing.
