@@ -43,7 +43,7 @@ In the Ask blocks below, each option is `"label": "description"`; render them th
 
 ## Execution
 
-### Startup checks (main thread)
+### Pre-flight (main thread)
 
 #### 1. Determine scope from git (do this first, if empty, no point asking anything)
 

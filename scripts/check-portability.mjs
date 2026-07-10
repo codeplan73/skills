@@ -29,7 +29,7 @@
 //     the no-dash rule, so their own prose follows it).
 // 11. No hyphen in prose. Compounds become simple words (read only, not read-only).
 //     Code, paths, flags, ALL CAPS keywords, and the parsed artifact literals
-//     (in-progress, gap-fill, whole-repo, Follow-up) keep their hyphens.
+//     (in-progress, gap-fill, whole-repo, Follow-up, pre-flight) keep theirs.
 //
 // Budgets (rule 5) are also reported as utilization on every run, and anything
 // above WARN_AT is called out while it is still passing. See BUDGET POLICY below.
@@ -193,9 +193,15 @@ function proseOnly(text) {
       fm.split('\n').map((l) => (/^description:/.test(l) ? l : MASK(l))).join('\n')
     );
 }
-// Literal tokens the skills WRITE INTO and MATCH ON in artifacts. Renaming these
-// is a data migration, not a copy edit, so they keep their hyphens everywhere.
-const PARSED_LITERALS = new Set(['in-progress', 'gap-fill', 'whole-repo', 'Follow-up', 'follow-up']);
+// Named things the skills MATCH ON: values they write into artifacts, phase names,
+// and section headings. Renaming one is a migration across skills, not a copy edit,
+// so these keep their hyphens everywhere, backticked or not.
+//   in-progress, gap-fill, whole-repo  values and phase names other skills read
+//   Follow-up                          a spec section heading
+//   pre-flight                         the named phase every skill runs before it acts
+const PARSED_LITERALS = new Set([
+  'in-progress', 'gap-fill', 'whole-repo', 'Follow-up', 'follow-up', 'pre-flight', 'Pre-flight',
+]);
 const isExemptTerm = (w) => /^[A-Z0-9-]+$/.test(w) || PARSED_LITERALS.has(w);
 
 function check(path) {

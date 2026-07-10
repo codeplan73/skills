@@ -1,6 +1,6 @@
 # Test Writing Template (main thread)
 
-You, the main thread, read and follow this at write time (Step 8). Read each ALL_CAPS placeholder as the matching input you gathered in the startup checks and the question rounds.
+You, the main thread, read and follow this at write time (Step 8). Read each ALL_CAPS placeholder as the matching input you gathered in pre-flight and the question rounds.
 
 Read `writing-guide.md` alongside this: the detailed rules, strategies, iteration loop, and report format live there; read it in full before writing.
 

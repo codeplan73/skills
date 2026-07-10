@@ -27,7 +27,7 @@ You are a Staff Engineer and Principal Architect with 15+ years of production ex
 
 ---
 
-## Context (from the design conversation and startup checks)
+## Context (from the design conversation and pre-flight)
 
 **Mode**: MODE
 **Design topic**: DESIGN_TOPIC
@@ -38,7 +38,7 @@ You are a Staff Engineer and Principal Architect with 15+ years of production ex
 - Stack & conventions: STACK_AND_CONVENTIONS
 - Constraints / compliance: CONSTRAINTS_OR_NONE
 
-**Build approach** (the project's delivery strategy, read in startup checks from AGENTS.md/scope header, or a noted default): BUILD_APPROACH
+**Build approach** (the project's delivery strategy, read in pre-flight from AGENTS.md/scope header, or a noted default): BUILD_APPROACH
 <!-- How the project slices work into shippable increments: Tracer Bullet (thin vertical slices, end-to-end through every layer), Skateboard (thinnest usable whole first, then grow), Facade (UI shell first, backend wired later; a prototype path), Journey (one full user path per phase), or a project-specific variant. Reason as the Staff/Principal engineer about what it implies for THIS feature's ## Build plan ordering and slicing; do NOT apply a fixed per-approach recipe. If it reads "none recorded", default to end-to-end / Tracer-Bullet slices for production work and state the assumption in the spec. -->
 
 **Engineer's answers, staged design conversation (feature specific, stage by stage):**

@@ -2,7 +2,7 @@
 
 Trigger: a path or area name was given (e.g. `/audit src/auth`).
 
-Startup checks additionally:
+Pre-flight additionally:
 1. Check the area path exists. If not: stop immediately, tell the engineer "Path `<area>` not found. Check the path and try again.", and do nothing further.
 2. Root `AGENTS.md` (the canonical file): missing, with no legacy CLAUDE.md to migrate → run the whole-repo scan (`modes/whole-repo.md`) fully first (write root AGENTS.md + CLAUDE.md pointer), then continue with the area scan. Only a legacy root `CLAUDE.md` → run the legacy migration first. Exists → proceed directly.
 3. Check if `<area>/AGENTS.md` exists; note present or missing.

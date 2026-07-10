@@ -52,7 +52,7 @@ Act on the pick:
    - Feature linked spec: do not edit the status line; a confirmed but unbuilt spec correctly stays `Proposed` (/develop advances it).
    - Standalone decision spec: set `**Status**:` to `Accepted` on this confirmation (ratification is the deliverable; /develop won't advance it, `Proposed` would strand it).
    - Already shipped documentation path: born `Accepted`; leave it, /sync reconciles against the scope.
-3. **Derive tasks + link the scope (after confirmation).** Use the scope feature found in the startup checks (or find it again cheaply by scanning scope filenames/headings across per workspace subdirs; open only the single scope file containing it, `scope.md` or the matching `<epic>.md`).
+3. **Derive tasks + link the scope (after confirmation).** Use the scope feature found in pre-flight (or find it again cheaply by scanning scope filenames/headings across per workspace subdirs; open only the single scope file containing it, `scope.md` or the matching `<epic>.md`).
 
    **Finding the decision box (do not match on one fixed string).** Every feature carries exactly one decision box: the sub task whose label ends with `(spec)`. Its wording varies by feature, `Design it (spec)` on a normal feature and `Decide the stack (spec)` on the Stack and architecture feature, so locate it by that `(spec)` suffix, not by an exact label. Every other sub task is an execution box (`Scaffold from the decision: /develop …`, `Build it: /develop …`, `Verify it`, `Test it`) and is never ticked here.
 

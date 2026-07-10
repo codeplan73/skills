@@ -80,22 +80,22 @@ Two independent choices, location (repo shape) and shape (decision size):
 ## Portability (any OS, any agent)
 
 - **Commands**: `git` is the only required CLI, same on every OS. Other shell snippets (`mkdir -p`, `date`, `find`, `ls`, `cat`, `wc`) are POSIX reference, not literal scripts; use your agent's cross platform file tools (read, search/glob, write, create dir) and your knowledge of today's date. Create `docs/specs/` with your write tool, not `mkdir`.
-- **Bundled files**: `agent-prompt.md`, `agent-modes/*.md`, and `spec-template.md` live at paths relative to this skill's folder. The main thread reads these itself right before it writes the spec (see *Write the spec*): `agent-prompt.md` (the persona, rules, and report format), the one matching `agent-modes/<mode>.md`, and `spec-template.md` (the section structure). Read them only at write time, not during startup checks, so they don't sit in context through the whole interview.
+- **Bundled files**: `agent-prompt.md`, `agent-modes/*.md`, and `spec-template.md` live at paths relative to this skill's folder. The main thread reads these itself right before it writes the spec (see *Write the spec*): `agent-prompt.md` (the persona, rules, and report format), the one matching `agent-modes/<mode>.md`, and `spec-template.md` (the section structure). Read them only at write time, not during pre-flight, so they don't sit in context through the whole interview.
 - **No interactive question support?** Use whatever your agent provides (an options picker) and fall back only where missing: ask the question rounds as plain text with the same options.
 
 ## Execution
 
-### Step 0: Topic check (before startup checks)
+### Step 0: Topic check (before pre-flight)
 
 If no design topic was provided (`/architect` with no argument or an empty description), stop and ask before doing anything else:
 
 "What design decision do you want to work through? Describe the feature, system, or choice you need to design in one or two sentences."
 
-Wait for the answer; use it as the design topic before startup checks.
+Wait for the answer; use it as the design topic before pre-flight.
 
 ---
 
-### Startup checks (main model)
+### Pre-flight (main model)
 
 Run these steps (the `git` commands are literal; everything else uses your agent's file tools):
 
@@ -143,28 +143,28 @@ After the staged conversation, you write the spec yourself. Do not spawn anyone 
 
 Then write the spec, applying:
 - **From `agent-prompt.md`**: adopt the persona ("Who you are / How you think / What you do NOT do") and follow the common instructions, Step 0, Step 0b, `## Expert rules that apply to all modes`, and `## Report format`. At `## Instructions by mode`, follow the one mode file above as the only mode specific block; ignore the other mode files. `agent-prompt.md` is written as a subagent brief with ALL_CAPS placeholders; read those placeholders as the inputs you already gathered in the conversation (listed below), and apply the rules to yourself.
-- **From `spec-template.md`**: use only the part between `=== SPEC TEMPLATE START ===` and `=== SPEC TEMPLATE END ===` (the spec section structure + field guidance: Summary, Context, Options considered, Decision, Rationale, the mode specific design section, Consequences, Follow-up, References, etc.). The trailing reference/meta sections (`## Filename conventions`, the `## Status values` table, the umbrella structure / child status notes, `## Writing rules`) are your own guidance: you resolved the filename, shape, and initial `**Status**:` in startup checks; write the `**Status**:` line per the "On the initial `**Status**:` line" rule in `## Expert rules that apply to all modes`. Do not edit `spec-template.md`.
+- **From `spec-template.md`**: use only the part between `=== SPEC TEMPLATE START ===` and `=== SPEC TEMPLATE END ===` (the spec section structure + field guidance: Summary, Context, Options considered, Decision, Rationale, the mode specific design section, Consequences, Follow-up, References, etc.). The trailing reference/meta sections (`## Filename conventions`, the `## Status values` table, the umbrella structure / child status notes, `## Writing rules`) are your own guidance: you resolved the filename, shape, and initial `**Status**:` in pre-flight; write the `**Status**:` line per the "On the initial `**Status**:` line" rule in `## Expert rules that apply to all modes`. Do not edit `spec-template.md`.
 
 **References and links: reuse the Stage (c) `REFERENCES_LEVEL`.** Write the References section and `(basis: ...)` citations only at the chosen level: `none` = no `## References` section and no citations anywhere (Rationale stays); `sources` = named Project sources and Practices only, no links; `sources+links` = sources plus the web verified links the Stage (c) landscape / tool discovery checks already returned. Do NOT fetch anything now; those checks ran once during the conversation and the links they confirmed are what you write. If a link you want was never verified in that check, cite the source by name with no URL rather than fetching at write time. The written links are for a human to follow, not for later AI reads. Only if Stage (c) never ran (e.g. the documentation path), present the References consent panel now (same panel, recommended pick `No references, keep it clean`) and set `REFERENCES_LEVEL` to `none` or `sources` (no fetch at write time is available, so `sources+links` is not offered here).
 
 The inferred MODE (from Framing) is already one of `FEATURE` / `ARCHITECTURE` / `ENHANCEMENT` / `CROSS-CUTTING`.
 
-The inputs to apply (you already have them from the design conversation and startup checks):
+The inputs to apply (you already have them from the design conversation and pre-flight):
 1. Design topic (from the user's original message)
 2. The inferred framing: MODE, platform (web/mobile/API), stack & conventions (from `AGENTS.md`), and any constraints/compliance inferred or confirmed
-2a. The feature's build approach (startup checks precedence: scope row `Approach` override, else the project default from `AGENTS.md`/scope header, else the noted default) → `BUILD_APPROACH`; order and slice `## Build plan` by what the approach implies for this feature
+2a. The feature's build approach (pre-flight precedence: scope row `Approach` override, else the project default from `AGENTS.md`/scope header, else the noted default) → `BUILD_APPROACH`; order and slice `## Build plan` by what the approach implies for this feature
 3. All staged conversation answers, stage by stage: the confirmed acceptance criteria (already IDed AC-1…, to seed `## Requirements`), the confirmed data model (entities/fields/relationships, to seed `## Build plan` task 1), the confirmed stack/tool picks, API surface, authz model, and edge cases. On the documentation path (staged conversation skipped) treat it as `"Staged design skipped, documenting an already-made decision"`, not an error
 3a. The RECOMMEND items → `RECOMMEND_ITEMS_OR_NONE`: the specific decisions you must make and justify (tool/provider aligned to the stack, session model, etc.); make each call, don't echo it back as an open question. If none, treat as `"none"`
 3b. The References level → `REFERENCES_LEVEL` (`none` | `sources` | `sources+links`, per the rule above). If Stage (c) never ran and you have not asked, default to `none`
 4. Context file contents: `AGENTS.md` (root + the feature area's nested), or `CLAUDE.md` as fallback, or "MISSING"
 5. Existing spec list (filenames + first line of each)
-6. Related spec paths (flagged in startup checks)
+6. Related spec paths (flagged in pre-flight)
 7. The resolved spec location (`$SPEC_DIR`), next number, and shape: a single file `$SPEC_DIR/NNNN-title.md`, or a directory `$SPEC_DIR/NNNN-title/` (`index.md` + `rationale.md`, plus child specs for an umbrella). Umbrella: write the named child decisions; any inventory/audit goes in `rationale.md`, never in `docs/scope/`, never loose in the code tree. Only the `index.md` carries a `**Status**:` line (it mirrors the feature); child specs omit the lifecycle Status (spec content governed by the umbrella)
 8. Source file count (whether there's code to read; for a large ENHANCEMENT/CROSS-CUTTING codebase, offload the reading to a `scout` subagent per *Subagents* and write from its map)
 9. Operation: `create` | `update` | `supersede`
-10. Today's date (from startup checks)
+10. Today's date (from pre-flight)
 11. Documentation context (if the "already built" path ran: the engineer's free text answers about why this was chosen, alternatives, and tradeoffs)
-12. Community skills relevant to this feature (identified from `AGENTS.md`, per startup checks): open a skill file on demand, only if it materially shapes this decision; its conventions are authoritative when consulted. Name each in the `## Decision` **Implementation skills** field.
+12. Community skills relevant to this feature (identified from `AGENTS.md`, per pre-flight): open a skill file on demand, only if it materially shapes this decision; its conventions are authoritative when consulted. Name each in the `## Decision` **Implementation skills** field.
 
 ---
 
@@ -175,7 +175,7 @@ Once the spec file exists, read `internal/after-subagent.md` and follow it for c
 ### Update / Supersede path
 
 If the task is to update or supersede an existing spec:
-- Startup checks: read the existing spec in full
+- Pre-flight: read the existing spec in full
 - Skip the staged conversation if operation is in place update
 - Set the operation: `update` or `supersede`
 - If supersede: write the new spec AND update the old spec's status to `Superseded by [NNNN](NNNN-title.md)`

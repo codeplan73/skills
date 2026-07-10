@@ -1,6 +1,6 @@
 # Test Writing Guide (read by the main thread at write time)
 
-The main thread reads this file in full at write time (Step 8), just before it writes the tests. It holds the strategy, rules, tool specifics, iteration loop, and required report format. Reading it only at write time keeps this detail out of context through the earlier startup checks and question steps.
+The main thread reads this file in full at write time (Step 8), just before it writes the tests. It holds the strategy, rules, tool specifics, iteration loop, and required report format. Reading it only at write time keeps this detail out of context through the earlier pre-flight and question steps.
 
 ---
 
