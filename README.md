@@ -10,6 +10,8 @@ idea → /scope → /audit → /architect → /develop → /check verify → /te
 
 Run `/debug` anytime something breaks. Run a bare `/scope` anytime to see where things stand.
 
+> 📖 **Want the full picture?** Read the **[Workflow Guide](docs/workflow-guide.md)** — a plain-language walkthrough of every skill, the files that carry the work, who owns what, and one idea followed all the way from scope to shipped.
+
 ## The skills
 
 | Skill | What it does |
@@ -105,6 +107,10 @@ When: the last step around merge. Monorepo: reconciles the right workspace.
 
 **debug**: Runs a disciplined root cause loop and hands a regression test to `/test`.
 When: anytime something is failing, throwing, or behaving wrong. Not tied to project type.
+
+## Learn more
+
+The **[Workflow Guide](docs/workflow-guide.md)** is the deep dive: how the scope, specs, AGENTS.md, and design system live and who is allowed to change them; the acceptance-criteria thread that ties every stage together; a full worked example from idea to shipped; the debug loop; and how the same flow runs on an existing codebase and in a monorepo.
 
 ---
 
