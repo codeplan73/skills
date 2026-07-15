@@ -60,6 +60,8 @@ Each skill's instructions live in its `SKILL.md`, which is what every client rea
 /architect → /develop → /check verify → /test → /check review → /document → /sync
 ```
 
+At the end of `/scope` you also pick a **workflow depth** for the project (override per feature anytime): `Vibe` (just `/develop`, self-checked, for throwaway work), `Lean` (adds `/check verify`), `Medium` (adds `/test`), or `Full` (adds a fresh-model `/check review` and `/document`). The depth sets the checking tail after `/develop` and what "done" requires; the `/architect` gate applies at every depth.
+
 `/scope` fixes what to build. `/architect` designs how, as a spec whose acceptance criteria are the contract; every later step traces back to that contract. `/develop` gates on the spec: if building would mean inventing an undecided design, provider, or data model, it stops and routes you to `/architect`. You can override and build anyway, but the override is not free: the assumption is recorded as an `Assumed` spec in `docs/specs/`, and the feature cannot be marked `done` until `/architect` ratifies that decision (spec [0001](docs/specs/0001-develop-assumed-spec-gate.md)). A decision never lives only in the chat.
 
 ## What gets written, and where

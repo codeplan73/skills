@@ -82,6 +82,17 @@ The one real question here is how you want to deliver the work. The workflow off
 
 Whatever you pick is recorded as the project default. Any single feature can override it later if that one feature is better built a different way.
 
+Before it finishes, `scope` makes one more recommendation, how much workflow this project wants by default. Not every project needs the full loop, and a small app should not be pushed through review and a separate test suite for a styling tweak. So it proposes one of four depths, with a clear recommendation you can override, and explains what each one runs. The depth sets the stages that run after `develop`, the checking tail, and it also sets what "done" means, the last required stage is what marks a feature done. It does not turn off the gate, so at every depth a feature that needs a real decision still goes through `architect` first (or records an assumed spec).
+
+- **Vibe.** Just `develop`, nothing after it. You rely on `develop`'s own build time self check, it typechecks the code and renders the screen to look at it when it can, plus your own eye. No `check` verify, no test suite, no review. Because you have chosen to skip separate verification, `develop` marks the feature done itself once it is built and self checked. Good for throwaway prototypes, experiments, and personal projects.
+- **Lean.** After `develop`, `check` in verify mode on the real running app, which marks the feature done when it passes. No separate test suite or second opinion unless a feature asks for it. Good for low risk features and internal tools you still want proven.
+- **Medium.** After `develop`, `check` in verify mode, then `test`, which closes the feature. No fresh model review by default. Good for most real products.
+- **Full.** After `develop`, `check` in verify mode, `test`, a `check` review on a different model, then a `document` step, and most features are treated as needing a spec. Good for high risk work, payments, sign in, compliance, or a team codebase.
+
+So lean does not mean skipping `architect`. It means lean features rarely need a decision in the first place, so you seldom reach it, and when one does need a decision the gate still routes you there. And the vibe tier is the one place the workflow lets `develop` call something done on its own, because you told it up front that this is throwaway work and you are opting out of separate proof. The one rule that still holds at every tier: a feature built on an assumed decision cannot be marked done until `architect` ratifies it, no matter how light the tier.
+
+`scope` recommends the depth that fits what you described, a throwaway experiment lands on vibe, a small to do app on lean or medium, and records your pick as the project default. This is only a baseline. A single high risk feature still runs its heavier path, and later stages read this default so they never nag a vibe or lean project to run the full chain. For the to do app we take medium.
+
 #### Stage 2, decide the stack
 
 You run `architect`. Because this is a new project with no stack yet, it works in its stack mode, a wide comparison of options with a clear recommendation. Before it asks anything, it reads whatever context files exist, so it never asks what it can already see.
@@ -204,7 +215,7 @@ On a team, before it changes anything, `develop` checks a few things and warns y
 
 The limits matter as much as the features.
 
-- It will not mark a feature done on its own. Built is not done. Done waits for `check` in verify mode to pass and for tests to be in.
+- It will not quietly decide a feature is done. What done requires depends on the workflow tier you chose in `scope`. At lean and above, built is not done: done waits for `check` in verify mode to pass, and for tests to be in at medium and up. The one exception is the vibe tier, where you opted out of separate verification for throwaway work, so built and self checked is done and `develop` may mark it. Either way the choice is yours and explicit, set once as the project tier, never slipped in silently. And at every tier a feature built on an assumed decision stays open until `architect` ratifies it.
 - It will not invent a decision you have not made and hide it. If building would mean guessing a provider, a data shape, or a design, `develop` stops and sends you to `architect`. You can override and build anyway, but then it writes the assumption down as an `Assumed` spec and blocks the feature from done until `architect` ratifies it. The decision never lives only in the chat.
 - It will not reach the internet without your go ahead. It asks before searching for an outside connector or looking anything up, and it records what it used.
 - The review does not edit your code. It reads and reports, and you decide what to change.

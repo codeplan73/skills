@@ -64,6 +64,26 @@ No build task breakdown here. A not yet designed feature gets exactly one checkb
 
 Analysis/inventory is not a scope row: cataloguing duplication, listing call sites, auditing current state is decision support research living with the spec (`/architect` puts it in the spec's `rationale.md`). Never plan a row or step that writes a `.md` into `docs/scope/`.
 
+### Step 5b: Recommend the workflow depth (decision panel)
+
+Now that the features exist, propose the project's default **workflow depth**: how many stages a feature normally runs after `/develop`. This is a recommendation, not a question you ask cold: reason from the product (throwaway prototype vs internal tool vs real product vs payments/auth/compliance/regulated/team work) and the mix of feature weights you just assigned, then present a panel with exactly one recommended. Each level names the stages it runs, so the tradeoff is visible. Frame it: "Based on what you're building, here's the workflow I recommend. You can override, and any single feature can still run heavier."
+
+Depth governs only the stages **after** `/develop` (verify, test, review, document). It does **not** turn off the `/architect` gate: at every depth, a feature that needs a load bearing decision still runs `/architect` first (or records an `Assumed` spec). Lean does not mean "skip architect"; it means lean features are usually `Needs spec: no`, so you rarely reach it.
+
+- **question**: "How much workflow do you want by default for this project? Each level sets the stages a feature normally runs after `/develop`; a risky feature can still be bumped up, and `/architect` still applies whenever a decision is owed."
+- **header**: "Workflow"
+- **options** (mark exactly one `(recommended)` by the product signals, one line why):
+  - `Vibe`: "Just `/develop`. Nothing after it, you rely on `/develop`'s own build time self check (typecheck, and rendering the screen when it can) and your own eye. No `/check verify`, no test suite, no review. `/develop` can mark the feature `done` itself. Best for throwaway prototypes, experiments, and personal projects."
+  - `Lean`: "After `/develop`, `/check verify` on the real app. No separate test suite or second model review unless a feature needs it. Best for low risk features and internal tools you still want proven."
+  - `Medium`: "After `/develop`, `/check verify` then `/test`. No fresh model review by default. Best for most real products."
+  - `Full`: "After `/develop`, `/check verify`, `/test`, a fresh model `/check review`, then `/document`; and most features are treated as needing a spec. Best for high risk, payments, auth, compliance, regulated, or team projects."
+
+The picker appends a free text Other automatically; in a plain text fallback offer the same four. Recommend by signal: throwaway prototype, experiment, or a personal one off → `Vibe`; a low risk product or internal tool you still want proven → `Lean`; a normal production product → `Medium`; payments, auth, PII, compliance, regulated, or a team codebase → `Full`.
+
+Each tier also sets what `done` means (see `scope-template.md`): `Vibe` closes on build plus self check (`/develop` marks it), `Lean` on `/check verify` passing, `Medium`/`Full` on the tests being in (and the review for `Full`). The `Assumed` spec done gate still holds at every tier: a feature built on an unratified assumption cannot be `done` until `/architect` ratifies it.
+
+Record the pick as the project default in the scope header `**Workflow:**` line (see `scope-template.md`). It sets the baseline each feature inherits; a `full` weight feature in a `Lean` project still warrants its heavier path (the per feature Weight tag from Step 5 wins where it is higher). This default is what `/develop` reads to scale the next steps it recommends after a build.
+
 ### Step 6: Write the scope (single file or epic split)
 
 List the scope location again immediately before writing (a teammate may have changed it), then write per `scope-template.md`:
