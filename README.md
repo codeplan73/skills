@@ -10,6 +10,8 @@ idea → /scope → /audit → /architect → /develop → /check verify → /te
 
 Run `/debug` anytime something breaks. Run a bare `/scope` anytime to see where things stand.
 
+> 📖 **Want the full picture?** Read the **[Workflow Guide](docs/workflow-guide.md)** — a plain-language walkthrough of every skill, the files that carry the work, who owns what, and one idea followed all the way from scope to shipped.
+
 ## The skills
 
 | Skill | What it does |
@@ -58,7 +60,11 @@ Each skill's instructions live in its `SKILL.md`, which is what every client rea
 /architect → /develop → /check verify → /test → /check review → /document → /sync
 ```
 
-`/scope` fixes what to build. `/architect` designs how, as a spec whose acceptance criteria are the contract; every later step traces back to that contract. `/develop` gates on the spec: if building would mean inventing an undecided design, provider, or data model, it stops and sends you to `/architect` first.
+At the end of `/scope` you also pick a **workflow depth** for the project (override per feature anytime): `Vibe` (just `/develop`, self-checked, for throwaway work), `Lean` (adds `/check verify`), `Medium` (adds `/test`), or `Full` (adds a fresh-model `/check review` and `/document`). The depth sets the checking tail after `/develop` and what "done" requires; the `/architect` gate applies at every depth.
+
+`/scope` fixes what to build. `/architect` designs how, as a spec whose acceptance criteria are the contract; every later step traces back to that contract. `/develop` gates on the spec: if building would mean inventing an undecided design, provider, or data model, it stops and routes you to `/architect`. You can override and build anyway, but the override is not free: the assumption is recorded as an `Assumed` spec in `docs/specs/`, and the feature cannot be marked `done` until `/architect` ratifies that decision (spec [0001](docs/specs/0001-develop-assumed-spec-gate.md)).
+
+The gate is layered, not magic: `/architect` names the source of every value a feature must produce (so gaps surface at design time), `/develop` checks that coverage again before building, and at Medium+ an independent cross-model critic reads the spec for decisions it never settled (spec [0002](docs/specs/0002-decision-completeness-gate.md)). It's a strong, defense-in-depth gate that catches the vast majority — not an absolute guarantee, no prompt can be. Behavioral correctness is caught by the `/check verify` and `/test` layers.
 
 ## What gets written, and where
 
@@ -105,6 +111,10 @@ When: the last step around merge. Monorepo: reconciles the right workspace.
 
 **debug**: Runs a disciplined root cause loop and hands a regression test to `/test`.
 When: anytime something is failing, throwing, or behaving wrong. Not tied to project type.
+
+## Learn more
+
+The **[Workflow Guide](docs/workflow-guide.md)** is the deep dive: how the scope, specs, AGENTS.md, and design system live and who is allowed to change them; the acceptance-criteria thread that ties every stage together; a full worked example from idea to shipped; the debug loop; and how the same flow runs on an existing codebase and in a monorepo.
 
 ---
 

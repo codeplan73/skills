@@ -16,6 +16,7 @@ Scope structure `/scope` writes to: the reference shapes read while writing the 
 <One or two plain sentences: what the product is and who it serves.>
 
 **Build approach:** <Tracer Bullet | Skateboard | Facade | Journey> (<one-line principle>).
+**Workflow:** <Vibe | Lean | Medium | Full> (<the tail after develop: e.g. Medium = check verify, then test>). The project default depth; architect still gates any feature that needs a decision at every depth; a feature's own Weight tag wins where higher.
 **Weight profile:** <e.g. mostly lean and medium; billing is full (payments)>.  <!-- omit line if all default -->
 
 ## At a glance
@@ -100,7 +101,7 @@ Out of scope for the current build pass, kept so the plan stays honest.
 | `in-progress` (designed) | **`/architect` at spec capture** | `Design it` ticked; spec linked; `Build it: /develop <feature>` + **2 to 5 milestones rolled up from the spec**; `Verify it` + `Test it` boxes; any surfaced follow-up enrolled |
 | `in-progress` (building) | `/develop` | milestone sub-boxes tick one by one; code pointer filled |
 | `in-progress` (verified) | `/check verify` | `Build it` + milestones ticked; `Verify it` ticked |
-| `done` | `/test`, then `/sync` | all boxes ticked; `/sync` captures the slice's conventions into `AGENTS.md` |
+| `done` | the tier's last required stage (`Vibe` → `/develop`; `Lean` → `/check verify`; `Medium`/`Full` → `/test`), then `/sync` | the tier's required boxes ticked; `/sync` captures the slice's conventions into `AGENTS.md` |
 
 - **Next step** = the first unticked box (always a command or a tracked milestone).
 - **needs a decision** = run `/architect` first; otherwise straight to `/develop` (or `/audit` for standards & tooling). The tag drops once the spec is captured.
@@ -108,6 +109,7 @@ Out of scope for the current build pass, kept so the plan stays honest.
 - **Status** `planned` → `in-progress` → `done`, plus `existing` (pre-workflow) and `dropped` (de-scoped, kept for history).
 - **Approach tag** beside a heading (e.g. `· Facade`) overrides the project default for that feature; no tag = inherits it.
 - **Weight tag** `· full` = a fresh-model `/check review` warranted; `lean`/`medium` get no tag.
+- **Workflow** (header line) is the project default depth of stages each feature runs **after** `/develop`: **Vibe** = nothing after `/develop` (rely on its build-time self-check); **Lean** = `/check verify`; **Medium** = `/check verify` then `/test`; **Full** = `/check verify`, `/test`, a fresh-model `/check review`, then `/document` (and most features need a spec). The tier also sets what closes a feature to `done`, the last required stage marks it: **Vibe** → `/develop` (build + self-check); **Lean** → `/check verify` on PASS; **Medium**/**Full** → `/test` (with verify passed). At every tier an `Assumed` spec still blocks `done` until `/architect` ratifies it. Depth does not gate `/architect`: any feature that needs a decision runs `/architect` first (or records an `Assumed` spec) at every depth. A feature's Weight tag wins where it is higher than the default. `/develop` reads this to scale the next steps it recommends.
 - **Pointer line** (`spec <n> · code in <path>`): the spec link added by `/architect`, the code path by `/develop`.
 ```
 
@@ -137,6 +139,7 @@ When `scope.md` outgrows a comfortable scan (roughly a dozen plus features acros
 **Product**: <one line>
 **Behavior**: <plan | replan | add (inferred from the situation, not a typed subcommand)>
 **Build approach**: <name (one-line principle)> · **Per-feature overrides**: <feature → approach, … (or "none, all inherit")>
+**Workflow**: <Lean | Medium | Full> (<the stages it runs; why recommended for this product>)
 **Weight profile**: <e.g. billing full (payments), everything else lean/medium (or "all default")>
 **Scope file**: <docs/scope/scope.md> (<created new | updated in place | new epic file for <area>>)
 **Scope (this pass)**: <N> new features to build, <M> already on the scope, <K> deferred
